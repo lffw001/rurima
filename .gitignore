@@ -1,0 +1,18 @@
+# Binary
+rurima
+ruri
+# Editor configuration.
+.vscode/
+# Gdb log
+peda-*
+# Build dir.
+out
+# Tmp file.
+TODO
+*.save
+a.out
+t.c
+config.mk
+*.pyc
+test*
+test-lxc-index
