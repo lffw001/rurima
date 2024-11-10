@@ -28,6 +28,21 @@
  *
  */
 #include "include/rurima.h"
+static char *add_library_prefix(const char *_Nonnull image)
+{
+	/*
+	 * Warning: free() the return value after use.
+	 */
+	if (strchr(image, '/') != NULL) {
+		return image;
+	}
+	char *ret = malloc(strlen(image) + 11);
+	strcpy(ret, "library/");
+	strcat(ret, image);
+	// image is strdup()ed, so free it.
+	free(image);
+	return ret;
+}
 /*
  * Subcommand for rurima.
  */
@@ -47,7 +62,7 @@ void docker(int argc, char **_Nonnull argv)
 			if (i + 1 >= argc) {
 				error("{red}No image specified!\n");
 			}
-			image = argv[i + 1];
+			image = strdup(argv[i + 1]);
 			i++;
 		} else if (strcmp(argv[i], "-t") == 0 || strcmp(argv[i], "--tag") == 0) {
 			if (i + 1 >= argc) {
@@ -78,6 +93,9 @@ void docker(int argc, char **_Nonnull argv)
 		} else {
 			error("{red}Unknown argument!\n");
 		}
+	}
+	if (image != NULL) {
+		image = add_library_prefix(image);
 	}
 	if (strcmp(argv[0], "search") == 0) {
 		if (image == NULL) {
@@ -130,6 +148,7 @@ void docker(int argc, char **_Nonnull argv)
 	} else {
 		error("{red}Invalid subcommand!\n");
 	}
+	free(image);
 }
 void lxc(int argc, char **_Nonnull argv)
 {

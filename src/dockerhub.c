@@ -53,7 +53,7 @@ static char *get_tag_manifests(const char *_Nonnull image, const char *_Nonnull 
 	 * Warning: free() the return value after use.
 	 */
 	char url[4096] = { '\0' };
-	strcat(url, "https://registry-1.docker.io/v2/library/");
+	strcat(url, "https://registry-1.docker.io/v2/");
 	strcat(url, image);
 	strcat(url, "/manifests/");
 	strcat(url, tag);
@@ -92,7 +92,7 @@ static char **get_blobs(const char *_Nonnull image, const char *_Nonnull digest,
 	 * Warning: free() the return value after use.
 	 */
 	char url[4096] = { '\0' };
-	strcat(url, "https://registry-1.docker.io/v2/library/");
+	strcat(url, "https://registry-1.docker.io/v2/");
 	strcat(url, image);
 	strcat(url, "/manifests/");
 	strcat(url, digest);
@@ -149,7 +149,7 @@ static void pull_images(const char *_Nonnull image, char *const *_Nonnull blobs,
 		char *sha = get_short_sha(blobs[i]);
 		cprintf("{base}Pulling{cyan} %s {base}as{cyan} layer-%d\n", sha, i);
 		free(sha);
-		sprintf(url, "https://registry-1.docker.io/v2/library/%s/blobs/%s", image, blobs[i]);
+		sprintf(url, "https://registry-1.docker.io/v2/%s/blobs/%s", image, blobs[i]);
 		sprintf(filename, "layer-%d", i);
 		char *auth = malloc(strlen(token) + 114);
 		auth[0] = '\0';
@@ -173,7 +173,7 @@ static char *get_config(const char *_Nonnull image, const char *_Nonnull digest,
 	 * Warning: free() the return value after use.
 	 */
 	char url[4096] = { '\0' };
-	strcat(url, "https://registry-1.docker.io/v2/library/");
+	strcat(url, "https://registry-1.docker.io/v2/");
 	strcat(url, image);
 	strcat(url, "/manifests/");
 	strcat(url, digest);
@@ -196,7 +196,7 @@ static char *get_config(const char *_Nonnull image, const char *_Nonnull digest,
 static char **get_cmdline(const char *_Nonnull image, const char *_Nonnull config, const char *_Nonnull token)
 {
 	char url[4096] = { '\0' };
-	strcat(url, "https://registry-1.docker.io/v2/library/");
+	strcat(url, "https://registry-1.docker.io/v2/");
 	strcat(url, image);
 	strcat(url, "/blobs/");
 	strcat(url, config);
@@ -405,7 +405,7 @@ int docker_search_tag(const char *_Nonnull image, const char *_Nonnull page_size
 {
 	char *url = malloc(4096);
 	url[0] = '\0';
-	strcat(url, "https://hub.docker.com/v2/repositories/library/");
+	strcat(url, "https://hub.docker.com/v2/repositories/");
 	strcat(url, image);
 	strcat(url, "/tags/?page_size=");
 	strcat(url, page_size);
