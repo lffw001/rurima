@@ -94,9 +94,6 @@ void docker(int argc, char **_Nonnull argv)
 			error("{red}Unknown argument!\n");
 		}
 	}
-	if (image != NULL) {
-		image = add_library_prefix(image);
-	}
 	if (strcmp(argv[0], "search") == 0) {
 		if (image == NULL) {
 			error("{red}No image specified!\n");
@@ -112,6 +109,7 @@ void docker(int argc, char **_Nonnull argv)
 		if (image == NULL) {
 			error("{red}No image specified!\n");
 		}
+		image = add_library_prefix(image);
 		docker_search_tag(image, page_size, architecture, quiet);
 	} else if (strcmp(argv[0], "pull") == 0) {
 		if (tag == NULL) {
@@ -126,6 +124,7 @@ void docker(int argc, char **_Nonnull argv)
 		if (!run_with_root()) {
 			warning("{yellow}You are not running as root, might cause bug unpacking rootfs!\n");
 		}
+		image = add_library_prefix(image);
 		char **tmp = docker_pull(image, tag, architecture, savedir);
 		for (int i = 0; tmp[i] != NULL; i++) {
 			free(tmp[i]);
