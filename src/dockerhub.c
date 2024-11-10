@@ -34,7 +34,7 @@ static char *get_token(const char *_Nonnull image)
 	 * Warning: free() the return value after use.
 	 */
 	char url[4096] = { '\0' };
-	strcat(url, "https://auth.docker.io/token?service=registry.docker.io&scope=repository%3Alibrary%2F");
+	strcat(url, "https://auth.docker.io/token?service=registry.docker.io&scope=repository%3A");
 	strcat(url, image);
 	strcat(url, "%3Apull");
 	const char *curl_command[] = { "curl", "-L", "-s", url, NULL };
