@@ -28,7 +28,7 @@
  *
  */
 #include "include/rurima.h"
-static char *add_library_prefix(const char *_Nonnull image)
+static char *add_library_prefix(char *_Nonnull image)
 {
 	/*
 	 * Warning: free() the return value after use.
