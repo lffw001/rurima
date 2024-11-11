@@ -47,16 +47,16 @@ static char *get_token(const char *_Nonnull image)
 	log("{base}Token: {cyan}%s{clear}\n", ret);
 	return ret;
 }
-static char *get_tag_manifests(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nonnull token)
+static char *get_tag_manifests(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nonnull token, const char *_Nullable mirror)
 {
 	/*
 	 * Warning: free() the return value after use.
 	 */
+	if (mirror == NULL) {
+		mirror = "registry-1.docker.io";
+	}
 	char url[4096] = { '\0' };
-	strcat(url, "https://registry-1.docker.io/v2/");
-	strcat(url, image);
-	strcat(url, "/manifests/");
-	strcat(url, tag);
+	sprintf(url, "https://%s/v2/%s/manifests/%s", mirror, image, tag);
 	char *auth = malloc(strlen(token) + 114);
 	auth[0] = '\0';
 	sprintf(auth, "Authorization: Bearer %s", token);
@@ -86,16 +86,16 @@ static char *get_tag_digest(const char *_Nonnull manifests, const char *_Nullabl
 	free(tmp);
 	return digest;
 }
-static char **get_blobs(const char *_Nonnull image, const char *_Nonnull digest, const char *_Nonnull token)
+static char **get_blobs(const char *_Nonnull image, const char *_Nonnull digest, const char *_Nonnull token, const char *_Nullable mirror)
 {
 	/*
 	 * Warning: free() the return value after use.
 	 */
 	char url[4096] = { '\0' };
-	strcat(url, "https://registry-1.docker.io/v2/");
-	strcat(url, image);
-	strcat(url, "/manifests/");
-	strcat(url, digest);
+	if (mirror == NULL) {
+		mirror = "registry-1.docker.io";
+	}
+	sprintf(url, "https://%s/v2/%s/manifests/%s", mirror, image, digest);
 	log("{base}url: {cyan}%s{clear}\n", url);
 	char *auth = malloc(strlen(token) + 114);
 	auth[0] = '\0';
@@ -131,7 +131,7 @@ static char *get_short_sha(const char *_Nonnull sha)
 	ret[16] = '\0';
 	return ret;
 }
-static void pull_images(const char *_Nonnull image, char *const *_Nonnull blobs, const char *_Nonnull token, const char *_Nonnull savedir)
+static void pull_images(const char *_Nonnull image, char *const *_Nonnull blobs, const char *_Nonnull token, const char *_Nonnull savedir, const char *_Nullable mirror)
 {
 	/*
 	 * Pull images.
@@ -142,6 +142,9 @@ static void pull_images(const char *_Nonnull image, char *const *_Nonnull blobs,
 		error("{red}Failed to create directory!\n");
 	}
 	chdir(savedir);
+	if (mirror == NULL) {
+		mirror = "registry-1.docker.io";
+	}
 	for (int i = 0;; i++) {
 		if (blobs[i] == NULL) {
 			break;
@@ -149,7 +152,7 @@ static void pull_images(const char *_Nonnull image, char *const *_Nonnull blobs,
 		char *sha = get_short_sha(blobs[i]);
 		cprintf("{base}Pulling{cyan} %s {base}as{cyan} layer-%d\n", sha, i);
 		free(sha);
-		sprintf(url, "https://registry-1.docker.io/v2/%s/blobs/%s", image, blobs[i]);
+		sprintf(url, "https://%s/v2/%s/blobs/%s", mirror, image, blobs[i]);
 		sprintf(filename, "layer-%d", i);
 		char *auth = malloc(strlen(token) + 114);
 		auth[0] = '\0';
@@ -168,16 +171,16 @@ static void pull_images(const char *_Nonnull image, char *const *_Nonnull blobs,
 		remove(filename);
 	}
 }
-static char *get_config_digset(const char *_Nonnull image, const char *_Nonnull digest, const char *_Nonnull token)
+static char *get_config_digset(const char *_Nonnull image, const char *_Nonnull digest, const char *_Nonnull token, const char *_Nullable mirror)
 {
 	/*
 	 * Warning: free() the return value after use.
 	 */
+	if (mirror == NULL) {
+		mirror = "registry-1.docker.io";
+	}
 	char url[4096] = { '\0' };
-	strcat(url, "https://registry-1.docker.io/v2/");
-	strcat(url, image);
-	strcat(url, "/manifests/");
-	strcat(url, digest);
+	sprintf(url, "https://%s/v2/%s/manifests/%s", mirror, image, digest);
 	char *auth = malloc(strlen(token) + 114);
 	sprintf(auth, "Authorization: Bearer %s", token);
 	const char *curl_command[] = { "curl", "-L", "-s", "-H", "Accept: application/vnd.oci.image.manifest.v1+json", "-H", auth, url, NULL };
@@ -251,17 +254,17 @@ static void parse_env(char *const *_Nonnull env, char **_Nonnull buf, int len)
 		j += 2;
 	}
 }
-static struct DOCKER *get_image_config(const char *_Nonnull image, const char *_Nonnull config, const char *_Nonnull token)
+static struct DOCKER *get_image_config(const char *_Nonnull image, const char *_Nonnull config, const char *_Nonnull token, const char *_Nullable mirror)
 {
 	/*
 	 * Warning: free() the return value after use.
 	 */
 	struct DOCKER *ret = malloc(sizeof(struct DOCKER));
+	if (mirror == NULL) {
+		mirror = "registry-1.docker.io";
+	}
 	char url[4096] = { '\0' };
-	strcat(url, "https://registry-1.docker.io/v2/");
-	strcat(url, image);
-	strcat(url, "/blobs/");
-	strcat(url, config);
+	sprintf(url, "https://%s/v2/%s/blobs/%s", mirror, image, config);
 	char *auth = malloc(strlen(token) + 114);
 	auth[0] = '\0';
 	sprintf(auth, "Authorization: Bearer %s", token);
@@ -335,7 +338,7 @@ static struct DOCKER *get_image_config(const char *_Nonnull image, const char *_
 	free(auth);
 	return ret;
 }
-struct DOCKER *get_config(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nullable architecture)
+struct DOCKER *get_docker_config(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nullable architecture, const char *_Nullable mirror)
 {
 	/*
 	 * Warning: free() the return value after use.
@@ -343,33 +346,36 @@ struct DOCKER *get_config(const char *_Nonnull image, const char *_Nonnull tag, 
 	 * Return the config of image.
 	 */
 	char *token = get_token(image);
-	char *manifests = get_tag_manifests(image, tag, token);
+	char *manifests = get_tag_manifests(image, tag, token, mirror);
 	char *digest = get_tag_digest(manifests, architecture);
-	char *config = get_config_digset(image, digest, token);
-	struct DOCKER *ret = get_image_config(image, config, token);
+	char *config = get_config_digset(image, digest, token, mirror);
+	struct DOCKER *ret = get_image_config(image, config, token, mirror);
 	free(manifests);
 	free(token);
 	free(digest);
 	free(config);
 	return ret;
 }
-struct DOCKER *docker_pull(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nullable architecture, const char *_Nonnull savedir)
+struct DOCKER *docker_pull(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nullable architecture, const char *_Nonnull savedir, const char *_Nullable mirror)
 {
 	/*
 	 * Warning: free() the return value after use.
 	 *
 	 * Return the config of image.
 	 */
+	if (mirror == NULL) {
+		mirror = "registry-1.docker.io";
+	}
 	char *token = get_token(image);
-	char *manifests = get_tag_manifests(image, tag, token);
+	char *manifests = get_tag_manifests(image, tag, token, mirror);
 	char *digest = get_tag_digest(manifests, architecture);
-	char **blobs = get_blobs(image, digest, token);
+	char **blobs = get_blobs(image, digest, token, mirror);
 	if (blobs == NULL) {
 		error("{red}Failed to get blobs!\n");
 	}
-	pull_images(image, blobs, token, savedir);
-	char *config = get_config_digset(image, digest, token);
-	struct DOCKER *ret = get_image_config(image, config, token);
+	pull_images(image, blobs, token, savedir, mirror);
+	char *config = get_config_digset(image, digest, token, mirror);
+	struct DOCKER *ret = get_image_config(image, config, token, mirror);
 	free(manifests);
 	free(token);
 	free(digest);

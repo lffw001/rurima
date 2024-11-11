@@ -125,6 +125,7 @@ void docker(int argc, char **_Nonnull argv)
 	char *architecture = NULL;
 	char *savedir = NULL;
 	char *page_size = NULL;
+	char *mirror = NULL;
 	bool quiet = false;
 	if (argc == 0) {
 		error("{red}No subcommand specified!\n");
@@ -166,6 +167,12 @@ void docker(int argc, char **_Nonnull argv)
 			i++;
 		} else if (strcmp(argv[i], "-q") == 0 || strcmp(argv[i], "--quiet") == 0) {
 			quiet = true;
+		} else if (strcmp(argv[i], "-m") == 0 || strcmp(argv[i], "--mirror") == 0) {
+			if (i + 1 >= argc) {
+				error("{red}No mirror specified!\n");
+			}
+			mirror = argv[i + 1];
+			i++;
 		} else {
 			error("{red}Unknown argument!\n");
 		}
@@ -201,7 +208,7 @@ void docker(int argc, char **_Nonnull argv)
 			warning("{yellow}You are not running as root, might cause bug unpacking rootfs!\n");
 		}
 		image = add_library_prefix(image);
-		struct DOCKER *config = docker_pull(image, tag, architecture, savedir);
+		struct DOCKER *config = docker_pull(image, tag, architecture, savedir, mirror);
 		if (!quiet) {
 			show_docker_config(config, savedir);
 		}
@@ -214,8 +221,9 @@ void docker(int argc, char **_Nonnull argv)
 			error("{red}No image specified!\n");
 		}
 		image = add_library_prefix(image);
-		struct DOCKER *config = get_config(image, tag, architecture);
+		struct DOCKER *config = get_docker_config(image, tag, architecture, mirror);
 		show_docker_config(config, savedir);
+		free_docker_config(config);
 	} else if (strcmp(argv[0], "help") == 0 || strcmp(argv[0], "-h") == 0 || strcmp(argv[0], "--help") == 0) {
 		cprintf("{green}Usage: docker [subcommand] [options]\n");
 		cprintf("{green}Subcommands:\n");
@@ -230,6 +238,7 @@ void docker(int argc, char **_Nonnull argv)
 		cprintf("{green}  -a, --arch: Architecture of image.\n");
 		cprintf("{green}  -s, --savedir: Save directory of image.\n");
 		cprintf("{green}  -p, --page_size: Page size of search.\n");
+		cprintf("{green}  -m, --mirror: Mirror of DockerHub.\n");
 		cprintf("{green}  -q, --quiet: Quiet mode.\n");
 	} else {
 		error("{red}Invalid subcommand!\n");
