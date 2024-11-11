@@ -46,7 +46,7 @@ void check_dep(void)
 	free(result);
 	result = fork_execvp_get_stdout(curl_command);
 	if (result == NULL) {
-		error("{red}curl not found!\nIf you are aarch64, armv7, x86_64, i386 or riscv64 user\nYou can find it in\nhttps://github.com/Moe-sushi/curl-static\n");
+		error("{red}curl not found!\n");
 	}
 	free(result);
 	result = fork_execvp_get_stdout(file_command);

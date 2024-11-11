@@ -5,12 +5,12 @@ rurima is designed to be the ruri container manager, but since the dockerhub and
 You can get rurima binary (staticly linked) for arm64, armv7, armhf, riscv64, i386, loong64, s390x, ppc64le and x86_64 from the release page.     
 https://github.com/Moe-hacker/rurima/releases/tag/null          
 # Dependent:   
-rurima needs tar, xz, gzip, file and curl (with libssl), you can find these static binary for aarch64, armv7, x86_64, i386 or riscv64 in：      
+rurima needs tar, xz, gzip, file, you can find these static binary for aarch64, armv7, x86_64, i386 or riscv64 in：      
 [tar-static](https://github.com/Moe-sushi/tar-static)      
 [xz-static](https://github.com/Moe-sushi/xz-static)     
 [gzip-static](https://github.com/Moe-sushi/gzip-static)     
 [file-static](https://github.com/Moe-sushi/file-static)      
-[curl-static](https://github.com/Moe-sushi/curl-static)      
+rurima also need `curl`, but th static build have bugs, and I found that Android 15 has a built-in curl: `/bin/curl`.          
 rurima also need proot for rootless support, without proot, it might cause bugs unpacking rootfs, sadly, I failed to build proot-static, please install it manually.      
 # TODO:
 Manage ruri containers and configs.   
