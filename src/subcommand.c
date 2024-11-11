@@ -43,7 +43,7 @@ static char *add_library_prefix(char *_Nonnull image)
 	free(image);
 	return ret;
 }
-static void show_docker_config(struct DOCKER *_Nonnull config)
+static void show_docker_config(struct DOCKER *_Nonnull config, char *_Nonnull savedir)
 {
 	/*
 	 * Show docker config.
@@ -77,6 +77,26 @@ static void show_docker_config(struct DOCKER *_Nonnull config)
 		}
 		cprintf("{clear}\n");
 	}
+	cprintf("{base}Run with ruri:\n\n");
+	printf("ruri ");
+	printf("-w ");
+	if (config->workdir != NULL) {
+		printf("-W %s ", config->workdir);
+	}
+	for (int i = 0; config->env[i] != NULL; i += 2) {
+		printf("-e \"%s\" \"%s\" ", config->env[i], config->env[i + 1]);
+	}
+	printf("%s ", savedir);
+	if (config->entrypoint[0] != NULL) {
+		for (int i = 0; config->entrypoint[i] != NULL; i++) {
+			printf("%s ", config->entrypoint[i]);
+		}
+	} else if (config->command[0] != NULL) {
+		for (int i = 0; config->command[i] != NULL; i++) {
+			printf("%s ", config->command[i]);
+		}
+	}
+	printf("\n");
 	// We don't need the config anymore.
 	free(config->workdir);
 	for (int i = 0; config->env[i] != NULL; i++) {
@@ -127,7 +147,11 @@ void docker(int argc, char **_Nonnull argv)
 			if (i + 1 >= argc) {
 				error("{red}No save directory specified!\n");
 			}
-			savedir = argv[i + 1];
+			mkdirs(argv[i + 1], 0755);
+			savedir = realpath(argv[i + 1], NULL);
+			if (savedir == NULL) {
+				error("{red}Failed to create the save directory!\n");
+			}
 			i++;
 		} else if (strcmp(argv[i], "-p") == 0 || strcmp(argv[i], "--page_size") == 0) {
 			if (i + 1 >= argc) {
@@ -173,7 +197,7 @@ void docker(int argc, char **_Nonnull argv)
 		}
 		image = add_library_prefix(image);
 		struct DOCKER *config = docker_pull(image, tag, architecture, savedir);
-		show_docker_config(config);
+		show_docker_config(config, savedir);
 	} else if (strcmp(argv[0], "help") == 0 || strcmp(argv[0], "-h") == 0 || strcmp(argv[0], "--help") == 0) {
 		cprintf("{green}Usage: docker [subcommand] [options]\n");
 		cprintf("{green}Subcommands:\n");
@@ -192,6 +216,7 @@ void docker(int argc, char **_Nonnull argv)
 		error("{red}Invalid subcommand!\n");
 	}
 	free(image);
+	free(savedir);
 }
 void lxc(int argc, char **_Nonnull argv)
 {
