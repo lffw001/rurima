@@ -69,4 +69,5 @@ void check_dep(void)
 	if (result == NULL) {
 		error("{red}file does not support --brief --mime-type!\nIf you are aarch64, armv7, x86_64, i386 or riscv64 user\nYou can find a support version in\nhttps://github.com/Moe-sushi/file-static\n");
 	}
+	free(result);
 }
