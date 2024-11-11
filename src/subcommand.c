@@ -57,7 +57,7 @@ static void free_docker_config(struct DOCKER *_Nonnull config)
 	}
 	free(config);
 }
-static void show_docker_config(struct DOCKER *_Nonnull config, char *_Nonnull savedir)
+static void show_docker_config(struct DOCKER *_Nonnull config, char *_Nullable savedir)
 {
 	/*
 	 * Show docker config.
@@ -100,7 +100,7 @@ static void show_docker_config(struct DOCKER *_Nonnull config, char *_Nonnull sa
 	for (int i = 0; config->env[i] != NULL; i += 2) {
 		printf("-e \"%s\" \"%s\" ", config->env[i], config->env[i + 1]);
 	}
-	printf("%s ", savedir);
+	printf("%s ", savedir == NULL ? "/path/to/container" : savedir);
 	if (config->entrypoint[0] != NULL) {
 		for (int i = 0; config->entrypoint[i] != NULL; i++) {
 			printf("%s ", config->entrypoint[i]);
@@ -111,6 +111,9 @@ static void show_docker_config(struct DOCKER *_Nonnull config, char *_Nonnull sa
 		}
 	}
 	printf("\n\033[0m\n");
+	if (savedir == NULL) {
+		cprintf("{yellow}Please replace /path/to/container with your container path!\n");
+	}
 }
 /*
  * Subcommand for rurima.
@@ -203,13 +206,24 @@ void docker(int argc, char **_Nonnull argv)
 			show_docker_config(config, savedir);
 		}
 		free_docker_config(config);
+	} else if (strcmp(argv[0], "config") == 0) {
+		if (tag == NULL) {
+			error("{red}No tag specified!\n");
+		}
+		if (image == NULL) {
+			error("{red}No image specified!\n");
+		}
+		image = add_library_prefix(image);
+		struct DOCKER *config = get_config(image, tag, architecture);
+		show_docker_config(config, savedir);
 	} else if (strcmp(argv[0], "help") == 0 || strcmp(argv[0], "-h") == 0 || strcmp(argv[0], "--help") == 0) {
 		cprintf("{green}Usage: docker [subcommand] [options]\n");
 		cprintf("{green}Subcommands:\n");
 		cprintf("{green}  search: Search images from DockerHub.\n");
-		cprintf("{green}  tag: Search tags from DockerHub.\n");
-		cprintf("{green}  pull: Pull image from DockerHub.\n");
-		cprintf("{green}  help: Show help message.\n");
+		cprintf("{green}  tag:    Search tags from DockerHub.\n");
+		cprintf("{green}  pull:   Pull image from DockerHub.\n");
+		cprintf("{green}  config: Get config of image from DockerHub.\n");
+		cprintf("{green}  help:   Show help message.\n");
 		cprintf("{green}Options:\n");
 		cprintf("{green}  -i, --image: Image name.\n");
 		cprintf("{green}  -t, --tag: Tag of image.\n");

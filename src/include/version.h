@@ -29,4 +29,4 @@
  *
  */
 // Version info.
-#define RURIMA_VERSION "0.1"
+#define RURIMA_VERSION "0.1-unreleased"

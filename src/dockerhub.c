@@ -168,7 +168,7 @@ static void pull_images(const char *_Nonnull image, char *const *_Nonnull blobs,
 		remove(filename);
 	}
 }
-static char *get_config(const char *_Nonnull image, const char *_Nonnull digest, const char *_Nonnull token)
+static char *get_config_digset(const char *_Nonnull image, const char *_Nonnull digest, const char *_Nonnull token)
 {
 	/*
 	 * Warning: free() the return value after use.
@@ -335,12 +335,30 @@ static struct DOCKER *get_image_config(const char *_Nonnull image, const char *_
 	free(auth);
 	return ret;
 }
+struct DOCKER *get_config(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nullable architecture)
+{
+	/*
+	 * Warning: free() the return value after use.
+	 *
+	 * Return the config of image.
+	 */
+	char *token = get_token(image);
+	char *manifests = get_tag_manifests(image, tag, token);
+	char *digest = get_tag_digest(manifests, architecture);
+	char *config = get_config_digset(image, digest, token);
+	struct DOCKER *ret = get_image_config(image, config, token);
+	free(manifests);
+	free(token);
+	free(digest);
+	free(config);
+	return ret;
+}
 struct DOCKER *docker_pull(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nullable architecture, const char *_Nonnull savedir)
 {
 	/*
 	 * Warning: free() the return value after use.
 	 *
-	 * Return the start command of the image.
+	 * Return the config of image.
 	 */
 	char *token = get_token(image);
 	char *manifests = get_tag_manifests(image, tag, token);
@@ -350,7 +368,7 @@ struct DOCKER *docker_pull(const char *_Nonnull image, const char *_Nonnull tag,
 		error("{red}Failed to get blobs!\n");
 	}
 	pull_images(image, blobs, token, savedir);
-	char *config = get_config(image, digest, token);
+	char *config = get_config_digset(image, digest, token);
 	struct DOCKER *ret = get_image_config(image, config, token);
 	free(manifests);
 	free(token);

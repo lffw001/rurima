@@ -4,6 +4,8 @@ rurima is designed to be the ruri container manager, but since the dockerhub and
 # Update for docker subcommand:
 `docker` subcommand now supports auto convert docker config to ruri command, to make it more esay to start the container.        
 But if you just want to pull the image but don't want to see the config, use `-q` arg to  disable showing that info.      
+
+`docker` subcommand added `config` command to just get the config of a docker image, you can use `rurima docker config -i [image] -t [tag]|grep "ruri \-w"|cat` to get ruri command to start the container.      
 # WARNING:      
 ```
 * Your warranty is void.

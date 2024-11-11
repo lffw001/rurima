@@ -211,3 +211,4 @@ void unpack(int argc, char **_Nonnull argv);
 struct RURIMA *init_config(void);
 void get_input(char *_Nonnull message, char *_Nonnull buf);
 void check_dep(void);
+struct DOCKER *get_config(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nullable architecture);
