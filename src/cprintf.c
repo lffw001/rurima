@@ -33,7 +33,7 @@
 #define true ((_Bool) + 1u)
 #define false ((_Bool) + 0u)
 #endif
-static void print_rgb_color(const char *color)
+static void print_rgb_color(const char *_Nonnull color)
 {
 	/*
 	 * print \033[1;38;2;R;G;Bm format color.
@@ -43,9 +43,9 @@ static void print_rgb_color(const char *color)
 		buf[i - 1] = color[i];
 		buf[i] = 0;
 	}
-	printf("\033[1;38;2;%sm", buf);
+	printf("\033[0m\033[1;38;2;%sm", buf);
 }
-static void fprint_rgb_color(FILE *stream, const char *color)
+static void fprint_rgb_color(FILE *_Nonnull stream, const char *_Nonnull color)
 {
 	/*
 	 * print \033[1;38;2;R;G;Bm format color.
@@ -55,9 +55,9 @@ static void fprint_rgb_color(FILE *stream, const char *color)
 		buf[i - 1] = color[i];
 		buf[i] = 0;
 	}
-	fprintf(stream, "\033[1;38;2;%sm", buf);
+	fprintf(stream, "\033[0m\033[1;38;2;%sm", buf);
 }
-static bool is_rgb_color(const char *color)
+static bool is_rgb_color(const char *_Nonnull color)
 {
 	/*
 	 * Check if color is an R;G;B format color.
@@ -90,7 +90,7 @@ static bool is_rgb_color(const char *color)
 	}
 	return true;
 }
-static const char *cfprintf_print_color(FILE *stream, const char *buf)
+static const char *cfprintf_print_color(FILE *_Nonnull stream, const char *_Nonnull buf)
 {
 	/*
 	 * Only valid {color} will be recognized,
@@ -111,25 +111,25 @@ static const char *cfprintf_print_color(FILE *stream, const char *buf)
 		color[i + 1] = 0;
 	}
 	if (strcmp(color, "{clear}") == 0) {
-		fprintf(stream, "\033[0m");
+		fprintf(stream, "\033[0m\033[0m");
 	} else if (strcmp(color, "{black}") == 0) {
-		fprintf(stream, "\033[30m");
+		fprintf(stream, "\033[0m\033[30m");
 	} else if (strcmp(color, "{red}") == 0) {
-		fprintf(stream, "\033[31m");
+		fprintf(stream, "\033[0m\033[31m");
 	} else if (strcmp(color, "{green}") == 0) {
-		fprintf(stream, "\033[32m");
+		fprintf(stream, "\033[0m\033[32m");
 	} else if (strcmp(color, "{yellow}") == 0) {
-		fprintf(stream, "\033[33m");
+		fprintf(stream, "\033[0m\033[33m");
 	} else if (strcmp(color, "{blue}") == 0) {
-		fprintf(stream, "\033[34m");
+		fprintf(stream, "\033[0m\033[34m");
 	} else if (strcmp(color, "{purple}") == 0) {
-		fprintf(stream, "\033[35m");
+		fprintf(stream, "\033[0m\033[35m");
 	} else if (strcmp(color, "{cyan}") == 0) {
-		fprintf(stream, "\033[36m");
+		fprintf(stream, "\033[0m\033[36m");
 	} else if (strcmp(color, "{white}") == 0) {
-		fprintf(stream, "\033[37m");
+		fprintf(stream, "\033[0m\033[37m");
 	} else if (strcmp(color, "{base}") == 0) {
-		fprintf(stream, CPRINTF_BASE_COLOR);
+		fprintf(stream, "\033[0m%s", CPRINTF_BASE_COLOR);
 	} else if (is_rgb_color(color)) {
 		fprint_rgb_color(stream, color);
 	} else {
@@ -138,7 +138,7 @@ static const char *cfprintf_print_color(FILE *stream, const char *buf)
 	}
 	return ret;
 }
-static const char *cprintf_print_color(const char *buf)
+static const char *cprintf_print_color(const char *_Nonnull buf)
 {
 	/*
 	 * Only valid {color} will be recognized,
@@ -161,23 +161,23 @@ static const char *cprintf_print_color(const char *buf)
 	if (strcmp(color, "{clear}") == 0) {
 		printf("\033[0m");
 	} else if (strcmp(color, "{black}") == 0) {
-		printf("\033[30m");
+		printf("\033[0m\033[30m");
 	} else if (strcmp(color, "{red}") == 0) {
-		printf("\033[31m");
+		printf("\033[0m\033[31m");
 	} else if (strcmp(color, "{green}") == 0) {
-		printf("\033[32m");
+		printf("\033[0m\033[32m");
 	} else if (strcmp(color, "{yellow}") == 0) {
-		printf("\033[33m");
+		printf("\033[0m\033[33m");
 	} else if (strcmp(color, "{blue}") == 0) {
-		printf("\033[34m");
+		printf("\033[0m\033[34m");
 	} else if (strcmp(color, "{purple}") == 0) {
-		printf("\033[35m");
+		printf("\033[0m\033[35m");
 	} else if (strcmp(color, "{cyan}") == 0) {
-		printf("\033[36m");
+		printf("\033[0m\033[36m");
 	} else if (strcmp(color, "{white}") == 0) {
-		printf("\033[37m");
+		printf("\033[0m\033[37m");
 	} else if (strcmp(color, "{base}") == 0) {
-		printf(CPRINTF_BASE_COLOR);
+		printf("\033[0m%s", CPRINTF_BASE_COLOR);
 	} else if (is_rgb_color(color)) {
 		print_rgb_color(color);
 	} else {
@@ -186,7 +186,7 @@ static const char *cprintf_print_color(const char *buf)
 	}
 	return ret;
 }
-void __cprintf(const char *buf)
+void __cprintf(const char *_Nonnull buf)
 {
 	const char *p = NULL;
 	p = buf;
@@ -205,8 +205,9 @@ void __cprintf(const char *buf)
 	}
 	// We will always reset the color in the end.
 	printf("\033[0m");
+	fflush(stdout);
 }
-void __cfprintf(FILE *stream, const char *buf)
+void __cfprintf(FILE *_Nonnull stream, const char *_Nonnull buf)
 {
 	const char *p = NULL;
 	p = buf;
@@ -225,8 +226,9 @@ void __cfprintf(FILE *stream, const char *buf)
 	}
 	// We will always reset the color in the end.
 	fprintf(stream, "\033[0m");
+	fflush(stream);
 }
-size_t cprintf_get_bufsize(const char *format, ...)
+size_t cprintf_get_bufsize(const char *_Nonnull format, ...)
 {
 	/*
 	 * Get the size we need to malloc() for the string buffer.

@@ -91,7 +91,7 @@ static void show_docker_config(struct DOCKER *_Nonnull config, char *_Nonnull sa
 		}
 		cprintf("{clear}\n");
 	}
-	cprintf("{base}Run with ruri:\n\033[1;38;2;219;240;240m\n");
+	cprintf("{base}Run with ruri:\n") printf("\033[1;38;2;219;240;240m\n");
 	printf("ruri ");
 	printf("-w ");
 	if (config->workdir != NULL) {
