@@ -1,6 +1,9 @@
 # About:
 With the `docker` and `lxc` subcommand of rurima, you can search & get & unpack images from dockerhub or LXC mirror easily.      
 rurima is designed to be the ruri container manager, but since the dockerhub and lxc support is done, I made them to be subcommands of rurima, so you can use these feature directly.      
+# Update for docker subcommand:
+`docker` subcommand now supports auto convert docker config to ruri command, to make it more esay to start the container.        
+But if you just want to pull the image but don't want to see the config, use `-q` arg to  disable showing that info.      
 # WARNING:      
 ```
 * Your warranty is void.
