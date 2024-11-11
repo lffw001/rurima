@@ -43,6 +43,20 @@ static char *add_library_prefix(char *_Nonnull image)
 	free(image);
 	return ret;
 }
+static void free_docker_config(struct DOCKER *_Nonnull config)
+{
+	free(config->workdir);
+	for (int i = 0; config->env[i] != NULL; i++) {
+		free(config->env[i]);
+	}
+	for (int i = 0; config->command[i] != NULL; i++) {
+		free(config->command[i]);
+	}
+	for (int i = 0; config->entrypoint[i] != NULL; i++) {
+		free(config->entrypoint[i]);
+	}
+	free(config);
+}
 static void show_docker_config(struct DOCKER *_Nonnull config, char *_Nonnull savedir)
 {
 	/*
@@ -77,7 +91,7 @@ static void show_docker_config(struct DOCKER *_Nonnull config, char *_Nonnull sa
 		}
 		cprintf("{clear}\n");
 	}
-	cprintf("{base}Run with ruri:\n\n");
+	cprintf("{base}Run with ruri:\n\033[1;38;2;219;240;240m\n");
 	printf("ruri ");
 	printf("-w ");
 	if (config->workdir != NULL) {
@@ -96,19 +110,7 @@ static void show_docker_config(struct DOCKER *_Nonnull config, char *_Nonnull sa
 			printf("%s ", config->command[i]);
 		}
 	}
-	printf("\n");
-	// We don't need the config anymore.
-	free(config->workdir);
-	for (int i = 0; config->env[i] != NULL; i++) {
-		free(config->env[i]);
-	}
-	for (int i = 0; config->command[i] != NULL; i++) {
-		free(config->command[i]);
-	}
-	for (int i = 0; config->entrypoint[i] != NULL; i++) {
-		free(config->entrypoint[i]);
-	}
-	free(config);
+	printf("\n\033[0m\n");
 }
 /*
  * Subcommand for rurima.
@@ -197,7 +199,10 @@ void docker(int argc, char **_Nonnull argv)
 		}
 		image = add_library_prefix(image);
 		struct DOCKER *config = docker_pull(image, tag, architecture, savedir);
-		show_docker_config(config, savedir);
+		if (!quiet) {
+			show_docker_config(config, savedir);
+		}
+		free_docker_config(config);
 	} else if (strcmp(argv[0], "help") == 0 || strcmp(argv[0], "-h") == 0 || strcmp(argv[0], "--help") == 0) {
 		cprintf("{green}Usage: docker [subcommand] [options]\n");
 		cprintf("{green}Subcommands:\n");
