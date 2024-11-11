@@ -66,8 +66,8 @@
 // Ruri container config.
 #define INIT_VALUE (-114)
 #define MAX_COMMANDS (1024)
-#define MAX_ENVS (128 * 2)
-#define MAX_MOUNTPOINTS (128 * 2)
+#define MAX_ENVS (512 * 2)
+#define MAX_MOUNTPOINTS (512 * 2)
 struct __attribute__((aligned(128))) RURI_CONTAINER {
 	/*
 	 * This is a subset of CONTAINER struct in ruri.
@@ -78,11 +78,11 @@ struct __attribute__((aligned(128))) RURI_CONTAINER {
 	// Capabilities to drop.
 	cap_value_t drop_caplist[CAP_LAST_CAP + 1];
 	// Command for exec(2).
-	char *command[MAX_COMMANDS];
+	char *command[MAX_COMMANDS + 1];
 	// Extra mountpoints.
-	char *extra_mountpoint[MAX_MOUNTPOINTS];
+	char *extra_mountpoint[MAX_MOUNTPOINTS + 2];
 	// Extra read-only mountpoints.
-	char *extra_ro_mountpoint[MAX_MOUNTPOINTS];
+	char *extra_ro_mountpoint[MAX_MOUNTPOINTS + 2];
 	// Environment variables.
 	char *env[MAX_ENVS];
 	// Set NO_NEW_PRIV bit.
@@ -109,6 +109,10 @@ struct __attribute__((aligned(128))) RURI_CONTAINER {
 	char *cpuset;
 	// Memory.
 	char *memory;
+	// Just chroot.
+	bool just_chroot;
+	// Workdir.
+	char *workdir;
 };
 struct __attribute__((aligned(128))) RURIMA {
 	/*
@@ -137,9 +141,22 @@ struct __attribute__((aligned(128))) RURIMA {
 	// Hook script, will be copied into /tmp.
 	char *_Nullable hook_script;
 	// Hook command.
-	char *_Nullable hook_command[MAX_COMMANDS];
+	char *_Nullable hook_command[MAX_COMMANDS + 1];
 	// Full ruri container config.
 	struct RURI_CONTAINER container;
+};
+struct __attribute__((aligned(128))) DOCKER {
+	/*
+	 * This is part of docker config that we need.
+	 */
+	// Workdir.
+	char *_Nullable workdir;
+	// ENV.
+	char *_Nullable env[MAX_ENVS + 2];
+	// Command.
+	char *_Nullable command[MAX_COMMANDS + 1];
+	// Entry point.
+	char *_Nullable entrypoint[MAX_COMMANDS + 1];
 };
 // Warnings.
 #define warning(...) cfprintf(stderr, ##__VA_ARGS__)
@@ -182,7 +199,7 @@ int mkdirs(const char *_Nonnull path, mode_t mode);
 bool run_with_root(void);
 int docker_search(const char *_Nonnull image, const char *_Nonnull page_size, bool quiet);
 int docker_search_tag(const char *_Nonnull image, const char *_Nonnull page_size, const char *_Nullable architecture, bool quiet);
-char **docker_pull(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nullable architecture, const char *_Nonnull savedir);
+struct DOCKER *docker_pull(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nullable architecture, const char *_Nonnull savedir);
 void register_signal(void);
 char *get_host_arch(void);
 void lxc_pull_image(const char *_Nullable mirror, const char *_Nonnull os, const char *_Nonnull version, const char *_Nullable architecture, const char *_Nullable type, const char *_Nonnull savedir);

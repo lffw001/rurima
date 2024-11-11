@@ -63,6 +63,8 @@ struct RURIMA *init_config(void)
 	ret->container.ro_root = false;
 	ret->container.cpuset = NULL;
 	ret->container.memory = NULL;
+	ret->container.workdir = NULL;
+	ret->container.just_chroot = false;
 	return ret;
 }
 char *dump_ruri_config(struct RURIMA *_Nonnull config)
@@ -125,6 +127,12 @@ char *dump_ruri_config(struct RURIMA *_Nonnull config)
 	// memory.
 	ret = k2v_add_comment(ret, "Cgroup memory limit.");
 	ret = k2v_add_config(char, ret, "memory", config->container.memory);
+	// workdir.
+	ret = k2v_add_comment(ret, "The workdir.");
+	ret = k2v_add_config(char, ret, "workdir", config->container.workdir);
+	// just_chroot.
+	ret = k2v_add_comment(ret, "Just chrrot.");
+	ret = k2v_add_config(bool, ret, "just_chroot", config->container.just_chroot);
 	// extra_mountpoint.
 	for (int i = 0; true; i++) {
 		if (config->container.extra_mountpoint[i] == NULL) {

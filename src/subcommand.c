@@ -43,6 +43,53 @@ static char *add_library_prefix(char *_Nonnull image)
 	free(image);
 	return ret;
 }
+static void show_docker_config(struct DOCKER *_Nonnull config)
+{
+	/*
+	 * Show docker config.
+	 */
+	cprintf("{base}\nConfig:\n");
+	cprintf("{base}  Workdir:\n    {cyan}%s\n", config->workdir == NULL ? "NULL" : config->workdir);
+	cprintf("{base}  Env:\n");
+	if (config->env[0] == NULL) {
+		cprintf("{cyan}NULL\n");
+	} else {
+		for (int i = 0; config->env[i] != NULL; i += 2) {
+			cprintf("{cyan}    %s = ", config->env[i]);
+			cprintf("{cyan}%s\n", config->env[i + 1]);
+		}
+	}
+	cprintf("{base}  Command:\n    ");
+	if (config->command[0] == NULL) {
+		cprintf("{cyan}NULL\n");
+	} else {
+		for (int i = 0; config->command[i] != NULL; i++) {
+			cprintf("{cyan}%s ", config->command[i]);
+		}
+		cprintf("{clear}\n");
+	}
+	cprintf("{base}  Entrypoint:\n    ");
+	if (config->entrypoint[0] == NULL) {
+		cprintf("{cyan}NULL\n");
+	} else {
+		for (int i = 0; config->entrypoint[i] != NULL; i++) {
+			cprintf("{cyan}%s ", config->entrypoint[i]);
+		}
+		cprintf("{clear}\n");
+	}
+	// We don't need the config anymore.
+	free(config->workdir);
+	for (int i = 0; config->env[i] != NULL; i++) {
+		free(config->env[i]);
+	}
+	for (int i = 0; config->command[i] != NULL; i++) {
+		free(config->command[i]);
+	}
+	for (int i = 0; config->entrypoint[i] != NULL; i++) {
+		free(config->entrypoint[i]);
+	}
+	free(config);
+}
 /*
  * Subcommand for rurima.
  */
@@ -125,11 +172,8 @@ void docker(int argc, char **_Nonnull argv)
 			warning("{yellow}You are not running as root, might cause bug unpacking rootfs!\n");
 		}
 		image = add_library_prefix(image);
-		char **tmp = docker_pull(image, tag, architecture, savedir);
-		for (int i = 0; tmp[i] != NULL; i++) {
-			free(tmp[i]);
-		}
-		free(tmp);
+		struct DOCKER *config = docker_pull(image, tag, architecture, savedir);
+		show_docker_config(config);
 	} else if (strcmp(argv[0], "help") == 0 || strcmp(argv[0], "-h") == 0 || strcmp(argv[0], "--help") == 0) {
 		cprintf("{green}Usage: docker [subcommand] [options]\n");
 		cprintf("{green}Subcommands:\n");

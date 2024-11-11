@@ -154,6 +154,7 @@ static void pull_images(const char *_Nonnull image, char *const *_Nonnull blobs,
 		char *auth = malloc(strlen(token) + 114);
 		auth[0] = '\0';
 		sprintf(auth, "Authorization: Bearer %s", token);
+		log("{base}Command:\n{cyan}curl -L -s -H \"%s\" %s -o %s\n", auth, url, filename);
 		const char *curl_command[] = { "curl", "-L", "-s", "-H", auth, url, "-o", filename, NULL };
 		int ret = fork_execvp(curl_command);
 		if (ret != 0) {
@@ -193,8 +194,69 @@ static char *get_config(const char *_Nonnull image, const char *_Nonnull digest,
 	free(auth);
 	return config;
 }
-static char **get_cmdline(const char *_Nonnull image, const char *_Nonnull config, const char *_Nonnull token)
+static char *env_get_right(const char *_Nonnull env)
 {
+	/*
+	 * Warning: free() the return value after use.
+	 */
+	const char *p = env;
+	for (size_t i = 0; i < strlen(env); i++) {
+		if (env[i] == '\\') {
+			i++;
+			continue;
+		}
+		if (env[i] == '=') {
+			p = &env[i + 1];
+			break;
+		}
+	}
+	return strdup(p);
+}
+static char *env_get_left(const char *_Nonnull env)
+{
+	/*
+	 * Warning: free() the return value after use.
+	 */
+	char *ret = malloc(strlen(env) + 1);
+	strcpy(ret, env);
+	for (size_t i = 0; i < strlen(env); i++) {
+		if (env[i] == '\\') {
+			i++;
+			continue;
+		}
+		if (env[i] == '=') {
+			ret[i] = '\0';
+			break;
+		}
+	}
+	char *tmp = ret;
+	ret = strdup(tmp);
+	free(tmp);
+	return ret;
+}
+static void parse_env(char *const *_Nonnull env, char **_Nonnull buf, int len)
+{
+	/*
+	 * Parse env.
+	 */
+	if (len == 0) {
+		return;
+	}
+	int j = 0;
+	for (int i = 0; i < len; i++) {
+		buf[j] = env_get_left(env[i]);
+		buf[j + 1] = env_get_right(env[i]);
+		buf[j + 2] = NULL;
+		buf[j + 3] = NULL;
+		j += 2;
+	}
+}
+static struct DOCKER *get_image_config(const char *_Nonnull image, const char *_Nonnull config, const char *_Nonnull token)
+{
+	/*
+	 * Warning: free() the return value after use.
+	 */
+	struct DOCKER *ret = malloc(sizeof(struct DOCKER));
 	char url[4096] = { '\0' };
 	strcat(url, "https://registry-1.docker.io/v2/");
 	strcat(url, image);
@@ -208,25 +270,72 @@ static char **get_cmdline(const char *_Nonnull image, const char *_Nonnull confi
 	if (response == NULL) {
 		error("{red}Failed to get blobs!\n");
 	}
-	char *cmdline = json_get_key(response, "[config][Cmd]");
-	if (cmdline == NULL) {
-		error("{red}Failed to get cmdline!\n");
+	{
+		char *workdir = json_get_key(response, "[config][WorkingDir]");
+		log("{base}Env: {cyan}%s{clear}\n", workdir == NULL ? "NULL" : workdir);
+		if (workdir == NULL) {
+			ret->workdir = NULL;
+		} else {
+			ret->workdir = workdir;
+		}
 	}
-	log("{base}Cmdline: {cyan}%s{clear}\n", cmdline);
+	{
+		char *env_from_json = json_get_key(response, "[config][Env]");
+		log("{base}Env: {cyan}%s{clear}\n", env_from_json == NULL ? "NULL" : env_from_json);
+		if (env_from_json != NULL) {
+			char *tmp = malloc(strlen(env_from_json) + 114);
+			sprintf(tmp, "env=%s\n", env_from_json);
+			char *env[MAX_ENVS];
+			env[0] = NULL;
+			int len = k2v_get_key(char_array, "env", tmp, env, MAX_ENVS);
+			parse_env(env, ret->env, len);
+			for (int i = 0; i < len; i++) {
+				log("{base}Env[%d]: {cyan}%s{clear}\n", i, env[i]);
+				free(env[i]);
+			}
+			free(tmp);
+			free(env_from_json);
+		} else {
+			ret->env[0] = NULL;
+		}
+	}
+	{
+		char *entrypoint = json_get_key(response, "[config][Entrypoint]");
+		log("{base}Entrypoint: {cyan}%s{clear}\n", entrypoint == NULL ? "NULL" : entrypoint);
+		if (entrypoint != NULL) {
+			char *tmp = malloc(strlen(entrypoint) + 114);
+			sprintf(tmp, "entrypoint=%s\n", entrypoint);
+			int len = k2v_get_key(char_array, "entrypoint", tmp, ret->entrypoint, MAX_COMMANDS);
+			for (int i = 0; i < len; i++) {
+				log("{base}Entrypoint[%d]: {cyan}%s{clear}\n", i, ret->entrypoint[i]);
+			}
+			free(tmp);
+			free(entrypoint);
+		} else {
+			ret->entrypoint[0] = NULL;
+		}
+	}
+	{
+		char *cmdline = json_get_key(response, "[config][Cmd]");
+		log("{base}Cmdline: {cyan}%s{clear}\n", cmdline == NULL ? "NULL" : cmdline);
+		if (cmdline != NULL) {
+			char *tmp = malloc(strlen(cmdline) + 114);
+			sprintf(tmp, "cmdline=%s\n", cmdline);
+			int len = k2v_get_key(char_array, "cmdline", tmp, ret->command, MAX_COMMANDS);
+			for (int i = 0; i < len; i++) {
+				log("{base}Cmdline[%d]: {cyan}%s{clear}\n", i, ret->command[i]);
+			}
+			free(tmp);
+			free(cmdline);
+		} else {
+			ret->command[0] = NULL;
+		}
+	}
 	free(response);
 	free(auth);
-	char **ret = malloc(1024 * sizeof(char *));
-	char *tmp = malloc(strlen(cmdline) + 114);
-	sprintf(tmp, "cmdline=%s\n", cmdline);
-	int len = k2v_get_key(char_array, "cmdline", tmp, ret);
-	for (int i = 0; i < len; i++) {
-		log("{base}Cmdline[%d]: {cyan}%s{clear}\n", i, ret[i]);
-	}
-	free(tmp);
-	free(cmdline);
 	return ret;
 }
-char **docker_pull(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nullable architecture, const char *_Nonnull savedir)
+struct DOCKER *docker_pull(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nullable architecture, const char *_Nonnull savedir)
 {
 	/*
 	 * Warning: free() the return value after use.
@@ -242,7 +351,7 @@ char **docker_pull(const char *_Nonnull image, const char *_Nonnull tag, const c
 	}
 	pull_images(image, blobs, token, savedir);
 	char *config = get_config(image, digest, token);
-	char **cmdline = get_cmdline(image, config, token);
+	struct DOCKER *ret = get_image_config(image, config, token);
 	free(manifests);
 	free(token);
 	free(digest);
@@ -251,7 +360,7 @@ char **docker_pull(const char *_Nonnull image, const char *_Nonnull tag, const c
 	}
 	free(blobs);
 	free(config);
-	return cmdline;
+	return ret;
 }
 static char *__docker_search(const char *_Nonnull url)
 {
