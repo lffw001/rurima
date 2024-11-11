@@ -28,15 +28,107 @@
  *
  */
 #include "include/rurima.h"
-static char *get_token(const char *_Nonnull image)
+static char *get_auth_server_from_header(const char *_Nonnull header)
+{
+	/*
+	 * Warning: free() the return value after use.
+	 */
+	const char *p = strstr(header, "www-authenticate: ");
+	if (p == NULL) {
+		error("{red}No auth server found!\n");
+	}
+	p = strstr(p, "realm=");
+	if (p == NULL) {
+		error("{red}No auth server found!\n");
+	}
+	p = strstr(p, "\"");
+	if (p == NULL) {
+		error("{red}No auth server found!\n");
+	}
+	p++;
+	const char *q = strstr(p, "\"");
+	if (q == NULL) {
+		error("{red}No auth server found!\n");
+	}
+	char *ret = malloc((size_t)(q - p + 1));
+	strncpy(ret, p, (size_t)(q - p));
+	ret[q - p] = '\0';
+	return ret;
+}
+static char *get_service_from_header(const char *_Nonnull header)
+{
+	/*
+	 * Warning: free() the return value after use.
+	 */
+	const char *p = strstr(header, "www-authenticate: ");
+	if (p == NULL) {
+		error("{red}No service found!\n");
+	}
+	p = strstr(p, "service=");
+	if (p == NULL) {
+		error("{red}No service found!\n");
+	}
+	p = strstr(p, "\"");
+	if (p == NULL) {
+		error("{red}No service found!\n");
+	}
+	p++;
+	const char *q = strstr(p, "\"");
+	if (q == NULL) {
+		error("{red}No service found!\n");
+	}
+	char *ret = malloc((size_t)(q - p + 1));
+	strncpy(ret, p, (size_t)(q - p));
+	ret[q - p] = '\0';
+	return ret;
+}
+static char *get_auth_server_url(const char *_Nullable mirror)
+{
+	/*
+	 * Warning: free() the return value after use.
+	 */
+	if (mirror == NULL) {
+		mirror = "registry-1.docker.io";
+	}
+	char url[4096] = { '\0' };
+	sprintf(url, "https://%s/v2/", mirror);
+	const char *curl_command[] = { "curl", "-s", "-I", url, NULL };
+	char *response = fork_execvp_get_stdout(curl_command);
+	if (response == NULL) {
+		error("{red}Failed to get auth server!\n");
+	}
+	char *server = get_auth_server_from_header(response);
+	if (server == NULL) {
+		error("{red}Failed to get auth server!\n");
+	}
+	char *service = get_service_from_header(response);
+	if (service == NULL) {
+		error("{red}Failed to get service!\n");
+	}
+	free(response);
+	char *ret = malloc(strlen(server) + strlen(service) + 22);
+	sprintf(ret, "%s?service=%s", server, service);
+	free(server);
+	free(service);
+	log("{base}Auth server url: {cyan}%s{clear}\n", ret);
+	return ret;
+}
+static char *get_token(const char *_Nonnull image, const char *_Nullable mirror)
 {
 	/*
 	 * Warning: free() the return value after use.
 	 */
 	char url[4096] = { '\0' };
-	strcat(url, "https://auth.docker.io/token?service=registry.docker.io&scope=repository%3A");
+	if (mirror == NULL) {
+		mirror = "registry-1.docker.io";
+	}
+	char *auth_server_url = get_auth_server_url(mirror);
+	strcat(url, auth_server_url);
+	free(auth_server_url);
+	strcat(url, "&scope=repository%3A");
 	strcat(url, image);
 	strcat(url, "%3Apull");
+	log("{base}url: {cyan}%s{clear}\n", url);
 	const char *curl_command[] = { "curl", "-L", "-s", url, NULL };
 	char *token_json = fork_execvp_get_stdout(curl_command);
 	if (token_json == NULL) {
@@ -345,7 +437,7 @@ struct DOCKER *get_docker_config(const char *_Nonnull image, const char *_Nonnul
 	 *
 	 * Return the config of image.
 	 */
-	char *token = get_token(image);
+	char *token = get_token(image, mirror);
 	char *manifests = get_tag_manifests(image, tag, token, mirror);
 	char *digest = get_tag_digest(manifests, architecture);
 	char *config = get_config_digset(image, digest, token, mirror);
@@ -366,7 +458,7 @@ struct DOCKER *docker_pull(const char *_Nonnull image, const char *_Nonnull tag,
 	if (mirror == NULL) {
 		mirror = "registry-1.docker.io";
 	}
-	char *token = get_token(image);
+	char *token = get_token(image, mirror);
 	char *manifests = get_tag_manifests(image, tag, token, mirror);
 	char *digest = get_tag_digest(manifests, architecture);
 	char **blobs = get_blobs(image, digest, token, mirror);
