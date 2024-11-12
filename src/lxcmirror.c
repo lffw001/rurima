@@ -155,7 +155,7 @@ void lxc_get_image_list(const char *_Nullable mirror, const char *_Nullable arch
 	char *line = NULL;
 	if (p == NULL) {
 		free(buf);
-		error("Failed to get index.");
+		error("{red}Failed to get index.\n");
 	}
 	bool found = false;
 	while ((line = get_current_line(p)) != NULL) {
@@ -182,7 +182,7 @@ void lxc_get_image_list(const char *_Nullable mirror, const char *_Nullable arch
 		p = goto_next_line(p);
 	}
 	if (!found) {
-		error("No image found.");
+		error("{red}No image found.\n");
 	}
 	free(buf);
 }
@@ -199,7 +199,7 @@ void lxc_search_image(const char *_Nullable mirror, const char *_Nonnull os, con
 	char *line = NULL;
 	if (p == NULL) {
 		free(buf);
-		error("Failed to get index.");
+		error("{red}Failed to get index.\n");
 	}
 	bool found = false;
 	while ((line = get_current_line(p)) != NULL) {
@@ -227,17 +227,17 @@ void lxc_search_image(const char *_Nullable mirror, const char *_Nonnull os, con
 	}
 	free(buf);
 	if (!found) {
-		error("No image found.");
+		error("{red}No image found.\n");
 	}
 }
 void lxc_pull_image(const char *_Nullable mirror, const char *_Nonnull os, const char *_Nonnull version, const char *_Nullable architecture, const char *_Nullable type, const char *_Nonnull savedir)
 {
 	char *dir = lxc_get_image_dir(mirror, os, version, architecture, type);
 	if (dir == NULL) {
-		error("Image not found.");
+		error("{red}Image not found.\n");
 	}
 	if (mkdirs(savedir, 0755) == -1) {
-		error("Failed to create directory.");
+		error("{red}Failed to create directory.\n");
 	}
 	chdir(savedir);
 	if (mirror == NULL) {

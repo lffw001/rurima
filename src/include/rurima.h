@@ -170,9 +170,9 @@ struct __attribute__((aligned(128))) DOCKER {
 		cfprintf(stderr, "{base}%s{clear}\n", " ﾙﾘﾘ >  x )ﾘ");                                       \
 		cfprintf(stderr, "{base}%s{clear}\n", "ﾉノ㇏  ^ ﾉ|ﾉ");                                       \
 		cfprintf(stderr, "{base}%s{clear}\n", "      ⠁⠁");                                           \
-		cfprintf(stderr, "{base}%s{clear}\n", "RURI ERROR MESSAGE");                                 \
+		cfprintf(stderr, "{base}%s{clear}\n", "RURIMA ERROR MESSAGE");                               \
 		cfprintf(stderr, "{base}%s{clear}\n", "If you think something is wrong, please report at:"); \
-		cfprintf(stderr, "\033[4m{base}%s{clear}\n", "https://github.com/Moe-hacker/ruri/issues");   \
+		cfprintf(stderr, "\033[4m{base}%s{clear}\n", "https://github.com/Moe-hacker/rurima/issues"); \
 		exit(EXIT_FAILURE);                                                                          \
 	}
 // Log system.
