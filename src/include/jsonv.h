@@ -27,6 +27,7 @@
  *
  *
  */
+#pragma once
 #define _GNU_SOURCE
 #include <fcntl.h>
 #include <stdio.h>

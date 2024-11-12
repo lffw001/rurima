@@ -103,7 +103,7 @@ bool run_with_root(void)
 		return false;
 	}
 }
-char *get_host_arch(void)
+char *docker_get_host_arch(void)
 {
 	/*
 	 * Get the cpu arch.
@@ -120,6 +120,113 @@ char *get_host_arch(void)
 #endif
 #if defined(__arm__)
 	ret = "arm";
+#endif
+#if defined(__armeb__)
+	ret = "arm";
+#endif
+#if defined(__cris__)
+	ret = "cris";
+#endif
+#if defined(__hexagon__)
+	ret = "hexagon";
+#endif
+#if defined(__hppa__)
+	ret = "hppa";
+#endif
+#if defined(__i386__)
+	ret = "386";
+#endif
+#if defined(__loongarch64__)
+	ret = "loong64";
+#endif
+#if defined(__m68k__)
+	ret = "m68k";
+#endif
+#if defined(__microblaze__)
+	ret = "microblaze";
+#endif
+#if defined(__mips__)
+	ret = "mips";
+#endif
+#if defined(__mips64__)
+	ret = "mips64";
+#endif
+#if defined(__mips64el__)
+	ret = "mips64el";
+#endif
+#if defined(__mipsel__)
+	ret = "mipsel";
+#endif
+#if defined(__mipsn32__)
+	ret = "mipsn32";
+#endif
+#if defined(__mipsn32el__)
+	ret = "mipsn32el";
+#endif
+#if defined(__ppc__)
+	ret = "ppc";
+#endif
+#if defined(__ppc64__)
+	ret = "ppc64";
+#endif
+#if defined(__ppc64le__)
+	ret = "ppc64le";
+#endif
+#if defined(__riscv32__)
+	ret = "riscv32";
+#endif
+#if defined(__riscv64__)
+	ret = "riscv64";
+#endif
+#if defined(__s390x__)
+	ret = "s390x";
+#endif
+#if defined(__sh4__)
+	ret = "sh4";
+#endif
+#if defined(__sh4eb__)
+	ret = "sh4eb";
+#endif
+#if defined(__sparc__)
+	ret = "sparc";
+#endif
+#if defined(__sparc32plus__)
+	ret = "sparc32plus";
+#endif
+#if defined(__sparc64__)
+	ret = "sparc64";
+#endif
+#if defined(__x86_64__)
+	ret = "amd64";
+#endif
+#if defined(__xtensa__)
+	ret = "xtensa";
+#endif
+#if defined(__xtensaeb__)
+	ret = "xtensaeb";
+#endif
+	if (ret == NULL) {
+		error("{red}Unknow cpu arch!\n");
+	}
+	return ret;
+}
+char *lxc_get_host_arch(void)
+{
+	/*
+	 * Get the cpu arch.
+	 * We just need to check the macro we have.
+	 *
+	 * Do not free() the returned value.
+	 */
+	char *ret = NULL;
+#if defined(__aarch64__)
+	ret = "arm64";
+#endif
+#if defined(__alpha__)
+	ret = "alpha";
+#endif
+#if defined(__arm__)
+	ret = "armhf";
 #endif
 #if defined(__armeb__)
 	ret = "armeabi";

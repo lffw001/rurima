@@ -162,6 +162,15 @@ void docker(int argc, char **_Nonnull argv)
 		struct DOCKER *config = get_docker_config(image, tag, architecture, mirror);
 		show_docker_config(config, savedir, runtime, quiet);
 		free_docker_config(config);
+	} else if (strcmp(argv[0], "arch") == 0) {
+		if (image == NULL) {
+			error("{red}No image specified!\n");
+		}
+		image = add_library_prefix(image);
+		if (tag == NULL) {
+			error("{red}No tag specified!\n");
+		}
+		docker_search_arch(image, tag, mirror);
 	} else if (strcmp(argv[0], "help") == 0 || strcmp(argv[0], "-h") == 0 || strcmp(argv[0], "--help") == 0) {
 		cprintf("{green}Usage: docker [subcommand] [options]\n");
 		cprintf("{green}Subcommands:\n");
@@ -169,6 +178,7 @@ void docker(int argc, char **_Nonnull argv)
 		cprintf("{green}  tag:    Search tags from DockerHub.\n");
 		cprintf("{green}  pull:   Pull image from DockerHub.\n");
 		cprintf("{green}  config: Get config of image from DockerHub.\n");
+		cprintf("{green}  arch:   Search architecture of image from DockerHub.\n");
 		cprintf("{green}  help:   Show help message.\n");
 		cprintf("{green}Options:\n");
 		cprintf("{green}  -i, --image: Image name.\n");
@@ -258,12 +268,18 @@ void lxc(int argc, char **_Nonnull argv)
 			error("{red}No os specified!\n");
 		}
 		lxc_search_image(mirror, os, architecture);
+	} else if (strcmp(argv[0], "arch") == 0) {
+		if (os == NULL) {
+			error("{red}No os specified!\n");
+		}
+		lxc_search_arch(mirror, os);
 	} else if (strcmp(argv[0], "help") == 0 || strcmp(argv[0], "-h") == 0 || strcmp(argv[0], "--help") == 0) {
 		cprintf("{green}Usage: lxc [subcommand] [options]\n");
 		cprintf("{green}Subcommands:\n");
 		cprintf("{green}  pull: Pull image from LXC image server.\n");
 		cprintf("{green}  list: List images from LXC image server.\n");
 		cprintf("{green}  search: Search images from LXC image server.\n");
+		cprintf("{green}  arch: Search architecture of images from LXC image server.\n");
 		cprintf("{green}  help: Show help message.\n");
 		cprintf("{green}Options:\n");
 		cprintf("{green}  -m, --mirror: Mirror of LXC image server.\n");

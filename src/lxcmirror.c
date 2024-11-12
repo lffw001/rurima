@@ -132,7 +132,7 @@ static char *lxc_get_image_dir(const char *_Nullable mirror, const char *_Nonnul
 		return NULL;
 	}
 	if (architecture == NULL) {
-		architecture = get_host_arch();
+		architecture = lxc_get_host_arch();
 	}
 	log("arch: %s\n", architecture);
 	if (type == NULL) {
@@ -169,7 +169,7 @@ void lxc_get_image_list(const char *_Nullable mirror, const char *_Nullable arch
 	 * and show them.
 	 */
 	if (architecture == NULL) {
-		architecture = get_host_arch();
+		architecture = lxc_get_host_arch();
 	}
 	if (mirror == NULL) {
 		mirror = "https://mirrors.bfsu.edu.cn/lxc-images";
@@ -217,7 +217,7 @@ void lxc_search_image(const char *_Nullable mirror, const char *_Nonnull os, con
 	 * and show them.
 	 */
 	if (architecture == NULL) {
-		architecture = get_host_arch();
+		architecture = lxc_get_host_arch();
 	}
 	if (mirror == NULL) {
 		mirror = "https://mirrors.bfsu.edu.cn/lxc-images";
@@ -284,4 +284,49 @@ void lxc_pull_image(const char *_Nullable mirror, const char *_Nonnull os, const
 	remove("rootfs.tar.xz");
 	free(url);
 	free(dir);
+}
+void lxc_search_arch(const char *_Nullable mirror, const char *_Nonnull os)
+{
+	/*
+	 * Search the architecture of the image from mirror,
+	 * and show them.
+	 */
+	if (mirror == NULL) {
+		mirror = "https://mirrors.bfsu.edu.cn/lxc-images";
+	}
+	char *buf = get_lxc_index(mirror);
+	const char *p = buf;
+	char *line = NULL;
+	if (p == NULL) {
+		free(buf);
+		error("{red}Failed to get index.\n");
+	}
+	bool found = false;
+	while ((line = get_current_line(p)) != NULL) {
+		char *os_cur = line_get_value(line, 0);
+		char *version = line_get_value(line, 1);
+		char *arch = line_get_value(line, 2);
+		char *type = line_get_value(line, 3);
+		if (strcmp(os_cur, os) != 0) {
+			free(os_cur);
+			free(version);
+			free(arch);
+			free(type);
+			free(line);
+			p = goto_next_line(p);
+			continue;
+		}
+		found = true;
+		cprintf("{yellow}%-13s {green}: {purple}%-10s {green}: {cyan}%-8s\n", os, version, arch);
+		free(os_cur);
+		free(version);
+		free(arch);
+		free(type);
+		free(line);
+		p = goto_next_line(p);
+	}
+	free(buf);
+	if (!found) {
+		error("{red}No image found.\n");
+	}
 }

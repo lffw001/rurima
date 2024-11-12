@@ -345,7 +345,7 @@ static char *get_tag_manifests(const char *_Nonnull image, const char *_Nonnull 
 	char *auth = malloc(strlen(token) + 114);
 	auth[0] = '\0';
 	sprintf(auth, "Authorization: Bearer %s", token);
-	const char *curl_command[] = { "curl", "-L", "-s", "-H", "Accept: application/vnd.docker.distribution.manifest.list.v2+json", "-H", auth, url, NULL };
+	const char *curl_command[] = { "curl", "-L", "-s", "-H", "Accept: application/vnd.docker.distribution.manifest.list.v1+json", "-H", auth, url, NULL };
 	char *ret = fork_execvp_get_stdout(curl_command);
 	if (ret == NULL) {
 		error("{red}Failed to get manifests!\n");
@@ -364,7 +364,7 @@ static char *get_tag_digest(const char *_Nonnull manifests, const char *_Nullabl
 	 *
 	 */
 	if (architecture == NULL) {
-		architecture = get_host_arch();
+		architecture = docker_get_host_arch();
 	}
 	char *tmp = json_get_key(manifests, "[manifests]");
 	char *digest = json_anon_layer_get_key(tmp, "[platform][architecture]", architecture, "[digest]");
@@ -794,6 +794,9 @@ int docker_search(const char *_Nonnull image, const char *_Nonnull page_size, bo
 	while (true) {
 		log("{base}url: {cyan}%s{clear}\n", url);
 		char *next_url = __docker_search(url);
+		if (next_url == NULL) {
+			exit(EXIT_SUCCESS);
+		}
 		log("{base}nexturl: {cyan}%s{clear}\n", next_url);
 		if (quiet) {
 			free(url);
@@ -832,7 +835,7 @@ static char *__docker_search_tag(const char *_Nonnull image, const char *_Nonnul
 	}
 	log("{base}Response from dockerhub:\n{cyan}%s{clear}\n", response);
 	if (architecture == NULL) {
-		architecture = get_host_arch();
+		architecture = docker_get_host_arch();
 	}
 	char *next_url = json_get_key(response, "[next]");
 	log("{base}next_url: {cyan}%s{clear}\n", next_url);
@@ -888,6 +891,9 @@ int docker_search_tag(const char *_Nonnull image, const char *_Nonnull page_size
 	while (true) {
 		log("{base}url: {cyan}%s{clear}\n", url);
 		char *next_url = __docker_search_tag(image, url, architecture);
+		if (next_url == NULL) {
+			exit(EXIT_SUCCESS);
+		}
 		log("{base}nexturl: {cyan}%s{clear}\n", next_url);
 		if (quiet) {
 			free(url);
@@ -907,5 +913,92 @@ int docker_search_tag(const char *_Nonnull image, const char *_Nonnull page_size
 			break;
 		}
 	}
+	return 0;
+}
+static void __docker_add_archlist(char *_Nonnull arch, char ***_Nullable archlist)
+{
+	/*
+	 * Add arch to archlist.
+	 *
+	 * We will not add duplicate arch.
+	 *
+	 */
+	if (strcmp(arch, "unknown") == 0) {
+		return;
+	}
+	if (*archlist == NULL) {
+		*archlist = malloc(sizeof(char *) * 3);
+		(*archlist)[0] = strdup(arch);
+		(*archlist)[1] = NULL;
+		return;
+	}
+	for (int i = 0; (*archlist)[i] != NULL; i++) {
+		if (strcmp((*archlist)[i], arch) == 0) {
+			return;
+		}
+	}
+	size_t j = 0;
+	for (; (*archlist)[j] != NULL; j++)
+		;
+	*archlist = realloc(*archlist, sizeof(char *) * (j + 3));
+	for (int i = 0;; i++) {
+		if ((*archlist)[i] == NULL) {
+			(*archlist)[i] = strdup(arch);
+			(*archlist)[i + 1] = NULL;
+			break;
+		}
+	}
+}
+static void docker_print_arch(const char *_Nonnull image, char *const *_Nonnull arch, size_t len)
+{
+	/*
+	 * Print architecture of image.
+	 *
+	 * We will not print unknown architecture or duplicate architecture.
+	 *
+	 */
+	char **archlist = NULL;
+	for (size_t i = 0; i < len; i++) {
+		__docker_add_archlist(arch[i], &archlist);
+	}
+	if (archlist == NULL) {
+		error("{red}No results found!\n");
+	}
+	for (int i = 0; archlist[i] != NULL; i++) {
+		cprintf("{yellow}[%s]: {cyan}%s{clear}\n", image, archlist[i]);
+	}
+	for (int i = 0; archlist[i] != NULL; i++) {
+		free(archlist[i]);
+	}
+	free(archlist);
+}
+int docker_search_arch(const char *_Nonnull image, const char *_Nonnull tag, char *_Nullable mirror)
+{
+	/*
+	 * Get architecture of image:tag.
+	 *
+	 * The return value is not important here,
+	 * because we will error() directly if failed.
+	 *
+	 */
+	if (mirror == NULL) {
+		mirror = "registry-1.docker.io";
+	}
+	char *token = get_token(image, mirror);
+	char *manifests = get_tag_manifests(image, tag, token, mirror);
+	char **arch = NULL;
+	char *tmp = json_get_key(manifests, "[manifests]");
+	size_t len = json_anon_layer_get_key_array(tmp, "[platform][architecture]", &arch);
+	if (len == 0) {
+		error("{red}No results found!\n");
+	}
+	docker_print_arch(image, arch, len);
+	free(manifests);
+	free(token);
+	for (size_t i = 0; i < len; i++) {
+		free(arch[i]);
+	}
+	free(arch);
+	free(tmp);
 	return 0;
 }

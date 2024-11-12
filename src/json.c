@@ -27,6 +27,7 @@
  *
  *
  */
+#include "include/jsonv.h"
 #include "include/rurima.h"
 /*
  * If there's no bugs, do not care how it works,

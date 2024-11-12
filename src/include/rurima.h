@@ -201,7 +201,8 @@ int docker_search(const char *_Nonnull image, const char *_Nonnull page_size, bo
 int docker_search_tag(const char *_Nonnull image, const char *_Nonnull page_size, const char *_Nullable architecture, bool quiet);
 struct DOCKER *docker_pull(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nullable architecture, const char *_Nonnull savedir, const char *_Nullable mirror);
 void register_signal(void);
-char *get_host_arch(void);
+char *docker_get_host_arch(void);
+char *lxc_get_host_arch(void);
 void lxc_pull_image(const char *_Nullable mirror, const char *_Nonnull os, const char *_Nonnull version, const char *_Nullable architecture, const char *_Nullable type, const char *_Nonnull savedir);
 void lxc_get_image_list(const char *_Nullable mirror, const char *_Nullable architecture);
 void lxc_search_image(const char *_Nullable mirror, const char *_Nonnull os, const char *_Nullable architecture);
@@ -214,3 +215,5 @@ void check_dep(void);
 struct DOCKER *get_docker_config(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nullable architecture, const char *_Nullable mirror);
 void show_docker_config(struct DOCKER *_Nonnull config, char *_Nullable savedir, char *_Nullable runtime, bool quiet);
 void free_docker_config(struct DOCKER *_Nonnull config);
+void lxc_search_arch(const char *_Nullable mirror, const char *_Nonnull os);
+int docker_search_arch(const char *_Nonnull image, const char *_Nonnull tag, char *_Nullable mirror);
