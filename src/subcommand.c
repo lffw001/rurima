@@ -75,16 +75,16 @@ static void print_chroot_command(struct DOCKER *_Nonnull config, char *_Nullable
 	printf("%s/sys\n", savedir == NULL ? "/path/to/container" : savedir);
 	printf("chroot ");
 	printf("%s ", savedir == NULL ? "/path/to/container" : savedir);
-	if (config->entrypoint[0] != NULL) {
+	if (config->command[0] != NULL) {
+		for (int i = 0; config->command[i] != NULL; i++) {
+			printf("%s ", config->command[i]);
+		}
+	} else if (config->entrypoint[0] != NULL) {
 		if (config->workdir != NULL) {
 			printf("%s/", config->workdir);
 		}
 		for (int i = 0; config->entrypoint[i] != NULL; i++) {
 			printf("%s ", config->entrypoint[i]);
-		}
-	} else if (config->command[0] != NULL) {
-		for (int i = 0; config->command[i] != NULL; i++) {
-			printf("%s ", config->command[i]);
 		}
 	}
 	printf("\n");
@@ -97,13 +97,13 @@ static void print_proot_command(struct DOCKER *_Nonnull config, char *_Nullable 
 		printf("-w %s ", config->workdir);
 	}
 	printf("-r %s ", savedir == NULL ? "/path/to/container" : savedir);
-	if (config->entrypoint[0] != NULL) {
-		for (int i = 0; config->entrypoint[i] != NULL; i++) {
-			printf("%s ", config->entrypoint[i]);
-		}
-	} else if (config->command[0] != NULL) {
+	if (config->command[0] != NULL) {
 		for (int i = 0; config->command[i] != NULL; i++) {
 			printf("%s ", config->command[i]);
+		}
+	} else if (config->entrypoint[0] != NULL) {
+		for (int i = 0; config->entrypoint[i] != NULL; i++) {
+			printf("%s ", config->entrypoint[i]);
 		}
 	}
 	printf("\n");
@@ -119,13 +119,13 @@ static void print_ruri_command(struct DOCKER *_Nonnull config, char *_Nullable s
 		printf("-e \"%s\" \"%s\" ", config->env[i], config->env[i + 1]);
 	}
 	printf("%s ", savedir == NULL ? "/path/to/container" : savedir);
-	if (config->entrypoint[0] != NULL) {
-		for (int i = 0; config->entrypoint[i] != NULL; i++) {
-			printf("%s ", config->entrypoint[i]);
-		}
-	} else if (config->command[0] != NULL) {
+	if (config->command[0] != NULL) {
 		for (int i = 0; config->command[i] != NULL; i++) {
 			printf("%s ", config->command[i]);
+		}
+	} else if (config->entrypoint[0] != NULL) {
+		for (int i = 0; config->entrypoint[i] != NULL; i++) {
+			printf("%s ", config->entrypoint[i]);
 		}
 	}
 	printf("\n");
