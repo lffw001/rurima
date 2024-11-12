@@ -173,7 +173,7 @@ struct __attribute__((aligned(128))) DOCKER {
 		cfprintf(stderr, "{base}%s{clear}\n", "RURIMA ERROR MESSAGE");                               \
 		cfprintf(stderr, "{base}%s{clear}\n", "If you think something is wrong, please report at:"); \
 		cfprintf(stderr, "\033[4m{base}%s{clear}\n", "https://github.com/Moe-hacker/rurima/issues"); \
-		exit(EXIT_FAILURE);                                                                          \
+		exit(114);                                                                                   \
 	}
 // Log system.
 #if defined(RURIMA_DEBUG)
@@ -212,3 +212,5 @@ struct RURIMA *init_config(void);
 void get_input(char *_Nonnull message, char *_Nonnull buf);
 void check_dep(void);
 struct DOCKER *get_docker_config(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nullable architecture, const char *_Nullable mirror);
+void show_docker_config(struct DOCKER *_Nonnull config, char *_Nullable savedir, char *_Nullable runtime, bool quiet);
+void free_docker_config(struct DOCKER *_Nonnull config);

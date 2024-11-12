@@ -49,6 +49,10 @@ char *fork_execvp_get_stdout(const char *_Nonnull argv[])
 {
 	/*
 	 * Warning: free() after use.
+	 * We will fork(2) and then execvp(3).
+	 * And then we will get the stdout of the child process.
+	 * Return the stdout of the child process.
+	 * If failed, return NULL.
 	 */
 	// Create a pipe.
 	int pipefd[2];

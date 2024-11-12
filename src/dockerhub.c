@@ -28,10 +28,187 @@
  *
  */
 #include "include/rurima.h"
+void free_docker_config(struct DOCKER *_Nonnull config)
+{
+	/*
+	 * free() the docker config.
+	 */
+	free(config->workdir);
+	for (int i = 0; config->env[i] != NULL; i++) {
+		free(config->env[i]);
+	}
+	for (int i = 0; config->command[i] != NULL; i++) {
+		free(config->command[i]);
+	}
+	for (int i = 0; config->entrypoint[i] != NULL; i++) {
+		free(config->entrypoint[i]);
+	}
+	free(config);
+}
+static void print_export_env(struct DOCKER *_Nonnull config)
+{
+	/*
+	 * Print export env command.
+	 */
+	for (int i = 0; config->env[i] != NULL && config->env[i + 1] != NULL; i += 2) {
+		printf("export %s=\"%s\"\n", config->env[i], config->env[i + 1]);
+	}
+}
+static void print_chroot_command(struct DOCKER *_Nonnull config, char *_Nullable savedir)
+{
+	/*
+	 * Print command to use chroot as runtime.
+	 */
+	print_export_env(config);
+	printf("mount --bind %s %s\n", savedir == NULL ? "/path/to/container" : savedir, savedir == NULL ? "/path/to/container" : savedir);
+	printf("mount --bind /dev ");
+	printf("%s/dev\n", savedir == NULL ? "/path/to/container" : savedir);
+	printf("mount --bind /proc ");
+	printf("%s/proc\n", savedir == NULL ? "/path/to/container" : savedir);
+	printf("mount --bind /sys ");
+	printf("%s/sys\n", savedir == NULL ? "/path/to/container" : savedir);
+	printf("chroot ");
+	printf("%s ", savedir == NULL ? "/path/to/container" : savedir);
+	if (config->command[0] != NULL) {
+		for (int i = 0; config->command[i] != NULL; i++) {
+			printf("%s ", config->command[i]);
+		}
+	} else if (config->entrypoint[0] != NULL) {
+		if (config->workdir != NULL) {
+			printf("%s/", config->workdir);
+		}
+		for (int i = 0; config->entrypoint[i] != NULL; i++) {
+			printf("%s ", config->entrypoint[i]);
+		}
+	}
+	printf("\n");
+}
+static void print_proot_command(struct DOCKER *_Nonnull config, char *_Nullable savedir)
+{
+	/*
+	 * Print command to use proot as runtime.
+	 */
+	print_export_env(config);
+	printf("proot <other args> -0 ");
+	if (config->workdir != NULL) {
+		printf("-w %s ", config->workdir);
+	}
+	printf("-r %s ", savedir == NULL ? "/path/to/container" : savedir);
+	if (config->command[0] != NULL) {
+		for (int i = 0; config->command[i] != NULL; i++) {
+			printf("%s ", config->command[i]);
+		}
+	} else if (config->entrypoint[0] != NULL) {
+		for (int i = 0; config->entrypoint[i] != NULL; i++) {
+			printf("%s ", config->entrypoint[i]);
+		}
+	}
+	printf("\n");
+}
+static void print_ruri_command(struct DOCKER *_Nonnull config, char *_Nullable savedir)
+{
+	/*
+	 * Print command to use ruri as runtime.
+	 */
+	printf("ruri ");
+	printf("-w ");
+	if (config->workdir != NULL) {
+		printf("-W %s ", config->workdir);
+	}
+	for (int i = 0; config->env[i] != NULL && config->env[i + 1] != NULL; i += 2) {
+		printf("-e \"%s\" \"%s\" ", config->env[i], config->env[i + 1]);
+	}
+	printf("%s ", savedir == NULL ? "/path/to/container" : savedir);
+	if (config->command[0] != NULL) {
+		for (int i = 0; config->command[i] != NULL; i++) {
+			printf("%s ", config->command[i]);
+		}
+	} else if (config->entrypoint[0] != NULL) {
+		for (int i = 0; config->entrypoint[i] != NULL; i++) {
+			printf("%s ", config->entrypoint[i]);
+		}
+	}
+	printf("\n");
+}
+void show_docker_config(struct DOCKER *_Nonnull config, char *_Nullable savedir, char *_Nullable runtime, bool quiet)
+{
+	/*
+	 * Show docker config.
+	 */
+	if (!quiet) {
+		cprintf("{base}\nConfig:\n");
+		cprintf("{base}  Workdir:\n    {cyan}%s\n", config->workdir == NULL ? "NULL" : config->workdir);
+		cprintf("{base}  Env:\n");
+		if (config->env[0] == NULL) {
+			cprintf("{cyan}NULL\n");
+		} else {
+			for (int i = 0; config->env[i] != NULL; i += 2) {
+				cprintf("{cyan}    %s = ", config->env[i]);
+				cprintf("{cyan}%s\n", config->env[i + 1]);
+			}
+		}
+		cprintf("{base}  Command:\n    ");
+		if (config->command[0] == NULL) {
+			cprintf("{cyan}NULL\n");
+		} else {
+			for (int i = 0; config->command[i] != NULL; i++) {
+				cprintf("{cyan}%s ", config->command[i]);
+			}
+			cprintf("{clear}\n");
+		}
+		cprintf("{base}  Entrypoint:\n    ");
+		if (config->entrypoint[0] == NULL) {
+			cprintf("{cyan}NULL\n");
+		} else {
+			for (int i = 0; config->entrypoint[i] != NULL; i++) {
+				cprintf("{cyan}%s ", config->entrypoint[i]);
+			}
+			cprintf("{clear}\n");
+		}
+	}
+	if (runtime == NULL) {
+		runtime = "ruri";
+	}
+	if (strcmp(runtime, "ruri") == 0) {
+		if (!quiet) {
+			cprintf("{base}Run with ruri:\n");
+			printf("\033[1;38;2;219;240;240m\n");
+		}
+		print_ruri_command(config, savedir);
+	} else if (strcmp(runtime, "proot") == 0) {
+		if (!quiet) {
+			cprintf("{base}Run with proot:\n");
+			printf("\033[1;38;2;219;240;240m\n");
+		}
+		print_proot_command(config, savedir);
+		if (!quiet) {
+			cprintf("\n{yellow}Please replace <other args> with your proot args!");
+		}
+	} else if (strcmp(runtime, "chroot") == 0) {
+		if (!quiet) {
+			cprintf("{base}Run with chroot:\n");
+			printf("\033[1;38;2;219;240;240m\n");
+		}
+		print_chroot_command(config, savedir);
+	} else {
+		error("Unknown container runtime!");
+	}
+	if (!quiet) {
+		printf("\n\033[0m");
+		if (savedir == NULL) {
+			cprintf("{yellow}Please replace /path/to/container with your container path!\n");
+		}
+	}
+}
 static char *get_auth_server_from_header(const char *_Nonnull header)
 {
 	/*
 	 * Warning: free() the return value after use.
+	 *
+	 * Get auth server from header.
+	 * Example:
+	 * www-authenticate: Bearer realm="https://auth.docker.io/token",service="registry.docker.io"
+	 *
 	 */
 	const char *p = strstr(header, "www-authenticate: ");
 	if (p == NULL) {
@@ -59,6 +236,10 @@ static char *get_service_from_header(const char *_Nonnull header)
 {
 	/*
 	 * Warning: free() the return value after use.
+	 *
+	 * Get service from header.
+	 * Example:
+	 * www-authenticate: Bearer realm="https://auth.docker.io/token",service="registry.docker.io"
 	 */
 	const char *p = strstr(header, "www-authenticate: ");
 	if (p == NULL) {
@@ -86,6 +267,10 @@ static char *get_auth_server_url(const char *_Nullable mirror)
 {
 	/*
 	 * Warning: free() the return value after use.
+	 *
+	 * Get auth server url.
+	 * Example:
+	 * https://auth.docker.io/token?service=registry.docker.io
 	 */
 	if (mirror == NULL) {
 		mirror = "registry-1.docker.io";
@@ -117,6 +302,10 @@ static char *get_token(const char *_Nonnull image, const char *_Nullable mirror)
 {
 	/*
 	 * Warning: free() the return value after use.
+	 *
+	 * Get token from Docker mirror.
+	 * This token is used to pull other files of image.
+	 *
 	 */
 	char url[4096] = { '\0' };
 	if (mirror == NULL) {
@@ -143,6 +332,10 @@ static char *get_tag_manifests(const char *_Nonnull image, const char *_Nonnull 
 {
 	/*
 	 * Warning: free() the return value after use.
+	 *
+	 * Get manifests of image.
+	 * This is used to get digest of image.
+	 *
 	 */
 	if (mirror == NULL) {
 		mirror = "registry-1.docker.io";
@@ -165,6 +358,10 @@ static char *get_tag_digest(const char *_Nonnull manifests, const char *_Nullabl
 {
 	/*
 	 * Warning: free() the return value after use.
+	 *
+	 * Get digest of image.
+	 * This is used to pull image.
+	 *
 	 */
 	if (architecture == NULL) {
 		architecture = get_host_arch();
@@ -182,6 +379,11 @@ static char **get_blobs(const char *_Nonnull image, const char *_Nonnull digest,
 {
 	/*
 	 * Warning: free() the return value after use.
+	 *
+	 * Get blobs of image.
+	 * This is used to pull image.
+	 * The layers to get will be stored in the returned array.
+	 *
 	 */
 	char url[4096] = { '\0' };
 	if (mirror == NULL) {
@@ -216,6 +418,9 @@ static char *get_short_sha(const char *_Nonnull sha)
 {
 	/*
 	 * Warning: free() the return value after use.
+	 *
+	 * Just for displaying layer information.
+	 *
 	 */
 	const char *p = &sha[7];
 	char *ret = malloc(32);
@@ -227,6 +432,10 @@ static void pull_images(const char *_Nonnull image, char *const *_Nonnull blobs,
 {
 	/*
 	 * Pull images.
+	 *
+	 * This function will pull all layers of image,
+	 * and extract them to savedir.
+	 *
 	 */
 	char url[4096] = { '\0' };
 	char filename[4096] = { '\0' };
@@ -267,6 +476,9 @@ static char *get_config_digset(const char *_Nonnull image, const char *_Nonnull 
 {
 	/*
 	 * Warning: free() the return value after use.
+	 *
+	 * Get the digest of config of image.
+	 *
 	 */
 	if (mirror == NULL) {
 		mirror = "registry-1.docker.io";
@@ -293,6 +505,9 @@ static char *env_get_right(const char *_Nonnull env)
 {
 	/*
 	 * Warning: free() the return value after use.
+	 *
+	 * This is used to parse env to key and value.
+	 *
 	 */
 	const char *p = env;
 	for (size_t i = 0; i < strlen(env); i++) {
@@ -311,6 +526,9 @@ static char *env_get_left(const char *_Nonnull env)
 {
 	/*
 	 * Warning: free() the return value after use.
+	 *
+	 * Same like above.
+	 *
 	 */
 	char *ret = malloc(strlen(env) + 1);
 	strcpy(ret, env);
@@ -333,6 +551,11 @@ static void parse_env(char *const *_Nonnull env, char **_Nonnull buf, int len)
 {
 	/*
 	 * Parse env.
+	 *
+	 * Env is like KEY=VALUE,
+	 * so we need to split them.
+	 * This is because ruri use `-e ENV VALUE` to define env.
+	 *
 	 */
 	if (len == 0) {
 		return;
@@ -350,6 +573,10 @@ static struct DOCKER *get_image_config(const char *_Nonnull image, const char *_
 {
 	/*
 	 * Warning: free() the return value after use.
+	 *
+	 * Get the config of image.
+	 * return a struct DOCKER.
+	 *
 	 */
 	struct DOCKER *ret = malloc(sizeof(struct DOCKER));
 	if (mirror == NULL) {
@@ -381,9 +608,9 @@ static struct DOCKER *get_image_config(const char *_Nonnull image, const char *_
 		if (env_from_json != NULL) {
 			char *tmp = malloc(strlen(env_from_json) + 114);
 			sprintf(tmp, "env=%s\n", env_from_json);
-			char *env[MAX_ENVS];
+			char *env[MAX_ENVS / 2];
 			env[0] = NULL;
-			int len = k2v_get_key(char_array, "env", tmp, env, MAX_ENVS);
+			int len = k2v_get_key(char_array, "env", tmp, env, MAX_ENVS / 2);
 			parse_env(env, ret->env, len);
 			for (int i = 0; i < len; i++) {
 				log("{base}Env[%d]: {cyan}%s{clear}\n", i, env[i]);
@@ -437,6 +664,8 @@ struct DOCKER *get_docker_config(const char *_Nonnull image, const char *_Nonnul
 	 * Warning: free() the return value after use.
 	 *
 	 * Return the config of image.
+	 * This function is called by subcommand.c
+	 *
 	 */
 	char *token = get_token(image, mirror);
 	char *manifests = get_tag_manifests(image, tag, token, mirror);
@@ -454,7 +683,10 @@ struct DOCKER *docker_pull(const char *_Nonnull image, const char *_Nonnull tag,
 	/*
 	 * Warning: free() the return value after use.
 	 *
-	 * Return the config of image.
+	 * We pull all the layers of image,
+	 * and extract them to savedir.
+	 * And we return the config of image.
+	 *
 	 */
 	if (mirror == NULL) {
 		mirror = "registry-1.docker.io";
@@ -484,7 +716,9 @@ static char *__docker_search(const char *_Nonnull url)
 	/*
 	 * Warning: free() the return value after use.
 	 *
-	 * Return next url.
+	 * This is the core parse function of docker_search().
+	 * It will read info from url, and return next url.
+	 *
 	 */
 	const char *curl_command[] = { "curl", "-L", "-s", url, NULL };
 	char *response = fork_execvp_get_stdout(curl_command);
@@ -544,6 +778,13 @@ static char *__docker_search(const char *_Nonnull url)
 }
 int docker_search(const char *_Nonnull image, const char *_Nonnull page_size, bool quiet)
 {
+	/*
+	 *
+	 * An implementation of docker search.
+	 * Return value is not important here,
+	 * because we will error() directly if failed.
+	 *
+	 */
 	char *url = malloc(4096);
 	url[0] = '\0';
 	strcat(url, "https://hub.docker.com/v2/search/repositories/?page_size=");
@@ -579,7 +820,9 @@ static char *__docker_search_tag(const char *_Nonnull image, const char *_Nonnul
 	/*
 	 * Warning: free() the return value after use.
 	 *
-	 * Return next url.
+	 * This is the core parse function of docker_search_tag().
+	 * It will read info from url, and return next url.
+	 *
 	 */
 	log("{base}url: {cyan}%s{clear}\n", url);
 	const char *curl_command[] = { "curl", "-L", "-s", url, NULL };
@@ -629,6 +872,13 @@ static char *__docker_search_tag(const char *_Nonnull image, const char *_Nonnul
 }
 int docker_search_tag(const char *_Nonnull image, const char *_Nonnull page_size, const char *_Nullable architecture, bool quiet)
 {
+	/*
+	 * An implementation of docker tag search.
+	 *
+	 * The return value is not important here,
+	 * because we will error() directly if failed.
+	 *
+	 */
 	char *url = malloc(4096);
 	url[0] = '\0';
 	strcat(url, "https://hub.docker.com/v2/repositories/");

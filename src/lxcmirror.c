@@ -40,9 +40,15 @@ static char *line_get_value(const char *_Nonnull line, int index)
 	/*
 	 * Get the value of the index in the line.
 	 * Warning: free() the return value after use.
+	 *
+	 * Example:
+	 * line = "a;b;c;d;e;f"
+	 * line_get_value(line, 2) will return "c"
+	 *
 	 */
 	char *tmp = strdup(line);
 	char *p = tmp;
+	// Skip index number of ';'.
 	for (int i = 0; i < index; i++) {
 		p = strchr(p, ';');
 		if (p == NULL) {
@@ -64,6 +70,7 @@ static const char *goto_next_line(const char *_Nonnull buf)
 {
 	/*
 	 * Return the pointer to the next line.
+	 * If no next line, return NULL.
 	 */
 	const char *p = strchr(buf, '\n');
 	if (p == NULL) {
@@ -75,6 +82,10 @@ static char *get_current_line(const char *_Nonnull buf)
 {
 	/*
 	 * Warning: free() the return value after use.
+	 *
+	 * Get the current line.
+	 * If no line, return NULL.
+	 *
 	 */
 	char *tmp = strdup(buf);
 	char *p = strchr(tmp, '\n');
@@ -93,6 +104,9 @@ static char *get_lxc_index(const char *_Nullable mirror)
 	 * Warning: free() the return value after use.
 	 *
 	 * Get lxc index info from mirror.
+	 *
+	 * Return: The index info.
+	 *
 	 */
 	char url[4096];
 	if (mirror == NULL) {
@@ -105,6 +119,12 @@ static char *get_lxc_index(const char *_Nullable mirror)
 }
 static char *lxc_get_image_dir(const char *_Nullable mirror, const char *_Nonnull os, const char *_Nonnull version, const char *_Nullable architecture, const char *_Nullable type)
 {
+	/*
+	 * Get the image dir from mirror.
+	 *
+	 * Return: The image dir.
+	 * If not found, return NULL.
+	 */
 	char *buf = get_lxc_index(mirror);
 	const char *p = buf;
 	if (p == NULL) {
@@ -144,6 +164,10 @@ static char *lxc_get_image_dir(const char *_Nullable mirror, const char *_Nonnul
 }
 void lxc_get_image_list(const char *_Nullable mirror, const char *_Nullable architecture)
 {
+	/*
+	 * Get the image list from mirror,
+	 * and show them.
+	 */
 	if (architecture == NULL) {
 		architecture = get_host_arch();
 	}
@@ -188,6 +212,10 @@ void lxc_get_image_list(const char *_Nullable mirror, const char *_Nullable arch
 }
 void lxc_search_image(const char *_Nullable mirror, const char *_Nonnull os, const char *_Nullable architecture)
 {
+	/*
+	 * Search the image from mirror,
+	 * and show them.
+	 */
 	if (architecture == NULL) {
 		architecture = get_host_arch();
 	}
@@ -232,6 +260,10 @@ void lxc_search_image(const char *_Nullable mirror, const char *_Nonnull os, con
 }
 void lxc_pull_image(const char *_Nullable mirror, const char *_Nonnull os, const char *_Nonnull version, const char *_Nullable architecture, const char *_Nullable type, const char *_Nonnull savedir)
 {
+	/*
+	 * Pull the rootfs.tar.xz from mirror,
+	 * and extract it to savedir.
+	 */
 	char *dir = lxc_get_image_dir(mirror, os, version, architecture, type);
 	if (dir == NULL) {
 		error("{red}Image not found.\n");

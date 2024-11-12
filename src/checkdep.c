@@ -32,6 +32,11 @@ void check_dep(void)
 {
 	/*
 	 * Check dependencies.
+	 * We need tar, curl, file, gzip, xz and file with --brief --mime-type support.
+	 * If not found, we will error() directly.
+	 * We also need proot, but it's only for unpacking rootfs without root privilege.
+	 * So we will not check it here.
+	 *
 	 */
 	const char *tar_command[] = { "tar", "--version", NULL };
 	const char *curl_command[] = { "curl", "--version", NULL };

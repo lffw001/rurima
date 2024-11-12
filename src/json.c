@@ -36,6 +36,10 @@ static char *unicode_to_char(const char *_Nonnull str)
 {
 	/*
 	 * Warning: free() after use.
+	 *
+	 * This is used to convert unicode to char.
+	 * We find unicode format like \uXXXX and convert it to char.
+	 *
 	 */
 	size_t len = strlen(str);
 	char *result = malloc(len + 1);
@@ -44,11 +48,7 @@ static char *unicode_to_char(const char *_Nonnull str)
 	}
 	size_t j = 0;
 	for (size_t i = 0; i < len; i++) {
-		if (str[i] == '\\' && i < len - 1 && str[i + 1] == '\\') {
-			result[j++] = str[i];
-			result[j++] = str[i];
-			i++;
-		} else if (str[i] == '\\' && i < len - 5 && str[i + 1] == 'u' && isxdigit(str[i + 2]) && isxdigit(str[i + 3]) && isxdigit(str[i + 4]) && isxdigit(str[i + 5])) {
+		if (str[i] == '\\' && i < len - 5 && str[i + 1] == 'u' && isxdigit(str[i + 2]) && isxdigit(str[i + 3]) && isxdigit(str[i + 4]) && isxdigit(str[i + 5])) {
 			char hex[5] = { str[i + 2], str[i + 3], str[i + 4], str[i + 5], '\0' };
 			result[j++] = (char)strtol(hex, NULL, 16);
 			log("{base}unicode: {cyan}%s{clear}\n", hex);
@@ -65,6 +65,13 @@ static char *format_json(const char *_Nonnull buf)
 {
 	/*
 	 * Warning: free() after use.
+	 *
+	 * We convert unicode to char,
+	 * and remove comments.
+	 *
+	 * We will not correct backslashes (`\\` to `\`),
+	 * it is corrected before return when we get the key.
+	 *
 	 */
 	char *tmp = unicode_to_char(buf);
 	char *ret = malloc(strlen(tmp) + 1);
@@ -112,6 +119,10 @@ static char *next_key(const char *_Nullable buf)
 {
 	/*
 	 * Need not to free() after use.
+	 *
+	 * Find the start of the next key,
+	 * and return the pointer to the start of the key.
+	 * If no key is found, return NULL.
 	 */
 	if (buf == NULL) {
 		return NULL;
@@ -160,6 +171,11 @@ static char *next_layer(const char *_Nullable buf)
 {
 	/*
 	 * Need not to free() after use.
+	 *
+	 * Find the start of the next anon layer,
+	 * and return the pointer to the start of the layer.
+	 * If no layer is found, return NULL.
+	 *
 	 */
 	if (buf == NULL) {
 		return NULL;
@@ -205,6 +221,11 @@ static char *current_key(const char *_Nonnull buf)
 {
 	/*
 	 * Warning: free() after use.
+	 *
+	 * Find the current key,
+	 * and return the key.
+	 * If no key is found, return NULL.
+	 *
 	 */
 	char *tmp = strdup(buf);
 	char *ret = NULL;
@@ -243,6 +264,10 @@ static char *correct_backslash(const char *_Nullable buf)
 {
 	/*
 	 * Warning: free() after use.
+	 *
+	 * Correct backslashes, `\\` to `\`.
+	 * This function is used by json_get_key().
+	 *
 	 */
 	if (buf == NULL) {
 		return NULL;
@@ -267,6 +292,13 @@ static char *parse_value(const char *_Nullable buf)
 {
 	/*
 	 * Warning: free() after use.
+	 *
+	 * Parse the value we get, we will do:
+	 * NULL value check.
+	 * Empty value check.
+	 * Remove space in the front.
+	 * Remove quotes if the value is a string.
+	 *
 	 */
 	log("{base}buf:\n{cyan}%s\n", buf);
 	if (buf == NULL) {
@@ -339,6 +371,11 @@ static char *current_value(const char *_Nonnull buf)
 {
 	/*
 	 * Warning: free() after use.
+	 *
+	 * Find the current value,
+	 * and return the value.
+	 * If no value is found, return NULL.
+	 *
 	 */
 	int level = 0;
 	char *tmp = strdup(buf);
@@ -408,6 +445,11 @@ static char *json_get_key_one_level(const char *_Nonnull buf, const char *_Nonnu
 {
 	/*
 	 * Warning: free() after use.
+	 *
+	 * From one json layer, get the value of key.
+	 * Return: The value we get.
+	 * If we didn't find the key, return NULL.
+	 *
 	 */
 	const char *p = buf;
 	const char *q = p;
@@ -444,6 +486,7 @@ char *json_get_key(const char *_Nonnull buf, const char *_Nonnull key)
 	 * We use key [foo][bar][buz] to get the value of buz.
 	 *
 	 * Warning: free() after use.
+	 *
 	 */
 	if (buf == NULL || key == NULL) {
 		return NULL;
@@ -475,10 +518,19 @@ size_t json_anon_layer_get_key_array(const char *_Nonnull buf, const char *_Nonn
 {
 	/*
 	 * Warning: free() after use.
-	 * Warning: **array should be NULL.
+	 * Warning: **array should be NULL, it will be malloc()ed.
 	 * Warning: There might be NULL in the array.
 	 * From json anonymous layers, get all values of key.
 	 * Return: The lenth we get.
+	 *
+	 * Example json:
+	 * {{"foo":"bar"},{"foo":"buz"}}
+	 * We use key [foo] to get the value of foo.
+	 * So we return ["bar", "buz"].
+	 *
+	 * It allows to use [foo][bar] to get the value of bar,
+	 * because it calls json_get_key() directly.
+	 *
 	 */
 	if (buf == NULL || key == NULL) {
 		return 0;
@@ -510,6 +562,14 @@ char *json_anon_layer_get_key(const char *_Nonnull buf, const char *_Nonnull key
 	 * Warning: free() after use.
 	 * From json anonymous layers, get key_to_get in the layer that key==value.
 	 * Return: The value we get.
+	 *
+	 * Example json:
+	 * {{"foo":"xxx",bar:"yyy"},{"foo":"buz","bar":"xxx"}}
+	 * We use key [foo] and value buz to get the value of bar.
+	 * So we return xxx.
+	 *
+	 * It will call json_get_key() directly.
+	 *
 	 */
 	const char *p = buf;
 	char *valtmp = NULL;
@@ -533,6 +593,11 @@ char *json_open_file(const char *_Nonnull path)
 {
 	/*
 	 * Warning: free() after use.
+	 *
+	 * Open a json file and return the content.
+	 * It will return NULL if failed.
+	 * Just a simple wrapper of open() and read().
+	 *
 	 */
 	struct stat st;
 	if (stat(path, &st) == -1) {
@@ -540,6 +605,9 @@ char *json_open_file(const char *_Nonnull path)
 	}
 	char *ret = malloc((size_t)st.st_size + 3);
 	int fd = open(path, O_RDONLY | O_CLOEXEC);
+	if (fd == -1) {
+		return NULL;
+	}
 	read(fd, ret, (size_t)st.st_size);
 	ret[st.st_size] = '\0';
 	return ret;

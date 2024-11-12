@@ -213,7 +213,8 @@ int extract_archive(const char *_Nonnull file, const char *_Nonnull dir)
 {
 	/*
 	 * Extract the archive.
-	 * Return 0 if success, 1 if failed.
+	 * The return value is not important,
+	 * because we will error() directly if failed.
 	 *
 	 * We read the file, output it to stdout,
 	 * and then pipe it to the extract command.
