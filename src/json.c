@@ -239,11 +239,12 @@ static char *current_key(const char *_Nonnull buf)
 	free(tmp);
 	return ret;
 }
-static char *correct_backslash(const char *_Nonnull buf)
+static char *correct_backslash(const char *_Nullable buf)
 {
 	/*
 	 * Warning: free() after use.
 	 */
+	if(buf==NULL){return NULL;}
 	char *ret = malloc(strlen(buf) + 1);
 	size_t j = 0;
 	for (size_t i = 0; i < strlen(buf); i++) {
@@ -269,7 +270,7 @@ static char *parse_value(const char *_Nullable buf)
 	if (buf == NULL) {
 		return NULL;
 	}
-	char *tmp = correct_backslash(buf);
+	char *tmp = strdup(buf);
 	if (tmp == NULL) {
 		return NULL;
 	}
@@ -463,6 +464,9 @@ char *json_get_key(const char *_Nonnull buf, const char *_Nonnull key)
 		}
 	}
 	free(keybuf);
+	tmp=ret;
+	ret=correct_backslash(tmp);
+	free(tmp);
 	return ret;
 }
 size_t json_anon_layer_get_key_array(const char *_Nonnull buf, const char *_Nonnull key, char ***_Nullable array)
