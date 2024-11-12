@@ -44,7 +44,11 @@ static char *unicode_to_char(const char *_Nonnull str)
 	}
 	size_t j = 0;
 	for (size_t i = 0; i < len; i++) {
-		if (str[i] == '\\' && i < len - 5 && str[i + 1] == 'u' && isxdigit(str[i + 2]) && isxdigit(str[i + 3]) && isxdigit(str[i + 4]) && isxdigit(str[i + 5])) {
+		if (str[i] == '\\' && i < len - 1 && str[i + 1] == '\\') {
+			result[j++] = str[i];
+			result[j++] = str[i];
+			i++;
+		} else if (str[i] == '\\' && i < len - 5 && str[i + 1] == 'u' && isxdigit(str[i + 2]) && isxdigit(str[i + 3]) && isxdigit(str[i + 4]) && isxdigit(str[i + 5])) {
 			char hex[5] = { str[i + 2], str[i + 3], str[i + 4], str[i + 5], '\0' };
 			result[j++] = (char)strtol(hex, NULL, 16);
 			log("{base}unicode: {cyan}%s{clear}\n", hex);
@@ -54,6 +58,7 @@ static char *unicode_to_char(const char *_Nonnull str)
 		}
 	}
 	result[j] = '\0';
+	log("{base}Result:\n{cyan}%s", result);
 	return result;
 }
 static char *format_json(const char *_Nonnull buf)
@@ -67,7 +72,16 @@ static char *format_json(const char *_Nonnull buf)
 	bool in_string = false;
 	for (size_t i = 0; i < strlen(tmp); i++) {
 		if (tmp[i] == '\\') {
+			ret[j] = tmp[i];
+			ret[j + 1] = '\0';
 			i++;
+			j++;
+			if (i >= strlen(tmp)) {
+				break;
+			}
+			ret[j] = tmp[i];
+			ret[j + 1] = '\0';
+			j++;
 			continue;
 		} else if (tmp[i] == '"') {
 			in_string = !in_string;
@@ -91,6 +105,7 @@ static char *format_json(const char *_Nonnull buf)
 		j++;
 	}
 	free(tmp);
+	log("{base}ret:{cyan}\n%s\n", ret);
 	return ret;
 }
 static char *next_key(const char *_Nullable buf)
@@ -224,15 +239,37 @@ static char *current_key(const char *_Nonnull buf)
 	free(tmp);
 	return ret;
 }
+static char *correct_backslash(const char *_Nonnull buf)
+{
+	/*
+	 * Warning: free() after use.
+	 */
+	char *ret = malloc(strlen(buf) + 1);
+	size_t j = 0;
+	for (size_t i = 0; i < strlen(buf); i++) {
+		if (buf[i] == '\\' && i < strlen(buf) - 1 && buf[i + 1] == '\\') {
+			i++;
+		}
+		ret[j] = buf[i];
+		ret[j + 1] = '\0';
+		j++;
+	}
+	char *tmp = ret;
+	ret = strdup(tmp);
+	free(tmp);
+	log("{base}ret: \n{cyan}%s\n", ret);
+	return ret;
+}
 static char *parse_value(const char *_Nullable buf)
 {
 	/*
 	 * Warning: free() after use.
 	 */
+	log("{base}buf:\n{cyan}%s\n", buf);
 	if (buf == NULL) {
 		return NULL;
 	}
-	char *tmp = strdup(buf);
+	char *tmp = correct_backslash(buf);
 	if (tmp == NULL) {
 		return NULL;
 	}
@@ -261,8 +298,9 @@ static char *parse_value(const char *_Nullable buf)
 		} else if (tmp[i] == ' ') {
 			continue;
 		} else if (tmp[i] == '[' || tmp[i] == '{') {
+			ret = strdup(&tmp[i]);
 			free(tmp);
-			return strdup(buf);
+			return ret;
 		} else if (tmp[i] == '"' && i < strlen(tmp)) {
 			ret = &tmp[i + 1];
 			break;

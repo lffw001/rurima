@@ -42,6 +42,9 @@ static void show_help(void)
 }
 int main(int argc, char **argv)
 {
+#ifdef RURIMA_DEV
+	warning("{red}You are using dev/debug build, if you think this is wrong, please rebuild rurima or get it from release page.\n");
+#endif
 	register_signal();
 	check_dep();
 	if (argc == 1) {

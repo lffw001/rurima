@@ -363,8 +363,9 @@ static struct DOCKER *get_image_config(const char *_Nonnull image, const char *_
 	const char *curl_command[] = { "curl", "-L", "-s", "-H", "Accept: application/vnd.oci.image.manifest.v1+json", "-H", auth, url, NULL };
 	char *response = fork_execvp_get_stdout(curl_command);
 	if (response == NULL) {
-		error("{red}Failed to get blobs!\n");
+		error("{red}Failed to get config!\n");
 	}
+	log("{base}Config:\n{cyan} %s\n", response);
 	{
 		char *workdir = json_get_key(response, "[config][WorkingDir]");
 		log("{base}Env: {cyan}%s{clear}\n", workdir == NULL ? "NULL" : workdir);

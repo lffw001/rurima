@@ -57,47 +57,65 @@ static void free_docker_config(struct DOCKER *_Nonnull config)
 	}
 	free(config);
 }
-static void show_docker_config(struct DOCKER *_Nonnull config, char *_Nullable savedir)
+static void print_export_env(struct DOCKER *_Nonnull config)
 {
-	/*
-	 * Show docker config.
-	 */
-	cprintf("{base}\nConfig:\n");
-	cprintf("{base}  Workdir:\n    {cyan}%s\n", config->workdir == NULL ? "NULL" : config->workdir);
-	cprintf("{base}  Env:\n");
-	if (config->env[0] == NULL) {
-		cprintf("{cyan}NULL\n");
-	} else {
-		for (int i = 0; config->env[i] != NULL; i += 2) {
-			cprintf("{cyan}    %s = ", config->env[i]);
-			cprintf("{cyan}%s\n", config->env[i + 1]);
-		}
+	for (int i = 0; config->env[i] != NULL && config->env[i + 1] != NULL; i += 2) {
+		printf("export %s=\"%s\"\n", config->env[i], config->env[i + 1]);
 	}
-	cprintf("{base}  Command:\n    ");
-	if (config->command[0] == NULL) {
-		cprintf("{cyan}NULL\n");
-	} else {
-		for (int i = 0; config->command[i] != NULL; i++) {
-			cprintf("{cyan}%s ", config->command[i]);
+}
+static void print_chroot_command(struct DOCKER *_Nonnull config, char *_Nullable savedir)
+{
+	print_export_env(config);
+	printf("mount --bind %s %s\n", savedir == NULL ? "/path/to/container" : savedir, savedir == NULL ? "/path/to/container" : savedir);
+	printf("mount --bind /dev ");
+	printf("%s/dev\n", savedir == NULL ? "/path/to/container" : savedir);
+	printf("mount --bind /proc ");
+	printf("%s/proc\n", savedir == NULL ? "/path/to/container" : savedir);
+	printf("mount --bind /sys ");
+	printf("%s/sys\n", savedir == NULL ? "/path/to/container" : savedir);
+	printf("chroot ");
+	printf("%s ", savedir == NULL ? "/path/to/container" : savedir);
+	if (config->entrypoint[0] != NULL) {
+		if (config->workdir != NULL) {
+			printf("%s/", config->workdir);
 		}
-		cprintf("{clear}\n");
-	}
-	cprintf("{base}  Entrypoint:\n    ");
-	if (config->entrypoint[0] == NULL) {
-		cprintf("{cyan}NULL\n");
-	} else {
 		for (int i = 0; config->entrypoint[i] != NULL; i++) {
-			cprintf("{cyan}%s ", config->entrypoint[i]);
+			printf("%s ", config->entrypoint[i]);
 		}
-		cprintf("{clear}\n");
+	} else if (config->command[0] != NULL) {
+		for (int i = 0; config->command[i] != NULL; i++) {
+			printf("%s ", config->command[i]);
+		}
 	}
-	cprintf("{base}Run with ruri:\n") printf("\033[1;38;2;219;240;240m\n");
+	printf("\n");
+}
+static void print_proot_command(struct DOCKER *_Nonnull config, char *_Nullable savedir)
+{
+	print_export_env(config);
+	printf("proot <other args> -0 ");
+	if (config->workdir != NULL) {
+		printf("-w %s ", config->workdir);
+	}
+	printf("-r %s ", savedir == NULL ? "/path/to/container" : savedir);
+	if (config->entrypoint[0] != NULL) {
+		for (int i = 0; config->entrypoint[i] != NULL; i++) {
+			printf("%s ", config->entrypoint[i]);
+		}
+	} else if (config->command[0] != NULL) {
+		for (int i = 0; config->command[i] != NULL; i++) {
+			printf("%s ", config->command[i]);
+		}
+	}
+	printf("\n");
+}
+static void print_ruri_command(struct DOCKER *_Nonnull config, char *_Nullable savedir)
+{
 	printf("ruri ");
 	printf("-w ");
 	if (config->workdir != NULL) {
 		printf("-W %s ", config->workdir);
 	}
-	for (int i = 0; config->env[i] != NULL; i += 2) {
+	for (int i = 0; config->env[i] != NULL && config->env[i + 1] != NULL; i += 2) {
 		printf("-e \"%s\" \"%s\" ", config->env[i], config->env[i + 1]);
 	}
 	printf("%s ", savedir == NULL ? "/path/to/container" : savedir);
@@ -110,9 +128,76 @@ static void show_docker_config(struct DOCKER *_Nonnull config, char *_Nullable s
 			printf("%s ", config->command[i]);
 		}
 	}
-	printf("\n\033[0m\n");
-	if (savedir == NULL) {
-		cprintf("{yellow}Please replace /path/to/container with your container path!\n");
+	printf("\n");
+}
+static void show_docker_config(struct DOCKER *_Nonnull config, char *_Nullable savedir, char *_Nullable runtime, bool quiet)
+{
+	/*
+	 * Show docker config.
+	 */
+	if (!quiet) {
+		cprintf("{base}\nConfig:\n");
+		cprintf("{base}  Workdir:\n    {cyan}%s\n", config->workdir == NULL ? "NULL" : config->workdir);
+		cprintf("{base}  Env:\n");
+		if (config->env[0] == NULL) {
+			cprintf("{cyan}NULL\n");
+		} else {
+			for (int i = 0; config->env[i] != NULL; i += 2) {
+				cprintf("{cyan}    %s = ", config->env[i]);
+				cprintf("{cyan}%s\n", config->env[i + 1]);
+			}
+		}
+		cprintf("{base}  Command:\n    ");
+		if (config->command[0] == NULL) {
+			cprintf("{cyan}NULL\n");
+		} else {
+			for (int i = 0; config->command[i] != NULL; i++) {
+				cprintf("{cyan}%s ", config->command[i]);
+			}
+			cprintf("{clear}\n");
+		}
+		cprintf("{base}  Entrypoint:\n    ");
+		if (config->entrypoint[0] == NULL) {
+			cprintf("{cyan}NULL\n");
+		} else {
+			for (int i = 0; config->entrypoint[i] != NULL; i++) {
+				cprintf("{cyan}%s ", config->entrypoint[i]);
+			}
+			cprintf("{clear}\n");
+		}
+	}
+	if (runtime == NULL) {
+		runtime = "ruri";
+	}
+	if (strcmp(runtime, "ruri") == 0) {
+		if (!quiet) {
+			cprintf("{base}Run with ruri:\n");
+			printf("\033[1;38;2;219;240;240m\n");
+		}
+		print_ruri_command(config, savedir);
+	} else if (strcmp(runtime, "proot") == 0) {
+		if (!quiet) {
+			cprintf("{base}Run with proot:\n");
+			printf("\033[1;38;2;219;240;240m\n");
+		}
+		print_proot_command(config, savedir);
+		if (!quiet) {
+			cprintf("\n{yellow}Please replace <other args> with your proot args!");
+		}
+	} else if (strcmp(runtime, "chroot") == 0) {
+		if (!quiet) {
+			cprintf("{base}Run with chroot:\n");
+			printf("\033[1;38;2;219;240;240m\n");
+		}
+		print_chroot_command(config, savedir);
+	} else {
+		error("Unknown container runtime!");
+	}
+	if (!quiet) {
+		printf("\n\033[0m");
+		if (savedir == NULL) {
+			cprintf("{yellow}Please replace /path/to/container with your container path!\n");
+		}
 	}
 }
 /*
@@ -126,6 +211,7 @@ void docker(int argc, char **_Nonnull argv)
 	char *savedir = NULL;
 	char *page_size = NULL;
 	char *mirror = NULL;
+	char *runtime = NULL;
 	bool quiet = false;
 	if (argc == 0) {
 		error("{red}No subcommand specified!\n");
@@ -148,6 +234,12 @@ void docker(int argc, char **_Nonnull argv)
 				error("{red}No architecture specified!\n");
 			}
 			architecture = argv[i + 1];
+			i++;
+		} else if (strcmp(argv[i], "-r") == 0 || strcmp(argv[i], "--runtime") == 0) {
+			if (i + 1 >= argc) {
+				error("{red}No container runtime specified!\n");
+			}
+			runtime = argv[i + 1];
 			i++;
 		} else if (strcmp(argv[i], "-s") == 0 || strcmp(argv[i], "--savedir") == 0) {
 			if (i + 1 >= argc) {
@@ -210,7 +302,7 @@ void docker(int argc, char **_Nonnull argv)
 		image = add_library_prefix(image);
 		struct DOCKER *config = docker_pull(image, tag, architecture, savedir, mirror);
 		if (!quiet) {
-			show_docker_config(config, savedir);
+			show_docker_config(config, savedir, runtime, quiet);
 		}
 		free_docker_config(config);
 	} else if (strcmp(argv[0], "config") == 0) {
@@ -222,7 +314,7 @@ void docker(int argc, char **_Nonnull argv)
 		}
 		image = add_library_prefix(image);
 		struct DOCKER *config = get_docker_config(image, tag, architecture, mirror);
-		show_docker_config(config, savedir);
+		show_docker_config(config, savedir, runtime, quiet);
 		free_docker_config(config);
 	} else if (strcmp(argv[0], "help") == 0 || strcmp(argv[0], "-h") == 0 || strcmp(argv[0], "--help") == 0) {
 		cprintf("{green}Usage: docker [subcommand] [options]\n");
@@ -239,6 +331,7 @@ void docker(int argc, char **_Nonnull argv)
 		cprintf("{green}  -s, --savedir: Save directory of image.\n");
 		cprintf("{green}  -p, --page_size: Page size of search.\n");
 		cprintf("{green}  -m, --mirror: Mirror of DockerHub.\n");
+		cprintf("{green}  -r, --runtime: runtime of container, support [ruri/proot/chroot].\n");
 		cprintf("{green}  -q, --quiet: Quiet mode.\n");
 	} else {
 		error("{red}Invalid subcommand!\n");
