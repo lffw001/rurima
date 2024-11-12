@@ -115,6 +115,9 @@ void docker(int argc, char **_Nonnull argv)
 			error("{red}Unknown argument!\n");
 		}
 	}
+	if (architecture == NULL) {
+		architecture = docker_get_host_arch();
+	}
 	if (strcmp(argv[0], "search") == 0) {
 		if (image == NULL) {
 			error("{red}No image specified!\n");
@@ -149,6 +152,12 @@ void docker(int argc, char **_Nonnull argv)
 		struct DOCKER *config = docker_pull(image, tag, architecture, savedir, mirror);
 		if (!quiet) {
 			show_docker_config(config, savedir, runtime, quiet);
+			if (config->architecture != NULL) {
+				if (strcmp(config->architecture, architecture) != 0) {
+					warning("{yellow}Failback mode detected!\n");
+					warning("{yellow}The architecture of the image is not the same as the specified architecture!\n");
+				}
+			}
 		}
 		free_docker_config(config);
 	} else if (strcmp(argv[0], "config") == 0) {
@@ -161,6 +170,14 @@ void docker(int argc, char **_Nonnull argv)
 		image = add_library_prefix(image);
 		struct DOCKER *config = get_docker_config(image, tag, architecture, mirror);
 		show_docker_config(config, savedir, runtime, quiet);
+		if (!quiet) {
+			if (config->architecture != NULL) {
+				if (strcmp(config->architecture, architecture) != 0) {
+					warning("{yellow}Failback mode detected!\n");
+					warning("{yellow}The architecture of the image is not the same as the specified architecture!\n");
+				}
+			}
+		}
 		free_docker_config(config);
 	} else if (strcmp(argv[0], "arch") == 0) {
 		if (image == NULL) {

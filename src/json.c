@@ -520,7 +520,6 @@ size_t json_anon_layer_get_key_array(const char *_Nonnull buf, const char *_Nonn
 	/*
 	 * Warning: free() after use.
 	 * Warning: **array should be NULL, it will be malloc()ed.
-	 * Warning: There might be NULL in the array.
 	 * From json anonymous layers, get all values of key.
 	 * Return: The lenth we get.
 	 *
@@ -544,13 +543,10 @@ size_t json_anon_layer_get_key_array(const char *_Nonnull buf, const char *_Nonn
 	while (p != NULL) {
 		(*array)[ret] = json_get_key(p, key);
 		if ((*array)[ret] != NULL) {
-			log("{base}array[%ld]: {cyan}%s{clear}\n", ret, (*array)[ret]);
-		} else {
-			log("{base}array[%ld]: {cyan}NULL{clear}\n", ret);
+			ret++;
+			(*array) = realloc((*array), sizeof(char *) * (ret + 1));
+			(*array)[ret] = NULL;
 		}
-		ret++;
-		(*array) = realloc((*array), sizeof(char *) * (ret + 1));
-		(*array)[ret] = NULL;
 		p = next_layer(p);
 	}
 	free(tmp);

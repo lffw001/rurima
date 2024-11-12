@@ -157,6 +157,8 @@ struct __attribute__((aligned(128))) DOCKER {
 	char *_Nullable command[MAX_COMMANDS + 1];
 	// Entry point.
 	char *_Nullable entrypoint[MAX_COMMANDS + 1];
+	// Architecture.
+	char *_Nullable architecture;
 };
 // Warnings.
 #define warning(...) cfprintf(stderr, ##__VA_ARGS__)
