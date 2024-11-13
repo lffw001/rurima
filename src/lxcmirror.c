@@ -58,7 +58,9 @@ static char *line_get_value(const char *_Nonnull line, int index)
 		p++;
 	}
 	if (strchr(p, ';') == NULL) {
-		*strchr(p, '\n') = '\0';
+		if (strchr(p, '\n') != NULL) {
+			*strchr(p, '\n') = '\0';
+		}
 	} else {
 		*strchr(p, ';') = '\0';
 	}
