@@ -45,3 +45,9 @@ Subcommands:
 Options:
   -h, --help: Show help message.
 ```
+---------
+
+<p align="center">「僕らタイムフライヤー</p>
+<p align="center">時を駆け上がるクライマー</p>
+<p align="center">時のかくれんぼ</p>
+<p align="center">はぐれっこはもういやなんだ」</p>
