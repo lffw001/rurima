@@ -110,9 +110,9 @@ static char *get_lxc_index(const char *_Nullable mirror)
 	 */
 	char url[4096];
 	if (mirror == NULL) {
-		sprintf(url, "https://mirrors.bfsu.edu.cn/lxc-images/meta/1.0/index-system");
+		sprintf(url, "https://images.linuxcontainers.org/meta/1.0/index-system");
 	} else {
-		sprintf(url, "%s/meta/1.0/index-system", mirror);
+		sprintf(url, "https://%s/meta/1.0/index-system", mirror);
 	}
 	const char *command[] = { "curl", "-L", "-s", url, NULL };
 	return fork_execvp_get_stdout(command);
@@ -172,7 +172,7 @@ void lxc_get_image_list(const char *_Nullable mirror, const char *_Nullable arch
 		architecture = lxc_get_host_arch();
 	}
 	if (mirror == NULL) {
-		mirror = "https://mirrors.bfsu.edu.cn/lxc-images";
+		mirror = "images.linuxcontainers.org";
 	}
 	char *buf = get_lxc_index(mirror);
 	const char *p = buf;
@@ -220,7 +220,7 @@ void lxc_search_image(const char *_Nullable mirror, const char *_Nonnull os, con
 		architecture = lxc_get_host_arch();
 	}
 	if (mirror == NULL) {
-		mirror = "https://mirrors.bfsu.edu.cn/lxc-images";
+		mirror = "images.linuxcontainers.org";
 	}
 	char *buf = get_lxc_index(mirror);
 	const char *p = buf;
@@ -273,10 +273,10 @@ void lxc_pull_image(const char *_Nullable mirror, const char *_Nonnull os, const
 	}
 	chdir(savedir);
 	if (mirror == NULL) {
-		mirror = "https://mirrors.bfsu.edu.cn/lxc-images";
+		mirror = "images.linuxcontainers.org";
 	}
 	char *url = malloc(strlen(mirror) + strlen(dir) + 114);
-	sprintf(url, "%s/%srootfs.tar.xz", mirror, dir);
+	sprintf(url, "https://%s/%srootfs.tar.xz", mirror, dir);
 	cprintf("{base}Pulling {cyan}rootfs.tar.xz\n");
 	const char *command[] = { "curl", "-L", "-s", url, "-o", "rootfs.tar.xz", NULL };
 	fork_execvp(command);
@@ -292,7 +292,7 @@ void lxc_search_arch(const char *_Nullable mirror, const char *_Nonnull os)
 	 * and show them.
 	 */
 	if (mirror == NULL) {
-		mirror = "https://mirrors.bfsu.edu.cn/lxc-images";
+		mirror = "images.linuxcontainers.org";
 	}
 	char *buf = get_lxc_index(mirror);
 	const char *p = buf;

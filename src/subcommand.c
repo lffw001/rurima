@@ -210,6 +210,8 @@ void docker(int argc, char **_Nonnull argv)
 		cprintf("{green}  -r, --runtime: runtime of container, support [ruri/proot/chroot].\n");
 		cprintf("{green}  -q, --quiet: Quiet mode.\n");
 		cprintf("{green}  -f, --failback: Failback mode.\n");
+		cprintf("\n{green}Note: please remove `https://` prefix from mirror url.\n");
+		cprintf("{green}For example: `-m registry-1.docker.io`\n");
 	} else {
 		error("{red}Invalid subcommand!\n");
 	}
@@ -309,6 +311,8 @@ void lxc(int argc, char **_Nonnull argv)
 		cprintf("{green}  -a, --arch: Architecture of image.\n");
 		cprintf("{green}  -t, --type: Type of image.\n");
 		cprintf("{green}  -s, --savedir: Save directory of image.\n");
+		cprintf("\n{green}Note: please remove `https://` prefix from mirror url.\n");
+		cprintf("{green}For example: `-m images.linuxcontainers.org`\n");
 	} else {
 		error("{red}Invalid subcommand!\n");
 	}
