@@ -163,24 +163,24 @@ struct __attribute__((aligned(128))) DOCKER {
 // Warnings.
 #define warning(...) cfprintf(stderr, ##__VA_ARGS__)
 // Show error msg and exit.
-#define error(...)                                                                                                  \
-	{                                                                                                           \
-		cfprintf(stderr, "{red}In %s() in %s line %d:\n", __func__, __FILE__, __LINE__);                    \
-		cfprintf(stderr, ##__VA_ARGS__);                                                                    \
-		cfprintf(stderr, "{base}%s{clear}\n", "  .^.   .^.");                                               \
-		cfprintf(stderr, "{base}%s{clear}\n", "  /⋀\\_ﾉ_/⋀\\");                                             \
-		cfprintf(stderr, "{base}%s{clear}\n", " /ﾉｿﾉ\\ﾉｿ丶)|");                                             \
-		cfprintf(stderr, "{base}%s{clear}\n", " ﾙﾘﾘ >  x )ﾘ");                                              \
-		cfprintf(stderr, "{base}%s{clear}\n", "ﾉノ㇏  ^ ﾉ|ﾉ");                                              \
-		cfprintf(stderr, "{base}%s{clear}\n", "      ⠁⠁");                                                  \
-		cfprintf(stderr, "{base}%s{clear}\n", "RURIMA ERROR MESSAGE");                                      \
-		cfprintf(stderr, "{base}%s{clear}\n", "Hint:");                                                     \
-		cfprintf(stderr, "{base}%s{clear}\n", "If you have network problems for lxc or docker subcommand"); \
-		cfprintf(stderr, "{base}%s{clear}\n", "Please use -m option to change the mirror.");                \
-		cfprintf(stderr, "{base}%s{clear}\n", "For docker subcommand, try -f to enable failback mode.");    \
-		cfprintf(stderr, "{base}%s{clear}\n", "If you think something is wrong, please report at:");        \
-		cfprintf(stderr, "\033[4m{base}%s{clear}\n", "https://github.com/Moe-hacker/rurima/issues");        \
-		exit(114);                                                                                          \
+#define error(...)                                                                                                     \
+	{                                                                                                              \
+		cfprintf(stderr, "{red}In %s() in %s line %d:\n", __func__, __FILE__, __LINE__);                       \
+		cfprintf(stderr, ##__VA_ARGS__);                                                                       \
+		cfprintf(stderr, "{base}%s{clear}\n", "  .^.   .^.");                                                  \
+		cfprintf(stderr, "{base}%s{clear}\n", "  /⋀\\_ﾉ_/⋀\\");                                                \
+		cfprintf(stderr, "{base}%s{clear}\n", " /ﾉｿﾉ\\ﾉｿ丶)|");                                                \
+		cfprintf(stderr, "{base}%s{clear}\n", " ﾙﾘﾘ >  x )ﾘ");                                                 \
+		cfprintf(stderr, "{base}%s{clear}\n", "ﾉノ㇏  ^ ﾉ|ﾉ");                                                 \
+		cfprintf(stderr, "{base}%s{clear}\n", "      ⠁⠁");                                                     \
+		cfprintf(stderr, "{base}%s{clear}\n", "RURIMA ERROR MESSAGE");                                         \
+		cfprintf(stderr, "{base}%s{clear}\n", "Hint:");                                                        \
+		cfprintf(stderr, "{base}%s{clear}\n", "  If you have network problems for lxc or docker subcommand,"); \
+		cfprintf(stderr, "{base}%s{clear}\n", "  please use -m option to change the mirror.");                 \
+		cfprintf(stderr, "{base}%s{clear}\n", "  For docker subcommand, try -f to enable failback mode.");     \
+		cfprintf(stderr, "{base}%s{clear}\n", "If you think something is wrong, please report at:");           \
+		cfprintf(stderr, "\033[4m{base}%s{clear}\n", "https://github.com/Moe-hacker/rurima/issues");           \
+		exit(114);                                                                                             \
 	}
 // Log system.
 #if defined(RURIMA_DEBUG)
