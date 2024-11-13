@@ -27,7 +27,12 @@
  *
  *
  */
+// Enable Linux features.
+#ifndef __linux__
+#error "This program is only for linux."
+#else
 #define _GNU_SOURCE
+#endif
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
