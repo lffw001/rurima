@@ -833,17 +833,17 @@ static char *__docker_search(const char *_Nonnull url)
 	}
 	log("{base}Results:\n{cyan}%s{clear}\n", results);
 	char **name = NULL;
-	size_t len = json_anon_layer_get_key_array(results, "[repo_name]", &name);
+	size_t len = json_anon_layer_get_key_array_allow_null_val(results, "[repo_name]", &name);
 	if (len == 0) {
 		error("{red}No results found!\n");
 	}
 	char **description = NULL;
-	size_t len2 = json_anon_layer_get_key_array(results, "[short_description]", &description);
+	size_t len2 = json_anon_layer_get_key_array_allow_null_val(results, "[short_description]", &description);
 	if (len2 != len) {
 		error("{red}Incorrect json!\n");
 	}
 	char **is_offical = NULL;
-	size_t len3 = json_anon_layer_get_key_array(results, "[is_official]", &is_offical);
+	size_t len3 = json_anon_layer_get_key_array_allow_null_val(results, "[is_official]", &is_offical);
 	if (len3 != len) {
 		error("{red}Incorrect json!\n");
 	}

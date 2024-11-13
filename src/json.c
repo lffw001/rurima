@@ -553,6 +553,42 @@ size_t json_anon_layer_get_key_array(const char *_Nonnull buf, const char *_Nonn
 	log("{base}ret: {cyan}%ld{clear}\n", ret);
 	return ret;
 }
+size_t json_anon_layer_get_key_array_allow_null_val(const char *_Nonnull buf, const char *_Nonnull key, char ***_Nullable array)
+{
+	/*
+	 * Warning: free() after use.
+	 * Warning: **array should be NULL, it will be malloc()ed.
+	 * From json anonymous layers, get all values of key.
+	 * Return: The lenth we get.
+	 *
+	 * Example json:
+	 * {{"foo":"bar"},{"foo":"buz"}}
+	 * We use key [foo] to get the value of foo.
+	 * So we return ["bar", "buz"].
+	 *
+	 * It allows to use [foo][bar] to get the value of bar,
+	 * because it calls json_get_key() directly.
+	 *
+	 */
+	if (buf == NULL || key == NULL) {
+		return 0;
+	}
+	char *tmp = format_json(buf);
+	(*array) = malloc(sizeof(char *));
+	(*array)[0] = NULL;
+	size_t ret = 0;
+	const char *p = tmp;
+	while (p != NULL) {
+		(*array)[ret] = json_get_key(p, key);
+		ret++;
+		(*array) = realloc((*array), sizeof(char *) * (ret + 1));
+		(*array)[ret] = NULL;
+		p = next_layer(p);
+	}
+	free(tmp);
+	log("{base}ret: {cyan}%ld{clear}\n", ret);
+	return ret;
+}
 char *json_anon_layer_get_key(const char *_Nonnull buf, const char *_Nonnull key, const char *_Nonnull value, const char *_Nonnull key_to_get)
 {
 	/*
