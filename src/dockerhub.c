@@ -822,6 +822,8 @@ struct DOCKER *docker_pull_failback(const char *_Nonnull image, const char *_Non
 		error("{red}Failed to get digest!\n");
 	}
 	pull_images(image, blobs, token, savedir, mirror, true);
+	free(token);
+	token = get_token(image, mirror, true);
 	char *config = get_config_digest_failback(image, tag, token, mirror);
 	struct DOCKER *ret = get_image_config(image, config, token, mirror);
 	free(manifests);
@@ -863,7 +865,15 @@ struct DOCKER *docker_pull(const char *_Nonnull image, const char *_Nonnull tag,
 		error("{red}Failed to get blobs!\n");
 	}
 	pull_images(image, blobs, token, savedir, mirror, failback);
+	if (failback) {
+		free(token);
+		token = get_token(image, mirror, true);
+	}
 	char *config = get_config_digest(image, tag, digest, token, mirror, failback);
+	if (failback) {
+		free(token);
+		token = get_token(image, mirror, true);
+	}
 	struct DOCKER *ret = get_image_config(image, config, token, mirror);
 	free(manifests);
 	free(token);
