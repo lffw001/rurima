@@ -32,8 +32,8 @@ void show_version_info(void)
 {
 	/*
 	 * Just show version info and license.
-	 * Version info is defined in macro RURI_VERSION.
-	 * RURI_COMMIT_ID is defined as -D option of compiler.
+	 * Version info is defined in macro RURIMA_VERSION.
+	 * RURIMA_COMMIT_ID is defined as -D option of compiler.
 	 */
 	cprintf("\n");
 	cprintf("{base}      ●●●●  ●   ● ●●●●   ●●●  ●   ●   ●  \n");
@@ -43,19 +43,23 @@ void show_version_info(void)
 	cprintf("{base}      ●   ●  ●●●  ●   ●  ●●●  ●   ● ●   ●\n");
 	cprintf("{base}        Licensed under the MIT License\n");
 	cprintf("{base}          <https://mit-license.org>\n");
-	cprintf("{base}Copyright (C) 2024 Moe-hacker\n\n");
-	cprintf("{base}%s%s%s", "ruri version .....:  ", RURIMA_VERSION, "\n");
+	cprintf("{base}        Copyright (C) 2024 Moe-hacker\n\n");
+	cprintf("{base}%s%s%s", "rurima version .....:  ", RURIMA_VERSION, "\n");
 #if defined(RURIMA_COMMIT_ID)
-	cprintf("{base}%s%s%s", "ruri commit id ...:  ", RURIMA_COMMIT_ID, "\n");
+	cprintf("{base}%s%s%s", "rurima commit id ...:  ", RURIMA_COMMIT_ID, "\n");
 #endif
-	cprintf("{base}%s%d%s%d%s", "libk2v ...........:  ", LIBK2V_MAJOR, ".", LIBK2V_MINOR, "\n");
-	cprintf("{base}%s%d%s%d%s", "cprintf ..........:  ", CPRINTF_MAJOR, ".", CPRINTF_MINOR, "\n");
-	cprintf("{base}%s%s\n", "Compiler version .:  ", __VERSION__);
-	cprintf("{base}%s%s\n", "Build date .......:  ", __TIMESTAMP__);
+#if defined(LIBCAP_MAJOR) && defined(LIBCAP_MINOR)
+	cprintf("{base}%s%d%s%d%s", "libcap .............:  ", LIBCAP_MAJOR, ".", LIBCAP_MINOR, "\n");
+#endif
+	cprintf("{base}%s%d%s%d%s", "libk2v .............:  ", LIBK2V_MAJOR, ".", LIBK2V_MINOR, "\n");
+	cprintf("{base}%s%d%s%d%s", "cprintf ............:  ", CPRINTF_MAJOR, ".", CPRINTF_MINOR, "\n");
+	cprintf("{base}%s%s\n", "Compiler version ...:  ", __VERSION__);
+	cprintf("{base}%s%s\n", "Build date .........:  ", __TIMESTAMP__);
 	cprintf("{base}\nThere is NO WARRANTY, to the extent permitted by law\n");
+	cprintf("{base}Docker is a registered trademark of Docker, Inc.\nThis program has no relationship with it.\n");
 	cprintf("{clear}\n");
 }
-// For `ruri -V`.
+// For `rurima -V`.
 void show_version_code(void)
 {
 	/*
@@ -64,12 +68,4 @@ void show_version_code(void)
 	 * Maybe it can be useful one day...
 	 */
 	cprintf("%s\n", RURIMA_VERSION);
-}
-// For `ruri -h`.
-void show_helps(void)
-{
-}
-// For `ruri -H`.
-void show_examples(void)
-{
 }

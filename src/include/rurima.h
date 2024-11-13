@@ -224,3 +224,5 @@ void show_docker_config(struct DOCKER *_Nonnull config, char *_Nullable savedir,
 void free_docker_config(struct DOCKER *_Nonnull config);
 void lxc_search_arch(const char *_Nullable mirror, const char *_Nonnull os);
 int docker_search_arch(const char *_Nonnull image, const char *_Nonnull tag, char *_Nullable mirror);
+void show_version_info(void);
+void show_version_code(void);

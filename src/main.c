@@ -38,6 +38,8 @@ static void show_help(void)
 	cprintf("{green}  help: Show help message.\n");
 	cprintf("{green}Options:\n");
 	cprintf("{green}  -h, --help: Show help message.\n");
+	cprintf("{green}  -v, --version: Show version info.\n");
+	cprintf("{green}  -V, --version-code: Show version code.\n");
 	cprintf("{green}See rurima [subcommand] help for further information.\n");
 }
 int main(int argc, char **argv)
@@ -69,6 +71,12 @@ int main(int argc, char **argv)
 			return 0;
 		} else if (strcmp(argv[i], "help") == 0 || strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
 			show_help();
+			return 0;
+		} else if (strcmp(argv[i], "version") == 0 || strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--version") == 0) {
+			show_version_info();
+			return 0;
+		} else if (strcmp(argv[i], "-V") == 0 || strcmp(argv[i], "--version-code") == 0) {
+			show_version_code();
 			return 0;
 		} else {
 			show_help();
