@@ -59,7 +59,7 @@ static char *unicode_to_char(const char *_Nonnull str)
 		}
 	}
 	result[j] = '\0';
-	log("{base}Result:\n{cyan}%s", result);
+	log("{base}Result:\n{cyan}%s\n", result);
 	return result;
 }
 static char *format_json(const char *_Nonnull buf)
