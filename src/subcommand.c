@@ -157,7 +157,7 @@ void docker(int argc, char **_Nonnull argv)
 			show_docker_config(config, savedir, runtime, quiet);
 			if (config->architecture != NULL) {
 				if (strcmp(config->architecture, architecture) != 0) {
-					warning("{yellow}Failback mode detected!\n");
+					warning("{yellow}\nWarning: failback mode detected!\n");
 					warning("{yellow}The architecture of the image is not the same as the specified architecture!\n");
 				}
 			}
@@ -176,7 +176,7 @@ void docker(int argc, char **_Nonnull argv)
 		if (!quiet) {
 			if (config->architecture != NULL) {
 				if (strcmp(config->architecture, architecture) != 0) {
-					warning("{yellow}Failback mode detected!\n");
+					warning("{yellow}Warning: failback mode detected!\n");
 					warning("{yellow}The architecture of the image is not the same as the specified architecture!\n");
 				}
 			}

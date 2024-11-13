@@ -94,6 +94,9 @@ static void print_proot_command(struct DOCKER *_Nonnull config, char *_Nullable 
 	if (config->workdir != NULL) {
 		printf("-w %s ", config->workdir);
 	}
+	if (strcmp(config->architecture, docker_get_host_arch()) != 0) {
+		printf("-q /path/to/qemu-%s-static ", config->architecture);
+	}
 	printf("-r %s ", savedir == NULL ? "/path/to/container" : savedir);
 	if (config->command[0] != NULL) {
 		for (int i = 0; config->command[i] != NULL; i++) {
@@ -115,6 +118,10 @@ static void print_ruri_command(struct DOCKER *_Nonnull config, char *_Nullable s
 	printf("-w ");
 	if (config->workdir != NULL) {
 		printf("-W %s ", config->workdir);
+	}
+	if (strcmp(config->architecture, docker_get_host_arch()) != 0) {
+		printf("-a %s ", config->architecture);
+		printf("-q /path/to/qemu-%s-static ", config->architecture);
 	}
 	for (int i = 0; config->env[i] != NULL && config->env[i + 1] != NULL; i += 2) {
 		printf("-e \"%s\" \"%s\" ", config->env[i], config->env[i + 1]);
@@ -191,6 +198,11 @@ void show_docker_config(struct DOCKER *_Nonnull config, char *_Nullable savedir,
 			printf("\033[38;2;219;240;240m\n");
 		}
 		print_chroot_command(config, savedir);
+		if (!quiet) {
+			if (strcmp(config->architecture, docker_get_host_arch()) != 0) {
+				warning("{yellow}For chroot, please configure binfimt_misc manually!\n");
+			}
+		}
 	} else {
 		error("Unknown container runtime!");
 	}
@@ -198,6 +210,9 @@ void show_docker_config(struct DOCKER *_Nonnull config, char *_Nullable savedir,
 		printf("\n\033[0m");
 		if (savedir == NULL) {
 			cprintf("{yellow}Please replace /path/to/container with your container path!\n");
+		}
+		if (strcmp(config->architecture, docker_get_host_arch()) != 0) {
+			cprintf("{yellow}Please replace /path/to/qemu-%s-static with your qemu binary path!\n", config->architecture);
 		}
 	}
 }
