@@ -13,6 +13,10 @@ strip rurima
 upx rurima
 cp rurima ../output/rurima
 cp LICENSE ../output/LICENSE
+./configure -s -D
+make
+upx rurima
+cp rurima ../output/rurima-dbg
 cd ..
 cd output
 tar -cvf ../$(uname -m).tar .

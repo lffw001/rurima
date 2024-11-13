@@ -105,6 +105,9 @@ default_cflag() {
     if [ $STATIC_COMPILE ]; then
         test_and_add_cflag "-static"
     fi
+    if [ $DEBUG_BUILD ]; then
+        test_and_add_cflag "-DRURIMA_DEBUG"
+    fi
     test_and_add_cflag "-U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=3"
     test_and_add_ldflag "-lcap"
 }
