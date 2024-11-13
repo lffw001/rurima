@@ -501,15 +501,17 @@ static char *get_short_sha(const char *_Nonnull sha)
 	ret[16] = '\0';
 	return ret;
 }
-static void pull_images(const char *_Nonnull image, char *const *_Nonnull blobs, const char *_Nonnull token, const char *_Nonnull savedir, const char *_Nullable mirror)
+static void pull_images(const char *_Nonnull image, char *const *_Nonnull blobs, const char *_Nonnull token, const char *_Nonnull savedir, const char *_Nullable mirror, bool failback)
 {
 	/*
 	 * Pull images.
 	 *
 	 * This function will pull all layers of image,
 	 * and extract them to savedir.
+	 * Failback mode will get token every time pull a layer.
 	 *
 	 */
+	char *token_tmp = NULL;
 	char url[4096] = { '\0' };
 	char filename[4096] = { '\0' };
 	if (mkdirs(savedir, 0755) != 0) {
@@ -528,9 +530,15 @@ static void pull_images(const char *_Nonnull image, char *const *_Nonnull blobs,
 		free(sha);
 		sprintf(url, "https://%s/v2/%s/blobs/%s", mirror, image, blobs[i]);
 		sprintf(filename, "layer-%d", i);
-		char *auth = malloc(strlen(token) + 114);
+		if (failback) {
+			token_tmp = get_token(image, mirror, failback);
+		} else {
+			token_tmp = strdup(token);
+		}
+		char *auth = malloc(strlen(token_tmp) + 114);
 		auth[0] = '\0';
-		sprintf(auth, "Authorization: Bearer %s", token);
+		sprintf(auth, "Authorization: Bearer %s", token_tmp);
+		free(token_tmp);
 		log("{base}Command:\n{cyan}curl -L -s -H \"%s\" %s -o %s\n", auth, url, filename);
 		const char *curl_command[] = { "curl", "-L", "-s", "-H", auth, url, "-o", filename, NULL };
 		int ret = fork_execvp(curl_command);
@@ -813,7 +821,7 @@ struct DOCKER *docker_pull_failback(const char *_Nonnull image, const char *_Non
 	if (len == 0) {
 		error("{red}Failed to get digest!\n");
 	}
-	pull_images(image, blobs, token, savedir, mirror);
+	pull_images(image, blobs, token, savedir, mirror, true);
 	char *config = get_config_digest_failback(image, tag, token, mirror);
 	struct DOCKER *ret = get_image_config(image, config, token, mirror);
 	free(manifests);
@@ -854,7 +862,7 @@ struct DOCKER *docker_pull(const char *_Nonnull image, const char *_Nonnull tag,
 	if (blobs == NULL) {
 		error("{red}Failed to get blobs!\n");
 	}
-	pull_images(image, blobs, token, savedir, mirror);
+	pull_images(image, blobs, token, savedir, mirror, failback);
 	char *config = get_config_digest(image, tag, digest, token, mirror, failback);
 	struct DOCKER *ret = get_image_config(image, config, token, mirror);
 	free(manifests);
