@@ -474,7 +474,7 @@ static void pull_images(const char *_Nonnull image, char *const *_Nonnull blobs,
 		remove(filename);
 	}
 }
-static char *get_config_digset_failback(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nonnull token, const char *_Nullable mirror)
+static char *get_config_digest_failback(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nonnull token, const char *_Nullable mirror)
 {
 	/*
 	 * Warning: free() the return value after use.
@@ -493,7 +493,7 @@ static char *get_config_digset_failback(const char *_Nonnull image, const char *
 	free(manifests);
 	return ret;
 }
-static char *get_config_digset(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nullable digest, const char *_Nonnull token, const char *_Nullable mirror)
+static char *get_config_digest(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nullable digest, const char *_Nonnull token, const char *_Nullable mirror, bool failback)
 {
 	/*
 	 * Warning: free() the return value after use.
@@ -505,7 +505,10 @@ static char *get_config_digset(const char *_Nonnull image, const char *_Nonnull 
 		mirror = "registry-1.docker.io";
 	}
 	if (digest == NULL) {
-		return get_config_digset_failback(image, tag, token, mirror);
+		if (!failback) {
+			error("{red}No digest found!\n");
+		}
+		return get_config_digest_failback(image, tag, token, mirror);
 	}
 	char url[4096] = { '\0' };
 	sprintf(url, "https://%s/v2/%s/manifests/%s", mirror, image, digest);
@@ -520,7 +523,10 @@ static char *get_config_digset(const char *_Nonnull image, const char *_Nonnull 
 	if (config == NULL) {
 		free(response);
 		free(auth);
-		return get_config_digset_failback(image, tag, token, mirror);
+		if (!failback) {
+			error("{red}Failed to get config!\n");
+		}
+		return get_config_digest_failback(image, tag, token, mirror);
 	}
 	log("{base}Config: %s{clear}\n", config);
 	free(response);
@@ -693,7 +699,7 @@ static struct DOCKER *get_image_config(const char *_Nonnull image, const char *_
 	free(auth);
 	return ret;
 }
-struct DOCKER *get_docker_config(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nullable architecture, const char *_Nullable mirror)
+struct DOCKER *get_docker_config(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nullable architecture, const char *_Nullable mirror, bool failback)
 {
 	/*
 	 * Warning: free() the return value after use.
@@ -705,8 +711,8 @@ struct DOCKER *get_docker_config(const char *_Nonnull image, const char *_Nonnul
 	char *token = get_token(image, mirror);
 	char *manifests = get_tag_manifests(image, tag, token, mirror);
 	char *digest = get_tag_digest(manifests, architecture);
-	// digset can be NULL, then we go to failback.
-	char *config = get_config_digset(image, tag, digest, token, mirror);
+	// digest can be NULL, then we go to failback.
+	char *config = get_config_digest(image, tag, digest, token, mirror, failback);
 	if (config == NULL) {
 		error("{red}Failed to get config!\n");
 	}
@@ -734,11 +740,10 @@ struct DOCKER *docker_pull_failback(const char *_Nonnull image, const char *_Non
 	char *layers = json_get_key(manifests, "[layers]");
 	size_t len = json_anon_layer_get_key_array(layers, "[digest]", &blobs);
 	if (len == 0) {
-		error("{red}Failed to get digset!\n");
+		error("{red}Failed to get digest!\n");
 	}
 	pull_images(image, blobs, token, savedir, mirror);
-	exit(0);
-	char *config = get_config_digset_failback(image, tag, token, mirror);
+	char *config = get_config_digest_failback(image, tag, token, mirror);
 	struct DOCKER *ret = get_image_config(image, config, token, mirror);
 	free(manifests);
 	free(token);
@@ -750,7 +755,7 @@ struct DOCKER *docker_pull_failback(const char *_Nonnull image, const char *_Non
 	free(layers);
 	return ret;
 }
-struct DOCKER *docker_pull(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nullable architecture, const char *_Nonnull savedir, const char *_Nullable mirror)
+struct DOCKER *docker_pull(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nullable architecture, const char *_Nonnull savedir, const char *_Nullable mirror, bool failback)
 {
 	/*
 	 * Warning: free() the return value after use.
@@ -769,6 +774,9 @@ struct DOCKER *docker_pull(const char *_Nonnull image, const char *_Nonnull tag,
 	if (digest == NULL) {
 		free(manifests);
 		free(token);
+		if (!failback) {
+			error("{red}Failed to get digest!\n");
+		}
 		return docker_pull_failback(image, tag, savedir, mirror);
 	}
 	char **blobs = get_blobs(image, digest, token, mirror);
@@ -776,7 +784,7 @@ struct DOCKER *docker_pull(const char *_Nonnull image, const char *_Nonnull tag,
 		error("{red}Failed to get blobs!\n");
 	}
 	pull_images(image, blobs, token, savedir, mirror);
-	char *config = get_config_digset(image, tag, digest, token, mirror);
+	char *config = get_config_digest(image, tag, digest, token, mirror, failback);
 	struct DOCKER *ret = get_image_config(image, config, token, mirror);
 	free(manifests);
 	free(token);

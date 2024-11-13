@@ -163,19 +163,24 @@ struct __attribute__((aligned(128))) DOCKER {
 // Warnings.
 #define warning(...) cfprintf(stderr, ##__VA_ARGS__)
 // Show error msg and exit.
-#define error(...)                                                                                           \
-	{                                                                                                    \
-		cfprintf(stderr, ##__VA_ARGS__);                                                             \
-		cfprintf(stderr, "{base}%s{clear}\n", "  .^.   .^.");                                        \
-		cfprintf(stderr, "{base}%s{clear}\n", "  /⋀\\_ﾉ_/⋀\\");                                      \
-		cfprintf(stderr, "{base}%s{clear}\n", " /ﾉｿﾉ\\ﾉｿ丶)|");                                      \
-		cfprintf(stderr, "{base}%s{clear}\n", " ﾙﾘﾘ >  x )ﾘ");                                       \
-		cfprintf(stderr, "{base}%s{clear}\n", "ﾉノ㇏  ^ ﾉ|ﾉ");                                       \
-		cfprintf(stderr, "{base}%s{clear}\n", "      ⠁⠁");                                           \
-		cfprintf(stderr, "{base}%s{clear}\n", "RURIMA ERROR MESSAGE");                               \
-		cfprintf(stderr, "{base}%s{clear}\n", "If you think something is wrong, please report at:"); \
-		cfprintf(stderr, "\033[4m{base}%s{clear}\n", "https://github.com/Moe-hacker/rurima/issues"); \
-		exit(114);                                                                                   \
+#define error(...)                                                                                                  \
+	{                                                                                                           \
+		cfprintf(stderr, "{red}In %s() in %s line %d:\n", __func__, __FILE__, __LINE__);                    \
+		cfprintf(stderr, ##__VA_ARGS__);                                                                    \
+		cfprintf(stderr, "{base}%s{clear}\n", "  .^.   .^.");                                               \
+		cfprintf(stderr, "{base}%s{clear}\n", "  /⋀\\_ﾉ_/⋀\\");                                             \
+		cfprintf(stderr, "{base}%s{clear}\n", " /ﾉｿﾉ\\ﾉｿ丶)|");                                             \
+		cfprintf(stderr, "{base}%s{clear}\n", " ﾙﾘﾘ >  x )ﾘ");                                              \
+		cfprintf(stderr, "{base}%s{clear}\n", "ﾉノ㇏  ^ ﾉ|ﾉ");                                              \
+		cfprintf(stderr, "{base}%s{clear}\n", "      ⠁⠁");                                                  \
+		cfprintf(stderr, "{base}%s{clear}\n", "RURIMA ERROR MESSAGE");                                      \
+		cfprintf(stderr, "{base}%s{clear}\n", "Hint:");                                                     \
+		cfprintf(stderr, "{base}%s{clear}\n", "If you have network problems for lxc or docker subcommand"); \
+		cfprintf(stderr, "{base}%s{clear}\n", "Please use -m option to change the mirror.");                \
+		cfprintf(stderr, "{base}%s{clear}\n", "For docker subcommand, try -f to enable failback mode.");    \
+		cfprintf(stderr, "{base}%s{clear}\n", "If you think something is wrong, please report at:");        \
+		cfprintf(stderr, "\033[4m{base}%s{clear}\n", "https://github.com/Moe-hacker/rurima/issues");        \
+		exit(114);                                                                                          \
 	}
 // Log system.
 #if defined(RURIMA_DEBUG)
@@ -201,7 +206,7 @@ int mkdirs(const char *_Nonnull path, mode_t mode);
 bool run_with_root(void);
 int docker_search(const char *_Nonnull image, const char *_Nonnull page_size, bool quiet);
 int docker_search_tag(const char *_Nonnull image, const char *_Nonnull page_size, const char *_Nullable architecture, bool quiet);
-struct DOCKER *docker_pull(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nullable architecture, const char *_Nonnull savedir, const char *_Nullable mirror);
+struct DOCKER *docker_pull(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nullable architecture, const char *_Nonnull savedir, const char *_Nullable mirror, bool failback);
 void register_signal(void);
 char *docker_get_host_arch(void);
 char *lxc_get_host_arch(void);
@@ -214,7 +219,7 @@ void unpack(int argc, char **_Nonnull argv);
 struct RURIMA *init_config(void);
 void get_input(char *_Nonnull message, char *_Nonnull buf);
 void check_dep(void);
-struct DOCKER *get_docker_config(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nullable architecture, const char *_Nullable mirror);
+struct DOCKER *get_docker_config(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nullable architecture, const char *_Nullable mirror, bool failback);
 void show_docker_config(struct DOCKER *_Nonnull config, char *_Nullable savedir, char *_Nullable runtime, bool quiet);
 void free_docker_config(struct DOCKER *_Nonnull config);
 void lxc_search_arch(const char *_Nullable mirror, const char *_Nonnull os);

@@ -59,6 +59,7 @@ void docker(int argc, char **_Nonnull argv)
 	char *mirror = NULL;
 	char *runtime = NULL;
 	bool quiet = false;
+	bool failback = false;
 	if (argc == 0) {
 		error("{red}No subcommand specified!\n");
 	}
@@ -105,6 +106,8 @@ void docker(int argc, char **_Nonnull argv)
 			i++;
 		} else if (strcmp(argv[i], "-q") == 0 || strcmp(argv[i], "--quiet") == 0) {
 			quiet = true;
+		} else if (strcmp(argv[i], "-f") == 0 || strcmp(argv[i], "--failback") == 0) {
+			failback = true;
 		} else if (strcmp(argv[i], "-m") == 0 || strcmp(argv[i], "--mirror") == 0) {
 			if (i + 1 >= argc) {
 				error("{red}No mirror specified!\n");
@@ -149,7 +152,7 @@ void docker(int argc, char **_Nonnull argv)
 			warning("{yellow}You are not running as root, might cause bug unpacking rootfs!\n");
 		}
 		image = add_library_prefix(image);
-		struct DOCKER *config = docker_pull(image, tag, architecture, savedir, mirror);
+		struct DOCKER *config = docker_pull(image, tag, architecture, savedir, mirror, failback);
 		if (!quiet) {
 			show_docker_config(config, savedir, runtime, quiet);
 			if (config->architecture != NULL) {
@@ -168,7 +171,7 @@ void docker(int argc, char **_Nonnull argv)
 			error("{red}No image specified!\n");
 		}
 		image = add_library_prefix(image);
-		struct DOCKER *config = get_docker_config(image, tag, architecture, mirror);
+		struct DOCKER *config = get_docker_config(image, tag, architecture, mirror, failback);
 		show_docker_config(config, savedir, runtime, quiet);
 		if (!quiet) {
 			if (config->architecture != NULL) {
@@ -206,6 +209,7 @@ void docker(int argc, char **_Nonnull argv)
 		cprintf("{green}  -m, --mirror: Mirror of DockerHub.\n");
 		cprintf("{green}  -r, --runtime: runtime of container, support [ruri/proot/chroot].\n");
 		cprintf("{green}  -q, --quiet: Quiet mode.\n");
+		cprintf("{green}  -f, --failback: Failback mode.\n");
 	} else {
 		error("{red}Invalid subcommand!\n");
 	}
