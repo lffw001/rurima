@@ -216,7 +216,7 @@ void show_docker_config(struct DOCKER *_Nonnull config, char *_Nullable savedir,
 		}
 	}
 }
-static char *get_auth_server_from_header(const char *_Nonnull header)
+static char *get_auth_server_from_header(const char *_Nonnull header, bool failback)
 {
 	/*
 	 * Warning: free() the return value after use.
@@ -228,19 +228,31 @@ static char *get_auth_server_from_header(const char *_Nonnull header)
 	 */
 	const char *p = strstr(header, "www-authenticate: ");
 	if (p == NULL) {
+		if (failback) {
+			return NULL;
+		}
 		error("{red}No auth server found!\n");
 	}
 	p = strstr(p, "realm=");
 	if (p == NULL) {
+		if (failback) {
+			return NULL;
+		}
 		error("{red}No auth server found!\n");
 	}
 	p = strstr(p, "\"");
 	if (p == NULL) {
+		if (failback) {
+			return NULL;
+		}
 		error("{red}No auth server found!\n");
 	}
 	p++;
 	const char *q = strstr(p, "\"");
 	if (q == NULL) {
+		if (failback) {
+			return NULL;
+		}
 		error("{red}No auth server found!\n");
 	}
 	char *ret = malloc((size_t)(q - p + 1));
@@ -248,7 +260,7 @@ static char *get_auth_server_from_header(const char *_Nonnull header)
 	ret[q - p] = '\0';
 	return ret;
 }
-static char *get_service_from_header(const char *_Nonnull header)
+static char *get_service_from_header(const char *_Nonnull header, bool failback)
 {
 	/*
 	 * Warning: free() the return value after use.
@@ -259,19 +271,31 @@ static char *get_service_from_header(const char *_Nonnull header)
 	 */
 	const char *p = strstr(header, "www-authenticate: ");
 	if (p == NULL) {
+		if (failback) {
+			return NULL;
+		}
 		error("{red}No service found!\n");
 	}
 	p = strstr(p, "service=");
 	if (p == NULL) {
+		if (failback) {
+			return NULL;
+		}
 		error("{red}No service found!\n");
 	}
 	p = strstr(p, "\"");
 	if (p == NULL) {
+		if (failback) {
+			return NULL;
+		}
 		error("{red}No service found!\n");
 	}
 	p++;
 	const char *q = strstr(p, "\"");
 	if (q == NULL) {
+		if (failback) {
+			return NULL;
+		}
 		error("{red}No service found!\n");
 	}
 	char *ret = malloc((size_t)(q - p + 1));
@@ -279,7 +303,7 @@ static char *get_service_from_header(const char *_Nonnull header)
 	ret[q - p] = '\0';
 	return ret;
 }
-static char *get_auth_server_url(const char *_Nullable mirror)
+static char *get_auth_server_url(const char *_Nullable mirror, bool failback)
 {
 	/*
 	 * Warning: free() the return value after use.
@@ -287,6 +311,7 @@ static char *get_auth_server_url(const char *_Nullable mirror)
 	 * Get auth server url.
 	 * Example:
 	 * https://auth.docker.io/token?service=registry.docker.io
+	 *
 	 */
 	if (mirror == NULL) {
 		mirror = "registry-1.docker.io";
@@ -296,14 +321,26 @@ static char *get_auth_server_url(const char *_Nullable mirror)
 	const char *curl_command[] = { "curl", "-s", "-I", url, NULL };
 	char *response = fork_execvp_get_stdout(curl_command);
 	if (response == NULL) {
+		if (failback) {
+			return NULL;
+		}
 		error("{red}Failed to get auth server!\n");
 	}
-	char *server = get_auth_server_from_header(response);
+	char *server = get_auth_server_from_header(response, failback);
 	if (server == NULL) {
+		if (failback) {
+			free(response);
+			return NULL;
+		}
 		error("{red}Failed to get auth server!\n");
 	}
-	char *service = get_service_from_header(response);
+	char *service = get_service_from_header(response, failback);
 	if (service == NULL) {
+		if (failback) {
+			free(response);
+			free(server);
+			return NULL;
+		}
 		error("{red}Failed to get service!\n");
 	}
 	free(response);
@@ -314,7 +351,7 @@ static char *get_auth_server_url(const char *_Nullable mirror)
 	log("{base}Auth server url: {cyan}%s{clear}\n", ret);
 	return ret;
 }
-static char *get_token(const char *_Nonnull image, const char *_Nullable mirror)
+static char *get_token(const char *_Nonnull image, const char *_Nullable mirror, bool failback)
 {
 	/*
 	 * Warning: free() the return value after use.
@@ -327,7 +364,16 @@ static char *get_token(const char *_Nonnull image, const char *_Nullable mirror)
 	if (mirror == NULL) {
 		mirror = "registry-1.docker.io";
 	}
-	char *auth_server_url = get_auth_server_url(mirror);
+	char *auth_server_url = get_auth_server_url(mirror, failback);
+	if (auth_server_url == NULL) {
+		if (failback) {
+			log("{red}No auth server found, using homo magic token 1145141919810\n");
+			// We hope the server administrator is homo.
+			return strdup("1145141919810");
+		} else {
+			error("{red}Failed to get auth server!\n");
+		}
+	}
 	strcat(url, auth_server_url);
 	free(auth_server_url);
 	strcat(url, "&scope=repository%3A");
@@ -340,6 +386,16 @@ static char *get_token(const char *_Nonnull image, const char *_Nullable mirror)
 		error("{red}Failed to get token!\n");
 	}
 	char *ret = json_get_key(token_json, "[token]");
+	if (ret == NULL) {
+		if (failback) {
+			free(token_json);
+			log("{red}Can not get token, using homo magic token 1145141919810\n");
+			// We hope the server administrator is homo.
+			return strdup("1145141919810");
+		} else {
+			error("{red}Failed to get token!");
+		}
+	}
 	free(token_json);
 	log("{base}Token: {cyan}%s{clear}\n", ret);
 	return ret;
@@ -723,7 +779,7 @@ struct DOCKER *get_docker_config(const char *_Nonnull image, const char *_Nonnul
 	 * This function is called by subcommand.c
 	 *
 	 */
-	char *token = get_token(image, mirror);
+	char *token = get_token(image, mirror, failback);
 	char *manifests = get_tag_manifests(image, tag, token, mirror);
 	char *digest = get_tag_digest(manifests, architecture);
 	// digest can be NULL, then we go to failback.
@@ -749,7 +805,7 @@ struct DOCKER *docker_pull_failback(const char *_Nonnull image, const char *_Non
 	if (mirror == NULL) {
 		mirror = "registry-1.docker.io";
 	}
-	char *token = get_token(image, mirror);
+	char *token = get_token(image, mirror, true);
 	char *manifests = get_tag_manifests(image, tag, token, mirror);
 	char **blobs = NULL;
 	char *layers = json_get_key(manifests, "[layers]");
@@ -783,7 +839,7 @@ struct DOCKER *docker_pull(const char *_Nonnull image, const char *_Nonnull tag,
 	if (mirror == NULL) {
 		mirror = "registry-1.docker.io";
 	}
-	char *token = get_token(image, mirror);
+	char *token = get_token(image, mirror, failback);
 	char *manifests = get_tag_manifests(image, tag, token, mirror);
 	char *digest = get_tag_digest(manifests, architecture);
 	if (digest == NULL) {
@@ -1072,7 +1128,7 @@ static void docker_print_arch(const char *_Nonnull image, char *const *_Nonnull 
 	}
 	free(archlist);
 }
-int docker_search_arch(const char *_Nonnull image, const char *_Nonnull tag, char *_Nullable mirror)
+int docker_search_arch(const char *_Nonnull image, const char *_Nonnull tag, char *_Nullable mirror, bool failback)
 {
 	/*
 	 * Get architecture of image:tag.
@@ -1084,7 +1140,7 @@ int docker_search_arch(const char *_Nonnull image, const char *_Nonnull tag, cha
 	if (mirror == NULL) {
 		mirror = "registry-1.docker.io";
 	}
-	char *token = get_token(image, mirror);
+	char *token = get_token(image, mirror, failback);
 	char *manifests = get_tag_manifests(image, tag, token, mirror);
 	char **arch = NULL;
 	char *tmp = json_get_key(manifests, "[manifests]");

@@ -190,7 +190,7 @@ void docker(int argc, char **_Nonnull argv)
 		if (tag == NULL) {
 			error("{red}No tag specified!\n");
 		}
-		docker_search_arch(image, tag, mirror);
+		docker_search_arch(image, tag, mirror, failback);
 	} else if (strcmp(argv[0], "help") == 0 || strcmp(argv[0], "-h") == 0 || strcmp(argv[0], "--help") == 0) {
 		cprintf("{green}Usage: docker [subcommand] [options]\n");
 		cprintf("{green}Subcommands:\n");
