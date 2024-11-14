@@ -228,6 +228,9 @@ static char *get_auth_server_from_header(const char *_Nonnull header, bool failb
 	 */
 	const char *p = strstr(header, "www-authenticate: ");
 	if (p == NULL) {
+		p = strstr(header, "Www-Authenticate: ");
+	}
+	if (p == NULL) {
 		if (failback) {
 			return NULL;
 		}
@@ -270,6 +273,9 @@ static char *get_service_from_header(const char *_Nonnull header, bool failback)
 	 * www-authenticate: Bearer realm="https://auth.docker.io/token",service="registry.docker.io"
 	 */
 	const char *p = strstr(header, "www-authenticate: ");
+	if (p == NULL) {
+		p = strstr(header, "Www-Authenticate: ");
+	}
 	if (p == NULL) {
 		if (failback) {
 			return NULL;
