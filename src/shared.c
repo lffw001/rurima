@@ -28,6 +28,31 @@
  *
  */
 #include "include/rurima.h"
+char *strstr_ignore_case(const char *_Nonnull haystack, const char *_Nonnull needle)
+{
+	/*
+	 * An implementation of strccasestr().
+	 */
+	char *haystack_lower = strdup(haystack);
+	char *needle_lower = strdup(needle);
+	char *ret = NULL;
+	for (size_t i = 0; i < strlen(haystack_lower); i++) {
+		haystack_lower[i] = tolower(haystack_lower[i]);
+	}
+	for (size_t i = 0; i < strlen(needle_lower); i++) {
+		needle_lower[i] = tolower(needle_lower[i]);
+	}
+	if (strstr(haystack_lower, needle_lower) == NULL) {
+		free(haystack_lower);
+		free(needle_lower);
+		return NULL;
+	} else {
+		ret = strstr(haystack_lower, needle_lower) - haystack_lower + haystack;
+	}
+	free(haystack_lower);
+	free(needle_lower);
+	return ret;
+}
 static char *get_dir_realpath(const char *_Nonnull dir)
 {
 	/*

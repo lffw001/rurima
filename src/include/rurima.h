@@ -232,3 +232,4 @@ int docker_search_arch(const char *_Nonnull image, const char *_Nonnull tag, cha
 void show_version_info(void);
 void show_version_code(void);
 void check_dir_deny_list(const char *_Nonnull dir);
+char *strstr_ignore_case(const char *_Nonnull haystack, const char *_Nonnull needle);
