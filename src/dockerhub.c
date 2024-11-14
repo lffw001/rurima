@@ -318,7 +318,7 @@ static char *get_auth_server_url(const char *_Nullable mirror, bool failback)
 	}
 	char url[4096] = { '\0' };
 	sprintf(url, "https://%s/v2/", mirror);
-	const char *curl_command[] = { "curl", "-s", "-I", url, NULL };
+	const char *curl_command[] = { "curl", "-s", "-L", "-I", url, NULL };
 	char *response = fork_execvp_get_stdout(curl_command);
 	if (response == NULL) {
 		if (failback) {
