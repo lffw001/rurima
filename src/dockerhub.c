@@ -231,6 +231,18 @@ static char *get_auth_server_from_header(const char *_Nonnull header, bool failb
 		p = strstr(header, "Www-Authenticate: ");
 	}
 	if (p == NULL) {
+		p = strstr(header, "WWW-Authenticate: ");
+	}
+	if (p == NULL) {
+		p = strstr(header, "www-Authenticate: ");
+	}
+	if (p == NULL) {
+		p = strstr(header, "Www-authenticate: ");
+	}
+	if (p == NULL) {
+		p = strstr(header, "WWW-authenticate: ");
+	}
+	if (p == NULL) {
 		if (failback) {
 			return NULL;
 		}
@@ -275,6 +287,18 @@ static char *get_service_from_header(const char *_Nonnull header, bool failback)
 	const char *p = strstr(header, "www-authenticate: ");
 	if (p == NULL) {
 		p = strstr(header, "Www-Authenticate: ");
+	}
+	if (p == NULL) {
+		p = strstr(header, "WWW-Authenticate: ");
+	}
+	if (p == NULL) {
+		p = strstr(header, "www-Authenticate: ");
+	}
+	if (p == NULL) {
+		p = strstr(header, "Www-authenticate: ");
+	}
+	if (p == NULL) {
+		p = strstr(header, "WWW-authenticate: ");
 	}
 	if (p == NULL) {
 		if (failback) {
