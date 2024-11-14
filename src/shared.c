@@ -28,6 +28,73 @@
  *
  */
 #include "include/rurima.h"
+static char *get_dir_realpath(const char *_Nonnull dir)
+{
+	/*
+	 * Get the realpath of the savedir.
+	 * Warning: free() the return value after use.
+	 */
+	char *ret = malloc(PATH_MAX + strlen(dir) + 1);
+	if (strchr(dir, '/') == dir) {
+		sprintf(ret, "%s", dir);
+	} else {
+		getcwd(ret, PATH_MAX);
+		strcat(ret, "/");
+		if (strstr(dir, "./") == dir) {
+			strcat(ret, dir + 2);
+		} else {
+			strcat(ret, dir);
+		}
+	}
+	return ret;
+}
+void check_dir_deny_list(const char *_Nonnull dir)
+{
+	/*
+	 * Check if the directory is in deny list.
+	 * If it is, we will refuse to extract the archive.
+	 * To protect the host system, we refuse to extract rootfs to unsafe directories.
+	 */
+	char *path = get_dir_realpath(dir);
+	log("{base}Realpath: {cyan}%s{clear}\n", path);
+	if (strcmp(path, "/") == 0) {
+		error("{red}Refuse to extract rootfs to /\n");
+	}
+	if (strstr(path, "/usr/") == path || strcmp(path, "/usr") == 0) {
+		error("{red}Refuse to extract rootfs to /usr/*\n");
+	}
+	if (strstr(path, "/etc/") == path || strcmp(path, "/etc") == 0) {
+		error("{red}Refuse to extract rootfs to /etc/*\n");
+	}
+	if (strstr(path, "/bin/") == path || strcmp(path, "/bin") == 0) {
+		error("{red}Refuse to extract rootfs to /bin/*\n");
+	}
+	if (strstr(path, "/lib/") == path || strcmp(path, "/lib") == 0) {
+		error("{red}Refuse to extract rootfs to /lib/*\n");
+	}
+	if (strstr(path, "/lib64/") == path || strcmp(path, "/lib64") == 0) {
+		error("{red}Refuse to extract rootfs to /lib64/*\n");
+	}
+	if (strstr(path, "/sbin/") == path || strcmp(path, "/sbin") == 0) {
+		error("{red}Refuse to extract rootfs to /sbin/*\n");
+	}
+	if (strstr(path, "/boot/") == path || strcmp(path, "/boot") == 0) {
+		error("{red}Refuse to extract rootfs to /boot/*\n");
+	}
+	if (strstr(path, "/dev/") == path || strcmp(path, "/dev") == 0) {
+		error("{red}Refuse to extract rootfs to /dev/*\n");
+	}
+	if (strstr(path, "/proc/") == path || strcmp(path, "/proc") == 0) {
+		error("{red}Refuse to extract rootfs to /proc/*\n");
+	}
+	if (strstr(path, "/sys/") == path || strcmp(path, "/sys") == 0) {
+		error("{red}Refuse to extract rootfs to /sys/*\n");
+	}
+	if (strstr(path, "/snap/") == path || strcmp(path, "/snap") == 0) {
+		error("{red}Refuse to extract rootfs to /snap/*\n");
+	}
+	free(path);
+}
 void get_input(char *_Nonnull message, char *_Nonnull buf)
 {
 	/*

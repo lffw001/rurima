@@ -266,6 +266,7 @@ void lxc_pull_image(const char *_Nullable mirror, const char *_Nonnull os, const
 	 * Pull the rootfs.tar.xz from mirror,
 	 * and extract it to savedir.
 	 */
+	check_dir_deny_list(savedir);
 	char *dir = lxc_get_image_dir(mirror, os, version, architecture, type);
 	if (dir == NULL) {
 		error("{red}Image not found.\n");

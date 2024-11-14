@@ -221,6 +221,7 @@ int extract_archive(const char *_Nonnull file, const char *_Nonnull dir)
 	 * So that we can show a progress bar by the size we output.
 	 *
 	 */
+	check_dir_deny_list(dir);
 	off_t size = get_file_size(file);
 	if (size == 0) {
 		error("{red}File size is 0!\n");

@@ -92,6 +92,7 @@ void docker(int argc, char **_Nonnull argv)
 			if (i + 1 >= argc) {
 				error("{red}No save directory specified!\n");
 			}
+			check_dir_deny_list(argv[i + 1]);
 			mkdirs(argv[i + 1], 0755);
 			savedir = realpath(argv[i + 1], NULL);
 			if (savedir == NULL) {
@@ -264,6 +265,7 @@ void lxc(int argc, char **_Nonnull argv)
 			if (i + 1 >= argc) {
 				error("{red}No save directory specified!\n");
 			}
+			check_dir_deny_list(argv[i + 1]);
 			savedir = argv[i + 1];
 			i++;
 		} else {
@@ -334,6 +336,7 @@ void unpack(int argc, char **_Nonnull argv)
 			if (i + 1 >= argc) {
 				error("{red}No directory specified!\n");
 			}
+			check_dir_deny_list(argv[i + 1]);
 			dir = argv[i + 1];
 		} else if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
 			cprintf("{green}Usage: unpack [options]\n");

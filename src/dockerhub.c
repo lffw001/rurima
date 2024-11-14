@@ -541,6 +541,7 @@ static void pull_images(const char *_Nonnull image, char *const *_Nonnull blobs,
 	 * Failback mode will get token every time pull a layer.
 	 *
 	 */
+	check_dir_deny_list(savedir);
 	char *token_tmp = NULL;
 	char url[4096] = { '\0' };
 	char filename[4096] = { '\0' };

@@ -231,3 +231,4 @@ void lxc_search_arch(const char *_Nullable mirror, const char *_Nonnull os);
 int docker_search_arch(const char *_Nonnull image, const char *_Nonnull tag, char *_Nullable mirror, bool failback);
 void show_version_info(void);
 void show_version_code(void);
+void check_dir_deny_list(const char *_Nonnull dir);
