@@ -118,6 +118,9 @@ void check_dir_deny_list(const char *_Nonnull dir)
 	if (strstr(path, "/snap/") == path || strcmp(path, "/snap") == 0) {
 		error("{red}Refuse to extract rootfs to /snap/*\n");
 	}
+	if (strcmp(path, "/data") == 0 || strcmp(path, "/data/") == 0 || strcmp(path, "/data/.") == 0 || strcmp(path, "/data/./") == 0) {
+		error("{red}Refuse to extract rootfs to /data\n");
+	}
 	free(path);
 }
 void get_input(char *_Nonnull message, char *_Nonnull buf)
