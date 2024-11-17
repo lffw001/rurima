@@ -46,6 +46,79 @@ static char *add_library_prefix(char *_Nonnull image)
 	free(image);
 	return ret;
 }
+static void docker_pull_try_mirrors(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nonnull architecture, const char *_Nonnull savedir, char *_Nonnull try_mirrorlist[], bool failback)
+{
+	/*
+	 * Try mirrors.
+	 */
+	char *rexec_argv[1024] = { NULL };
+	for (int i = 0; try_mirrorlist[i] != NULL; i++) {
+		cprintf("{base}Trying mirror: {cyan}%s\n", try_mirrorlist[i]);
+		rexec_argv[0] = "docker";
+		rexec_argv[1] = "pull";
+		rexec_argv[2] = "-i";
+		rexec_argv[3] = image;
+		rexec_argv[4] = "-t";
+		rexec_argv[5] = tag;
+		rexec_argv[6] = "-a";
+		rexec_argv[7] = architecture;
+		rexec_argv[8] = "-s";
+		rexec_argv[9] = savedir;
+		rexec_argv[10] = "-m";
+		rexec_argv[11] = try_mirrorlist[i];
+		if (failback) {
+			rexec_argv[12] = "-f";
+			rexec_argv[13] = NULL;
+			if (fork_rexec(12, rexec_argv) == 0) {
+				exit(0);
+			} else {
+				cprintf("{yellow}Mirror {cyan}%s {yellow}is not working!\n", try_mirrorlist[i]);
+			}
+		} else {
+			rexec_argv[12] = NULL;
+			if (fork_rexec(11, rexec_argv) == 0) {
+				exit(0);
+			} else {
+				cprintf("{yellow}Mirror {cyan}%s {yellow}is not working!\n", try_mirrorlist[i]);
+			}
+		}
+	}
+	char *mirrorlist_builtin[] = { "hub.xdark.top", "dockerpull.org", "hub.crdz.gq", "docker.1panel.live", "docker.unsee.tech", "docker.m.daocloud.io", "docker.kejinlion.pro", "registry.dockermirror.com", "hub.rat.dev", "dhub.kubesre.xyz", "docker.nastool.de", "docker.udayun.com", "docker.rainbond.cc", "hub.geekery.cn", "registry-1.docker.io", "docker.io", "registry.hub.docker.com", NULL };
+	for (int i = 0; mirrorlist_builtin[i] != NULL; i++) {
+		cprintf("{base}Trying mirror: {cyan}%s\n", mirrorlist_builtin[i]);
+		rexec_argv[0] = "docker";
+		rexec_argv[1] = "pull";
+		rexec_argv[2] = "-i";
+		rexec_argv[3] = image;
+		rexec_argv[4] = "-t";
+		rexec_argv[5] = tag;
+		rexec_argv[6] = "-a";
+		rexec_argv[7] = architecture;
+		rexec_argv[8] = "-s";
+		rexec_argv[9] = savedir;
+		rexec_argv[10] = "-m";
+		rexec_argv[11] = mirrorlist_builtin[i];
+		if (failback) {
+			rexec_argv[12] = "-f";
+			rexec_argv[13] = NULL;
+			if (fork_rexec(12, rexec_argv) == 0) {
+				cprintf("\n{green}Success!\n");
+				exit(0);
+			} else {
+				cprintf("\n{yellow}Mirror {cyan}%s {yellow}is not working!\n\n", mirrorlist_builtin[i]);
+			}
+		} else {
+			rexec_argv[12] = NULL;
+			if (fork_rexec(11, rexec_argv) == 0) {
+				cprintf("\n{green}Success!\n");
+				exit(0);
+			} else {
+				cprintf("\n{yellow}Mirror {cyan}%s {yellow}is not working!\n\n", mirrorlist_builtin[i]);
+			}
+		}
+	}
+	cprintf("{red}All mirrors are not working!\n");
+}
 /*
  * Subcommand for rurima.
  */
@@ -60,6 +133,8 @@ void docker(int argc, char **_Nonnull argv)
 	char *runtime = NULL;
 	bool quiet = false;
 	bool failback = false;
+	bool try_mirrors = false;
+	char *try_mirrorlist[1024] = { NULL };
 	if (argc == 0) {
 		error("{red}No subcommand specified!\n");
 	}
@@ -76,6 +151,20 @@ void docker(int argc, char **_Nonnull argv)
 			}
 			tag = argv[i + 1];
 			i++;
+		} else if (strcmp(argv[i], "-T") == 0 || strcmp(argv[i], "--try-mirrors") == 0) {
+			try_mirrors = true;
+			if (i + 1 < argc) {
+				if (strchr(argv[i + 1], '-') != argv[i + 1]) {
+					i++;
+					for (int j = 0; j < 1024; j++) {
+						if (try_mirrorlist[j] == NULL) {
+							try_mirrorlist[j] = argv[i];
+							try_mirrorlist[j + 1] = NULL;
+							break;
+						}
+					}
+				}
+			}
 		} else if (strcmp(argv[i], "-a") == 0 || strcmp(argv[i], "--arch") == 0) {
 			if (i + 1 >= argc) {
 				error("{red}No architecture specified!\n");
@@ -149,6 +238,13 @@ void docker(int argc, char **_Nonnull argv)
 		if (image == NULL) {
 			error("{red}No image specified!\n");
 		}
+		if (architecture == NULL) {
+			architecture = docker_get_host_arch();
+		}
+		if (try_mirrors) {
+			docker_pull_try_mirrors(image, tag, architecture, savedir, try_mirrorlist, failback);
+			exit(0);
+		}
 		if (!run_with_root()) {
 			warning("{yellow}You are not running as root, might cause bug unpacking rootfs!\n");
 		}
@@ -211,8 +307,10 @@ void docker(int argc, char **_Nonnull argv)
 		cprintf("{green}  -r, --runtime: runtime of container, support [ruri/proot/chroot].\n");
 		cprintf("{green}  -q, --quiet: Quiet mode.\n");
 		cprintf("{green}  -f, --failback: Failback mode.\n");
+		cprintf("{green}  -T, --try-mirrors <mirror>: Try mirrors.\n");
 		cprintf("\n{green}Note: please remove `https://` prefix from mirror url.\n");
 		cprintf("{green}For example: `-m registry-1.docker.io`\n");
+		cprintf("{green}Youb can add your perfered mirrors for `-T` option to try them first, for example: `-T hub.xdark.top -T dockerpull.org`\n");
 	} else {
 		error("{red}Invalid subcommand!\n");
 	}
