@@ -211,6 +211,15 @@ void docker(int argc, char **_Nonnull argv)
 	if (architecture == NULL) {
 		architecture = docker_get_host_arch();
 	}
+	if (mirror == NULL) {
+		mirror = "registry-1.docker.io";
+	}
+	if (strcmp(mirror, "registry-1.docker.io") != 0) {
+		if (!quiet) {
+			warning("{yellow}You are using unofficial mirror:{cyan} %s\n", mirror);
+			warning("{yellow}You use it as your own risk.\n")
+		}
+	}
 	if (strcmp(argv[0], "search") == 0) {
 		if (image == NULL) {
 			error("{red}No image specified!\n");
