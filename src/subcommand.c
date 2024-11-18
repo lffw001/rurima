@@ -69,14 +69,14 @@ static void docker_pull_try_mirrors(const char *_Nonnull image, const char *_Non
 		if (failback) {
 			rexec_argv[12] = "-f";
 			rexec_argv[13] = NULL;
-			if (fork_rexec(12, rexec_argv) == 0) {
+			if (fork_rexec(13, rexec_argv) == 0) {
 				exit(0);
 			} else {
 				cprintf("{yellow}Mirror {cyan}%s {yellow}is not working!\n", try_mirrorlist[i]);
 			}
 		} else {
 			rexec_argv[12] = NULL;
-			if (fork_rexec(11, rexec_argv) == 0) {
+			if (fork_rexec(12, rexec_argv) == 0) {
 				exit(0);
 			} else {
 				cprintf("{yellow}Mirror {cyan}%s {yellow}is not working!\n", try_mirrorlist[i]);
@@ -101,7 +101,7 @@ static void docker_pull_try_mirrors(const char *_Nonnull image, const char *_Non
 		if (failback) {
 			rexec_argv[12] = "-f";
 			rexec_argv[13] = NULL;
-			if (fork_rexec(12, rexec_argv) == 0) {
+			if (fork_rexec(13, rexec_argv) == 0) {
 				cprintf("\n{green}Success!\n");
 				exit(0);
 			} else {
@@ -109,7 +109,7 @@ static void docker_pull_try_mirrors(const char *_Nonnull image, const char *_Non
 			}
 		} else {
 			rexec_argv[12] = NULL;
-			if (fork_rexec(11, rexec_argv) == 0) {
+			if (fork_rexec(12, rexec_argv) == 0) {
 				cprintf("\n{green}Success!\n");
 				exit(0);
 			} else {
