@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 /*
  *
- * This file is part of libjsonv, with ABSOLUTELY NO WARRANTY.
+ * This file is part of rurima, with ABSOLUTELY NO WARRANTY.
  *
  * MIT License
  *
