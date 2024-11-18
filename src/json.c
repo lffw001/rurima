@@ -500,6 +500,11 @@ char *json_get_key(const char *_Nonnull buf, const char *_Nonnull key)
 			for (size_t j = i + 1; j < strlen(key); j++) {
 				if (key[j] == ']') {
 					ret = json_get_key_one_level(tmp, keybuf);
+					if (ret == NULL) {
+						free(keybuf);
+						free(tmp);
+						return NULL;
+					}
 					free(tmp);
 					tmp = ret;
 					break;
@@ -511,6 +516,9 @@ char *json_get_key(const char *_Nonnull buf, const char *_Nonnull key)
 	}
 	free(keybuf);
 	tmp = ret;
+	if (tmp == NULL) {
+		return NULL;
+	}
 	ret = correct_backslash(tmp);
 	free(tmp);
 	return ret;
