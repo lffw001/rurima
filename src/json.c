@@ -494,7 +494,7 @@ char *json_get_key(const char *_Nonnull buf, const char *_Nonnull key)
 	}
 	char *keybuf = malloc(strlen(key));
 	char *tmp = format_json(buf);
-	char *ret;
+	char *ret = NULL;
 	for (size_t i = 0; i < strlen(key); i++) {
 		if (key[i] == '[') {
 			for (size_t j = i + 1; j < strlen(key); j++) {
@@ -641,7 +641,7 @@ char *json_open_file(const char *_Nonnull path)
 	if (fd == -1) {
 		return NULL;
 	}
-	read(fd, ret, (size_t)st.st_size);
-	ret[st.st_size] = '\0';
+	ssize_t size = read(fd, ret, (size_t)st.st_size);
+	ret[size] = '\0';
 	return ret;
 }
