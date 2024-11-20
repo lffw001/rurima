@@ -27,6 +27,7 @@
  *
  *
  */
+#pragma once
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -48,7 +49,7 @@
 #define _Nonnull
 #endif
 // Version info.
-#define LIBK2V_MAJOR 1
+#define LIBK2V_MAJOR 2
 #define LIBK2V_MINOR 1
 // Warning.
 extern bool k2v_stop_at_warning;
