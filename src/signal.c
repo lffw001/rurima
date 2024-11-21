@@ -67,7 +67,7 @@ static void panic(int sig)
 	cfprintf(stderr, "\033[4m{base}%s{clear}\n\n", "https://github.com/Moe-hacker/rurima/issues");
 }
 // Catch coredump signal.
-void register_signal(void)
+void rurima_register_signal(void)
 {
 	/*
 	 * Only SIGSEGV means segmentation fault,

@@ -110,6 +110,8 @@ default_cflag() {
     fi
     test_and_add_cflag "-U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=3"
     test_and_add_ldflag "-lcap"
+    test_and_add_ldflag "-lpthread"
+    test_and_add_ldflag "-lseccomp"
 }
 dev_cflag() {
     test_and_add_cflag "-g"
@@ -137,6 +139,8 @@ dev_cflag() {
         test_and_add_cflag "-static"
     fi
     test_and_add_ldflag "-lcap"
+    test_and_add_ldflag "-lpthread"
+    test_and_add_ldflag "-lseccomp"
     export STRIP=true
 }
 check_headers_and_libs() {

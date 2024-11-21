@@ -8,6 +8,7 @@ apt install -y wget make clang git libseccomp-dev libcap-dev libc-dev binutils
 apt install -y upx
 git clone https://github.com/moe-hacker/rurima
 cd rurima
+git submodule update --init
 ./configure -s -D
 make
 mv rurima rurima-dbg

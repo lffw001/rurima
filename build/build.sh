@@ -7,6 +7,7 @@ mkdir output
 
 git clone https://github.com/moe-hacker/rurima
 cd rurima
+git submodule update --init
 ./configure -s
 make
 strip rurima

@@ -35,6 +35,7 @@ static void show_help(void)
 	cprintf("{green}  docker: DockerHub support.\n");
 	cprintf("{green}  lxc: LXC mirror support.\n");
 	cprintf("{green}  unpack: Unpack rootfs.\n");
+	cprintf("{green}  ruri: Built-in ruri command.\n");
 	cprintf("{green}  help: Show help message.\n");
 	cprintf("{green}Options:\n");
 	cprintf("{green}  -h, --help: Show help message.\n");
@@ -47,26 +48,26 @@ int main(int argc, char **argv)
 #ifdef RURIMA_DEV
 	warning("{red}You are using dev/debug build, if you think this is wrong, please rebuild rurima or get it from release page.\n");
 #endif
-	register_signal();
+	rurima_register_signal();
 	check_dep();
 	if (argc == 1) {
 		show_help();
 		return 0;
 	}
 	for (int i = 1; i < argc; i++) {
-		if (strcmp(argv[i], "docker") == 0) {
+		if (strcmp(argv[i], "docker") == 0 || strcmp(argv[i], "d") == 0) {
 			if (i + 1 >= argc) {
 				error("{red}No subcommand specified!\n");
 			}
 			docker(argc - i - 1, &argv[i + 1]);
 			return 0;
-		} else if (strcmp(argv[i], "lxc") == 0) {
+		} else if (strcmp(argv[i], "lxc") == 0 || strcmp(argv[i], "l") == 0) {
 			if (i + 1 >= argc) {
 				error("{red}No subcommand specified!\n");
 			}
 			lxc(argc - i - 1, &argv[i + 1]);
 			return 0;
-		} else if (strcmp(argv[i], "unpack") == 0) {
+		} else if (strcmp(argv[i], "unpack") == 0 || strcmp(argv[i], "u") == 0) {
 			unpack(argc - i - 1, &argv[i + 1]);
 			return 0;
 		} else if (strcmp(argv[i], "help") == 0 || strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
@@ -77,6 +78,9 @@ int main(int argc, char **argv)
 			return 0;
 		} else if (strcmp(argv[i], "-V") == 0 || strcmp(argv[i], "--version-code") == 0) {
 			show_version_code();
+			return 0;
+		} else if (strcmp(argv[i], "ruri") == 0 || strcmp(argv[i], "r") == 0) {
+			ruri(argc - i, &argv[i]);
 			return 0;
 		} else {
 			show_help();
