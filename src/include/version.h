@@ -30,3 +30,7 @@
  */
 // Version info.
 #define RURIMA_VERSION "0.1-unreleased"
+#include "../ruri/src/include/version.h"
+#define RURIMA_LXC_VERSION "1.0"
+#define RURIMA_DOCKER_VERSION "1.0"
+#define RURIMA_UNPACK_VERSION "1.0"
