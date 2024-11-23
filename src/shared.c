@@ -412,26 +412,3 @@ char *lxc_get_host_arch(void)
 	}
 	return ret;
 }
-int fork_rexec(int argc, char **_Nonnull argv)
-{
-	/*
-	 * Fork and execv self with argv.
-	 */
-	pid_t pid = fork();
-	if (pid == -1) {
-		error("{red}Fork failed!\n");
-	}
-	if (pid == 0) {
-		char **new_argv = malloc(sizeof(char *) * (argc + 2));
-		new_argv[0] = "/proc/self/exe";
-		for (int i = 0; i < argc; i++) {
-			new_argv[i + 1] = argv[i];
-			new_argv[i + 2] = NULL;
-		}
-		execv(new_argv[0], new_argv);
-		error("{red}Execv() failed!\n");
-	}
-	int status;
-	waitpid(pid, &status, 0);
-	return status;
-}
