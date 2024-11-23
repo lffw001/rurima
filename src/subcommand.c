@@ -239,7 +239,7 @@ void docker(int argc, char **_Nonnull argv)
 		docker_search_tag(image, page_size, architecture, quiet);
 	} else if (strcmp(argv[0], "pull") == 0) {
 		if (tag == NULL) {
-			error("{red}No tag specified!\n");
+			tag = "latest";
 		}
 		if (savedir == NULL) {
 			error("{red}No save directory specified!\n");
@@ -271,7 +271,7 @@ void docker(int argc, char **_Nonnull argv)
 		free_docker_config(config);
 	} else if (strcmp(argv[0], "config") == 0) {
 		if (tag == NULL) {
-			error("{red}No tag specified!\n");
+			tag = "latest";
 		}
 		if (image == NULL) {
 			error("{red}No image specified!\n");
