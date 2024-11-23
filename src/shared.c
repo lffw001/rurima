@@ -47,7 +47,7 @@ char *strstr_ignore_case(const char *_Nonnull haystack, const char *_Nonnull nee
 		free(needle_lower);
 		return NULL;
 	} else {
-		ret = strstr(haystack_lower, needle_lower) - haystack_lower + haystack;
+		ret = (char *)((strstr(haystack_lower, needle_lower) - haystack_lower) + haystack);
 	}
 	free(haystack_lower);
 	free(needle_lower);

@@ -57,15 +57,15 @@ static void docker_pull_try_mirrors(const char *_Nonnull image, const char *_Non
 		rexec_argv[0] = "docker";
 		rexec_argv[1] = "pull";
 		rexec_argv[2] = "-i";
-		rexec_argv[3] = image;
+		rexec_argv[3] = (char *)image;
 		rexec_argv[4] = "-t";
-		rexec_argv[5] = tag;
+		rexec_argv[5] = (char *)tag;
 		rexec_argv[6] = "-a";
-		rexec_argv[7] = architecture;
+		rexec_argv[7] = (char *)architecture;
 		rexec_argv[8] = "-s";
-		rexec_argv[9] = savedir;
+		rexec_argv[9] = (char *)savedir;
 		rexec_argv[10] = "-m";
-		rexec_argv[11] = try_mirrorlist[i];
+		rexec_argv[11] = (char *)try_mirrorlist[i];
 		if (failback) {
 			rexec_argv[12] = "-f";
 			rexec_argv[13] = NULL;
@@ -89,15 +89,15 @@ static void docker_pull_try_mirrors(const char *_Nonnull image, const char *_Non
 		rexec_argv[0] = "docker";
 		rexec_argv[1] = "pull";
 		rexec_argv[2] = "-i";
-		rexec_argv[3] = image;
+		rexec_argv[3] = (char *)image;
 		rexec_argv[4] = "-t";
-		rexec_argv[5] = tag;
+		rexec_argv[5] = (char *)tag;
 		rexec_argv[6] = "-a";
-		rexec_argv[7] = architecture;
+		rexec_argv[7] = (char *)architecture;
 		rexec_argv[8] = "-s";
-		rexec_argv[9] = savedir;
+		rexec_argv[9] = (char *)savedir;
 		rexec_argv[10] = "-m";
-		rexec_argv[11] = mirrorlist_builtin[i];
+		rexec_argv[11] = (char *)mirrorlist_builtin[i];
 		if (failback) {
 			rexec_argv[12] = "-f";
 			rexec_argv[13] = NULL;
