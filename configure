@@ -132,8 +132,10 @@ dev_cflag() {
     test_and_add_cflag "-fdata-sections"
     test_and_add_cflag "-Wl,--gc-sections"
     if [ $DEBUG_BUILD ]; then
+        test_and_add_cflag "-DRURI_DEBUG"
         test_and_add_cflag "-DRURIMA_DEBUG"
     fi
+    test_and_add_cflag "-DRURI_DEV"
     test_and_add_cflag "-DRURIMA_DEV"
     if [ $STATIC_COMPILE ]; then
         test_and_add_cflag "-static"

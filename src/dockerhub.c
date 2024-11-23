@@ -114,7 +114,7 @@ static void print_ruri_command(struct DOCKER *_Nonnull config, char *_Nullable s
 	/*
 	 * Print command to use ruri as runtime.
 	 */
-	printf("ruri ");
+	printf("rurima r ");
 	printf("-w ");
 	if (config->workdir != NULL) {
 		printf("-W %s ", config->workdir);
