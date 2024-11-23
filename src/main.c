@@ -43,8 +43,31 @@ static void show_help(void)
 	cprintf("{green}  -V, --version-code: Show version code.\n");
 	cprintf("{green}See rurima [subcommand] help for further information.\n");
 }
+static void detect_suid_or_capability(void)
+{
+	struct stat st;
+	if (stat("/proc/self/exe", &st) == 0) {
+		if (((st.st_mode & S_ISUID) || (st.st_mode & S_ISGID)) && (geteuid() == 0 || getegid() == 0)) {
+			error("{red}SUID or SGID bit detected on rurima, this is unsafe desu QwQ\n");
+		}
+	}
+	cap_t caps = cap_get_file("/proc/self/exe");
+	if (caps == NULL) {
+		return;
+	}
+	char *caps_str = cap_to_text(caps, NULL);
+	if (caps_str == NULL) {
+		return;
+	}
+	if (strlen(caps_str) > 0) {
+		error("{red}Capabilities detected on rurima, this is unsafe desu QwQ\n");
+	}
+	cap_free(caps);
+	cap_free(caps_str);
+}
 int main(int argc, char **argv)
 {
+	detect_suid_or_capability();
 #ifdef RURIMA_DEV
 	warning("{red}You are using dev/debug build, if you think this is wrong, please rebuild rurima or get it from release page.\n");
 #endif
