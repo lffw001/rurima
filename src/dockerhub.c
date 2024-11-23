@@ -315,7 +315,7 @@ static char *get_auth_server_url(const char *_Nullable mirror, bool failback)
 	 *
 	 */
 	if (mirror == NULL) {
-		mirror = "registry-1.docker.io";
+		mirror = gloal_config.docker_mirror;
 	}
 	char url[4096] = { '\0' };
 	sprintf(url, "https://%s/v2/", mirror);
@@ -363,7 +363,7 @@ static char *get_token(const char *_Nonnull image, const char *_Nullable mirror,
 	 */
 	char url[4096] = { '\0' };
 	if (mirror == NULL) {
-		mirror = "registry-1.docker.io";
+		mirror = gloal_config.docker_mirror;
 	}
 	char *auth_server_url = get_auth_server_url(mirror, failback);
 	if (auth_server_url == NULL) {
@@ -411,7 +411,7 @@ static char *get_tag_manifests(const char *_Nonnull image, const char *_Nonnull 
 	 *
 	 */
 	if (mirror == NULL) {
-		mirror = "registry-1.docker.io";
+		mirror = gloal_config.docker_mirror;
 	}
 	char url[4096] = { '\0' };
 	sprintf(url, "https://%s/v2/%s/manifests/%s", mirror, image, tag);
@@ -461,7 +461,7 @@ static char **get_blobs(const char *_Nonnull image, const char *_Nonnull digest,
 	 */
 	char url[4096] = { '\0' };
 	if (mirror == NULL) {
-		mirror = "registry-1.docker.io";
+		mirror = gloal_config.docker_mirror;
 	}
 	sprintf(url, "https://%s/v2/%s/manifests/%s", mirror, image, digest);
 	log("{base}url: {cyan}%s{clear}\n", url);
@@ -521,7 +521,7 @@ static void pull_images(const char *_Nonnull image, char *const *_Nonnull blobs,
 	}
 	chdir(savedir);
 	if (mirror == NULL) {
-		mirror = "registry-1.docker.io";
+		mirror = gloal_config.docker_mirror;
 	}
 	for (int i = 0;; i++) {
 		if (blobs[i] == NULL) {
@@ -564,7 +564,7 @@ static char *get_config_digest_failback(const char *_Nonnull image, const char *
 	 *
 	 */
 	if (mirror == NULL) {
-		mirror = "registry-1.docker.io";
+		mirror = gloal_config.docker_mirror;
 	}
 	char *manifests = get_tag_manifests(image, tag, token, mirror);
 	char *ret = json_get_key(manifests, "[config][digest]");
@@ -583,7 +583,7 @@ static char *get_config_digest(const char *_Nonnull image, const char *_Nonnull 
 	 *
 	 */
 	if (mirror == NULL) {
-		mirror = "registry-1.docker.io";
+		mirror = gloal_config.docker_mirror;
 	}
 	if (digest == NULL) {
 		if (!failback) {
@@ -693,7 +693,7 @@ static struct DOCKER *get_image_config(const char *_Nonnull image, const char *_
 	 */
 	struct DOCKER *ret = malloc(sizeof(struct DOCKER));
 	if (mirror == NULL) {
-		mirror = "registry-1.docker.io";
+		mirror = gloal_config.docker_mirror;
 	}
 	char url[4096] = { '\0' };
 	sprintf(url, "https://%s/v2/%s/blobs/%s", mirror, image, config);
@@ -813,7 +813,7 @@ struct DOCKER *docker_pull_failback(const char *_Nonnull image, const char *_Non
 	 *
 	 */
 	if (mirror == NULL) {
-		mirror = "registry-1.docker.io";
+		mirror = gloal_config.docker_mirror;
 	}
 	char *token = get_token(image, mirror, true);
 	char *manifests = get_tag_manifests(image, tag, token, mirror);
@@ -849,7 +849,7 @@ struct DOCKER *docker_pull(const char *_Nonnull image, const char *_Nonnull tag,
 	 *
 	 */
 	if (mirror == NULL) {
-		mirror = "registry-1.docker.io";
+		mirror = gloal_config.docker_mirror;
 	}
 	char *token = get_token(image, mirror, failback);
 	char *manifests = get_tag_manifests(image, tag, token, mirror);
@@ -1158,7 +1158,7 @@ int docker_search_arch(const char *_Nonnull image, const char *_Nonnull tag, cha
 	 *
 	 */
 	if (mirror == NULL) {
-		mirror = "registry-1.docker.io";
+		mirror = gloal_config.docker_mirror;
 	}
 	char *token = get_token(image, mirror, failback);
 	char *manifests = get_tag_manifests(image, tag, token, mirror);

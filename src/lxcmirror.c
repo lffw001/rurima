@@ -112,7 +112,7 @@ static char *get_lxc_index(const char *_Nullable mirror)
 	 */
 	char url[4096];
 	if (mirror == NULL) {
-		sprintf(url, "https://images.linuxcontainers.org/meta/1.0/index-system");
+		sprintf(url, "https://%s/meta/1.0/index-system", gloal_config.lxc_mirror);
 	} else {
 		sprintf(url, "https://%s/meta/1.0/index-system", mirror);
 	}
@@ -174,7 +174,7 @@ void lxc_get_image_list(const char *_Nullable mirror, const char *_Nullable arch
 		architecture = lxc_get_host_arch();
 	}
 	if (mirror == NULL) {
-		mirror = "images.linuxcontainers.org";
+		mirror = gloal_config.lxc_mirror;
 	}
 	char *buf = get_lxc_index(mirror);
 	const char *p = buf;
@@ -222,7 +222,7 @@ void lxc_search_image(const char *_Nullable mirror, const char *_Nonnull os, con
 		architecture = lxc_get_host_arch();
 	}
 	if (mirror == NULL) {
-		mirror = "images.linuxcontainers.org";
+		mirror = gloal_config.lxc_mirror;
 	}
 	char *buf = get_lxc_index(mirror);
 	const char *p = buf;
@@ -276,7 +276,7 @@ void lxc_pull_image(const char *_Nullable mirror, const char *_Nonnull os, const
 	}
 	chdir(savedir);
 	if (mirror == NULL) {
-		mirror = "images.linuxcontainers.org";
+		mirror = gloal_config.lxc_mirror;
 	}
 	char *url = malloc(strlen(mirror) + strlen(dir) + 114);
 	sprintf(url, "https://%s/%srootfs.tar.xz", mirror, dir);
@@ -295,7 +295,7 @@ void lxc_search_arch(const char *_Nullable mirror, const char *_Nonnull os)
 	 * and show them.
 	 */
 	if (mirror == NULL) {
-		mirror = "images.linuxcontainers.org";
+		mirror = gloal_config.lxc_mirror;
 	}
 	char *buf = get_lxc_index(mirror);
 	const char *p = buf;

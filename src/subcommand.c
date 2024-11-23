@@ -83,7 +83,7 @@ static void docker_pull_try_mirrors(const char *_Nonnull image, const char *_Non
 			}
 		}
 	}
-	char *mirrorlist_builtin[] = { "hub.xdark.top", "dockerpull.org", "hub.crdz.gq", "docker.1panel.live", "docker.unsee.tech", "docker.m.daocloud.io", "docker.kejinlion.pro", "registry.dockermirror.com", "hub.rat.dev", "dhub.kubesre.xyz", "docker.nastool.de", "docker.udayun.com", "docker.rainbond.cc", "hub.geekery.cn", "registry-1.docker.io", "docker.io", "registry.hub.docker.com", NULL };
+	char *mirrorlist_builtin[] = { gloal_config.docker_mirror, "hub.xdark.top", "dockerpull.org", "hub.crdz.gq", "docker.1panel.live", "docker.unsee.tech", "docker.m.daocloud.io", "docker.kejinlion.pro", "registry.dockermirror.com", "hub.rat.dev", "dhub.kubesre.xyz", "docker.nastool.de", "docker.udayun.com", "docker.rainbond.cc", "hub.geekery.cn", "registry.hub.docker.com", NULL };
 	for (int i = 0; mirrorlist_builtin[i] != NULL; i++) {
 		cprintf("{base}Trying mirror: {cyan}%s\n", mirrorlist_builtin[i]);
 		rexec_argv[0] = "docker";
@@ -212,7 +212,7 @@ void docker(int argc, char **_Nonnull argv)
 		architecture = docker_get_host_arch();
 	}
 	if (mirror == NULL) {
-		mirror = "registry-1.docker.io";
+		mirror = gloal_config.docker_mirror;
 	}
 	if (strcmp(mirror, "registry-1.docker.io") != 0) {
 		if (!quiet) {

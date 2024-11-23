@@ -69,7 +69,12 @@
 #include "cprintf.h"
 #include "jsonv.h"
 #include "../ruri/src/include/ruri.h"
-struct __attribute__((aligned(128))) RURIMA {
+struct RURIMA_CONFIG {
+	char *_Nonnull docker_mirror;
+	char *_Nonnull lxc_mirror;
+};
+extern struct RURIMA_CONFIG gloal_config;
+struct RURIMA {
 	/*
 	 * This is full rurima config.
 	 */
@@ -100,7 +105,7 @@ struct __attribute__((aligned(128))) RURIMA {
 	// Full ruri container config.
 	struct RURI_CONTAINER container;
 };
-struct __attribute__((aligned(128))) DOCKER {
+struct DOCKER {
 	/*
 	 * This is part of docker config that we need.
 	 */
