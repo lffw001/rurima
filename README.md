@@ -4,6 +4,7 @@ With the `docker` and `lxc` subcommand of rurima, you can search & get & unpack 
 rurima is designed to be the ruri container manager, but since the dockerhub and lxc support is done, I made them to be subcommands of rurima, so you can use these feature directly.      
 # Powered by ruri
 Rurima has a full integration of ruri now, you can just use it as a more powerful version of ruri.      
+You can use ruri as a subcommand of rurima now, for more info about ruri, see [ruri](https://github.com/Moe-hacker/ruri)      
 # Note & WIP:
 This project does not follow OCI and can only be a `PARTIAL` replacement of docker, this project is still under development.           
 # About suid or caps:
