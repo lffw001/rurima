@@ -68,57 +68,7 @@
 #include "k2v.h"
 #include "cprintf.h"
 #include "jsonv.h"
-// Ruri container config.
-#define INIT_VALUE (-114)
-#define MAX_COMMANDS (1024)
-#define MAX_ENVS (512 * 2)
-#define MAX_MOUNTPOINTS (512 * 2)
-struct __attribute__((aligned(128))) RURI_CONTAINER {
-	/*
-	 * This is a subset of CONTAINER struct in ruri.
-	 * It defines all configs for running ruri container.
-	 */
-	// Container directory.
-	char *container_dir;
-	// Capabilities to drop.
-	cap_value_t drop_caplist[CAP_LAST_CAP + 1];
-	// Command for exec(2).
-	char *command[MAX_COMMANDS + 1];
-	// Extra mountpoints.
-	char *extra_mountpoint[MAX_MOUNTPOINTS + 2];
-	// Extra read-only mountpoints.
-	char *extra_ro_mountpoint[MAX_MOUNTPOINTS + 2];
-	// Environment variables.
-	char *env[MAX_ENVS];
-	// Set NO_NEW_PRIV bit.
-	bool no_new_privs;
-	// Enable built-in seccomp profile.
-	bool enable_seccomp;
-	// Do not show warnings.
-	bool no_warnings;
-	// Unshare container.
-	bool enable_unshare;
-	// Useless rootless container support.
-	bool rootless;
-	// Mount host runtime.
-	bool mount_host_runtime;
-	// Arch of multi-architecture container.
-	char *cross_arch;
-	// Path of QEMU binary.
-	char *qemu_path;
-	// Do not store .rurienv file.
-	bool use_rurienv;
-	// Mount / as read-only.
-	bool ro_root;
-	// Cpuset.
-	char *cpuset;
-	// Memory.
-	char *memory;
-	// Just chroot.
-	bool just_chroot;
-	// Workdir.
-	char *workdir;
-};
+#include "../ruri/src/include/ruri.h"
 struct __attribute__((aligned(128))) RURIMA {
 	/*
 	 * This is full rurima config.
