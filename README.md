@@ -6,6 +6,9 @@ rurima is designed to be the ruri container manager, but since the dockerhub and
 I made ruri built-in into rurima, so `rurima r` have the same effect with ruri now.      
 # Note & WIP:
 This project does not follow OCI and can only be a `PARTIAL` replacement of docker, this project is still under development.           
+# About suid or caps:
+Rurima does not allow to set any suid/sgid (with root) or capability on it, it will check it in main() and error() if detected these unsafe settings.      
+So, please always use sudo instead.     
 # Reporting bugs:
 Please use the debug version(rurima-dbg) in release to get debug logs, and please tell me the command you run to cause the unexpected behavior you think!                     
 # Update for docker subcommand:
