@@ -410,3 +410,22 @@ char *lxc_get_host_arch(void)
 	}
 	return ret;
 }
+bool rootless_supported(void)
+{
+	pid_t pid = fork();
+	if (pid == 0) {
+		if (getuid() == 0) {
+			setuid(1145);
+		}
+		if (unshare(CLONE_NEWUSER) == -1) {
+			exit(114);
+		}
+		exit(0);
+	}
+	int status;
+	waitpid(pid, &status, 0);
+	if (WEXITSTATUS(status) == 0) {
+		return true;
+	}
+	return false;
+}

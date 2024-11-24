@@ -195,3 +195,4 @@ void *default_hook(const char *_Nonnull container_dir);
 void list_template(void);
 void template(const char *_Nonnull name, const char *_Nonnull dir, int argc, char **argv);
 void read_global_config(void);
+bool rootless_supported(void);
