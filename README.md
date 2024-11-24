@@ -2,6 +2,44 @@
 # About:
 With the `docker` and `lxc` subcommand of rurima, you can search & get & unpack images from dockerhub or LXC mirror easily.      
 rurima is designed to be the ruri container manager, but since the dockerhub and lxc support is done, I made them to be subcommands of rurima, so you can use these feature directly.      
+# Example usage of docker subcommand:
+Get whyour/qinglong docker image.      
+```sh
+rurima docker pull -i whyour/qinglong -s ./test
+```
+Get ubuntu docker image.      
+```sh
+rurima docker pull -i ubuntu -s ./test
+```
+Search for image `ubuntu`:      
+```sh
+rurima docker search -i ubuntu
+```
+Search tag for ubuntu:      
+```sh
+rurima docker tag -i ubuntu
+```
+Use docker mirror `dockerpull.org`
+```sh
+rurima docker pull -m dockerpull.org -i ubuntu -s ./test
+```
+Try every mirrorlist:      
+```sh
+rurima docker pull -T -i ubuntu -s ./test
+```
+Try failback mode:      
+```sh
+rurima docker pull -T -f -i ubuntu -s ./test
+```
+# Example usage of lxc subcommand:
+Pull alpine edge.      
+```sh
+rurima lxc pull -o alpine -v edge -s ./test
+```
+Use mirrors.bfsu.edu.cn/lxc-images as mirror:   
+```sh
+rurima lxc pull -m mirrors.bfsu.edu.cn/lxc-images -o alpine -v edge -s ./test
+```
 # Powered by ruri
 Rurima has a full integration of ruri now, you can just use it as a more powerful version of ruri.      
 You can use ruri as a subcommand of rurima now, for more info about ruri, see [ruri](https://github.com/Moe-hacker/ruri)      
