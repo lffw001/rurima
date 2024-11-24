@@ -49,6 +49,9 @@ void *default_hook(const char *_Nonnull container_dir)
 			char *argv[] = { "ruri", "-j", container_dir, "sh", "/tmp/hook.sh", NULL };
 			fork_rexec(5, argv);
 		} else {
+			if (!rootless_supported()) {
+				error("{red}Rootless mode is not supported on your system!\n");
+			}
 			char *argv[] = { "ruri", "-j", "-r", container_dir, "sh", "/tmp/hook.sh", NULL };
 			fork_rexec(6, argv);
 		}
@@ -66,6 +69,9 @@ void *default_hook(const char *_Nonnull container_dir)
 			char *argv[] = { "ruri", "-j", container_dir, "sh", "/tmp/hook.sh", NULL };
 			fork_rexec(5, argv);
 		} else {
+			if (!rootless_supported()) {
+				error("{red}Rootless mode is not supported on your system!\n");
+			}
 			char *argv[] = { "ruri", "-j", "-r", container_dir, "sh", "/tmp/hook.sh", NULL };
 			fork_rexec(6, argv);
 		}
