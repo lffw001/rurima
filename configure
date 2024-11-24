@@ -179,8 +179,11 @@ else
     dev_cflag
 fi
 printf "create config.mk... "
+SRC_ROOT=$(pwd)
 if command -v git >/dev/null; then
     CFLAGS="$CFLAGS -DRURIMA_COMMIT_ID=\\\"$(git rev-parse --short HEAD)\\\""
+    CFLAGS="$CFLAGS -DRURI_COMMIT_ID=\\\"$(cd src/ruri&&git rev-parse --short HEAD)\\\""
+    cd ${SRC_ROOT}
 fi
 echo "CFLAGS = $CFLAGS" >config.mk
 echo "LD_FLAGS = $LD_FLAGS" >>config.mk

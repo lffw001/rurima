@@ -45,12 +45,15 @@ void show_version_info(void)
 	cprintf("{base}          <https://mit-license.org>\n");
 	cprintf("{base}        Copyright (C) 2024 Moe-hacker\n\n");
 	cprintf("{base}%s%s%s", "rurima version ..................:  ", RURIMA_VERSION, "\n");
+#if defined(RURIMA_COMMIT_ID)
+	cprintf("{base}%s%s%s", "rurima commit id ................:  ", RURIMA_COMMIT_ID, "\n");
+#endif
 	cprintf("{base}%s%s%s", "rurima lxc-subcommand version ...:  ", RURIMA_LXC_VERSION, "\n");
 	cprintf("{base}%s%s%s", "rurima docker-subcommand version :  ", RURIMA_DOCKER_VERSION, "\n");
 	cprintf("{base}%s%s%s", "rurima unpack-subcommand version :  ", RURIMA_UNPACK_VERSION, "\n");
 	cprintf("{base}%s%s%s", "built-in ruri version ...........:  ", RURI_VERSION, "\n");
-#if defined(RURIMA_COMMIT_ID)
-	cprintf("{base}%s%s%s", "rurima commit id ................:  ", RURIMA_COMMIT_ID, "\n");
+#if defined(RURI_COMMIT_ID)
+	cprintf("{base}%s%s%s", "built-in ruri commit id .........:  ", RURI_COMMIT_ID, "\n");
 #endif
 #if defined(LIBCAP_MAJOR) && defined(LIBCAP_MINOR)
 	cprintf("{base}%s%d%s%d%s", "libcap ..........................:  ", LIBCAP_MAJOR, ".", LIBCAP_MINOR, "\n");
@@ -61,7 +64,7 @@ void show_version_info(void)
 	cprintf("{base}%s%s\n", "Compiler version ................:  ", __VERSION__);
 	cprintf("{base}%s%s\n", "Build date ......................:  ", __TIMESTAMP__);
 	cprintf("{base}\nThere is NO WARRANTY, to the extent permitted by law\n");
-	cprintf("{base}Docker is a registered trademark of Docker, Inc.\nThis program has no relationship with it.\n");
+	cprintf("{base}Docker is a registered trademark of Docker, Inc\nThis program has no relationship with it\n");
 	cprintf("{clear}\n");
 }
 // For `rurima -V`.

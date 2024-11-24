@@ -118,7 +118,15 @@ int main(int argc, char **argv)
 			return 0;
 		}
 		if (strcmp(argv[i], "ruri") == 0 || strcmp(argv[i], "r") == 0) {
-			ruri(argc - i, &argv[i]);
+			unsetenv("LD_PRELOAD");
+			pid_t pid = fork();
+			if (pid == 0) {
+				ruri(argc - i, &argv[i]);
+			} else {
+				int status;
+				waitpid(pid, &status, 0);
+				exit(WEXITSTATUS(status));
+			}
 			return 0;
 		}
 		show_help();
