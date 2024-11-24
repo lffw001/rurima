@@ -73,6 +73,7 @@ struct RURIMA_CONFIG {
 	char *_Nonnull docker_mirror;
 	char *_Nonnull lxc_mirror;
 	char *_Nullable hook_script;
+	bool quiet;
 };
 extern struct RURIMA_CONFIG gloal_config;
 struct RURIMA {

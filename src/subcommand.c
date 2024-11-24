@@ -196,6 +196,7 @@ void docker(int argc, char **_Nonnull argv)
 			i++;
 		} else if (strcmp(argv[i], "-q") == 0 || strcmp(argv[i], "--quiet") == 0) {
 			quiet = true;
+			gloal_config.quiet = true;
 		} else if (strcmp(argv[i], "-f") == 0 || strcmp(argv[i], "--failback") == 0) {
 			failback = true;
 		} else if (strcmp(argv[i], "-m") == 0 || strcmp(argv[i], "--mirror") == 0) {
@@ -375,6 +376,8 @@ void lxc(int argc, char **_Nonnull argv)
 			check_dir_deny_list(argv[i + 1]);
 			savedir = argv[i + 1];
 			i++;
+		} else if (strcmp(argv[i], "-q") == 0 || strcmp(argv[i], "--quiet") == 0) {
+			gloal_config.quiet = true;
 		} else {
 			error("{red}Unknown argument!\n");
 		}

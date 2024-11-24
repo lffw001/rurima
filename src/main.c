@@ -32,7 +32,8 @@
 struct RURIMA_CONFIG gloal_config = {
 	.docker_mirror = "registry-1.docker.io",
 	.lxc_mirror = "images.linuxcontainers.org",
-	.hook_script = NULL
+	.hook_script = NULL,
+	.quiet = false,
 };
 // clang-format on
 static void show_help(void)

@@ -925,18 +925,26 @@ static char *__docker_search(const char *_Nonnull url)
 	}
 	for (size_t i = 0; i < len; i++) {
 		if (strcmp(is_offical[i], "true") == 0) {
-			cprintf("{yellow}%s {green}[official]\n", name[i]);
-			if (description[i] != NULL) {
-				cprintf("  {cyan}Description: %s\n", description[i]);
+			if (!gloal_config.quiet) {
+				cprintf("{yellow}%s {green}[official]\n", name[i]);
+				if (description[i] != NULL) {
+					cprintf("  {cyan}Description: %s\n", description[i]);
+				} else {
+					cprintf("  {cyan}Description: No description\n");
+				}
 			} else {
-				cprintf("  {cyan}Description: No description\n");
+				printf("%s [official]\n", name[i]);
 			}
 		} else {
-			cprintf("{yellow}%s\n", name[i]);
-			if (description[i] != NULL) {
-				cprintf("  {cyan}Description: %s\n", description[i]);
+			if (!gloal_config.quiet) {
+				cprintf("{yellow}%s\n", name[i]);
+				if (description[i] != NULL) {
+					cprintf("  {cyan}Description: %s\n", description[i]);
+				} else {
+					cprintf("  {cyan}Description: No description\n");
+				}
 			} else {
-				cprintf("  {cyan}Description: No description\n");
+				printf("%s\n", name[i]);
 			}
 		}
 	}
@@ -1036,7 +1044,11 @@ static char *__docker_search_tag(const char *_Nonnull image, const char *_Nonnul
 		tmp = json_anon_layer_get_key(images[i], "[architecture]", architecture, "[digest]");
 		if (tmp != NULL) {
 			found = true;
-			cprintf("{yellow}[%s]: {cyan}%s{clear}\n", image, tags[i]);
+			if (!gloal_config.quiet) {
+				cprintf("{yellow}[%s]: {cyan}%s{clear}\n", image, tags[i]);
+			} else {
+				printf("[%s]: %s\n", image, tags[i]);
+			}
 			free(tmp);
 		}
 	}
@@ -1145,7 +1157,11 @@ static void docker_print_arch(const char *_Nonnull image, char *const *_Nonnull 
 		error("{red}No results found!\n");
 	}
 	for (int i = 0; archlist[i] != NULL; i++) {
-		cprintf("{yellow}[%s]: {cyan}%s{clear}\n", image, archlist[i]);
+		if (!gloal_config.quiet) {
+			cprintf("{yellow}[%s]: {cyan}%s{clear}\n", image, archlist[i]);
+		} else {
+			printf("[%s]: %s\n", image, archlist[i]);
+		}
 	}
 	for (int i = 0; archlist[i] != NULL; i++) {
 		free(archlist[i]);

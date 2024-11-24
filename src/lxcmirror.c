@@ -199,7 +199,11 @@ void lxc_get_image_list(const char *_Nullable mirror, const char *_Nullable arch
 			continue;
 		}
 		found = true;
-		cprintf("{yellow}%-13s {green}: {purple}%-10s {green}: {cyan}%-8s\n", os, version, type);
+		if (!gloal_config.quiet) {
+			cprintf("{yellow}%-13s {green}: {purple}%-10s {green}: {cyan}%-8s\n", os, version, type);
+		} else {
+			printf("%-13s : %-10s : %-8s\n", os, version, type);
+		}
 		free(os);
 		free(version);
 		free(arch);
@@ -247,7 +251,11 @@ void lxc_search_image(const char *_Nullable mirror, const char *_Nonnull os, con
 			continue;
 		}
 		found = true;
-		cprintf("{yellow}%-13s {green}: {purple}%-10s {green}: {cyan}%-8s\n", os, version, type);
+		if (!gloal_config.quiet) {
+			cprintf("{yellow}%-13s {green}: {purple}%-10s {green}: {cyan}%-8s\n", os, version, type);
+		} else {
+			printf("%-13s : %-10s : %-8s\n", os, version, type);
+		}
 		free(os_cur);
 		free(version);
 		free(arch);
@@ -320,7 +328,11 @@ void lxc_search_arch(const char *_Nullable mirror, const char *_Nonnull os)
 			continue;
 		}
 		found = true;
-		cprintf("{yellow}%-13s {green}: {purple}%-10s {green}: {cyan}%-8s\n", os, version, arch);
+		if (!gloal_config.quiet) {
+			cprintf("{yellow}%-13s {green}: {purple}%-10s {green}: {cyan}%-8s\n", os, version, arch);
+		} else {
+			printf("%-13s : %-10s : %-8s\n", os, version, arch);
+		}
 		free(os_cur);
 		free(version);
 		free(arch);
