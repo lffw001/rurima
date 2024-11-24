@@ -299,28 +299,28 @@ void docker(int argc, char **_Nonnull argv)
 		}
 		docker_search_arch(image, tag, mirror, failback);
 	} else if (strcmp(argv[0], "help") == 0 || strcmp(argv[0], "-h") == 0 || strcmp(argv[0], "--help") == 0) {
-		cprintf("{green}Usage: docker [subcommand] [options]\n");
-		cprintf("{green}Subcommands:\n");
-		cprintf("{green}  search: Search images from DockerHub.\n");
-		cprintf("{green}  tag:    Search tags from DockerHub.\n");
-		cprintf("{green}  pull:   Pull image from DockerHub.\n");
-		cprintf("{green}  config: Get config of image from DockerHub.\n");
-		cprintf("{green}  arch:   Search architecture of image from DockerHub.\n");
-		cprintf("{green}  help:   Show help message.\n");
-		cprintf("{green}Options:\n");
-		cprintf("{green}  -i, --image: Image name.\n");
-		cprintf("{green}  -t, --tag: Tag of image.\n");
-		cprintf("{green}  -a, --arch: Architecture of image.\n");
-		cprintf("{green}  -s, --savedir: Save directory of image.\n");
-		cprintf("{green}  -p, --page_size: Page size of search.\n");
-		cprintf("{green}  -m, --mirror: Mirror of DockerHub.\n");
-		cprintf("{green}  -r, --runtime: runtime of container, support [ruri/proot/chroot].\n");
-		cprintf("{green}  -q, --quiet: Quiet mode.\n");
-		cprintf("{green}  -f, --failback: Failback mode.\n");
-		cprintf("{green}  -T, --try-mirrors <mirror>: Try mirrors.\n");
-		cprintf("\n{green}Note: please remove `https://` prefix from mirror url.\n");
-		cprintf("{green}For example: `-m registry-1.docker.io`\n");
-		cprintf("{green}Youb can add your perfered mirrors for `-T` option to try them first, for example: `-T hub.xdark.top -T dockerpull.org`\n");
+		cprintf("{base}Usage: docker [subcommand] [options]\n");
+		cprintf("{base}Subcommands:\n");
+		cprintf("{base}  search: Search images from DockerHub.\n");
+		cprintf("{base}  tag:    Search tags from DockerHub.\n");
+		cprintf("{base}  pull:   Pull image from DockerHub.\n");
+		cprintf("{base}  config: Get config of image from DockerHub.\n");
+		cprintf("{base}  arch:   Search architecture of image from DockerHub.\n");
+		cprintf("{base}  help:   Show help message.\n");
+		cprintf("{base}Options:\n");
+		cprintf("{base}  -i, --image: Image name.\n");
+		cprintf("{base}  -t, --tag: Tag of image.\n");
+		cprintf("{base}  -a, --arch: Architecture of image.\n");
+		cprintf("{base}  -s, --savedir: Save directory of image.\n");
+		cprintf("{base}  -p, --page_size: Page size of search.\n");
+		cprintf("{base}  -m, --mirror: Mirror of DockerHub.\n");
+		cprintf("{base}  -r, --runtime: runtime of container, support [ruri/proot/chroot].\n");
+		cprintf("{base}  -q, --quiet: Quiet mode.\n");
+		cprintf("{base}  -f, --failback: Failback mode.\n");
+		cprintf("{base}  -T, --try-mirrors <mirror>: Try mirrors.\n");
+		cprintf("\n{base}Note: please remove `https://` prefix from mirror url.\n");
+		cprintf("{base}For example: `-m registry-1.docker.io`\n");
+		cprintf("{base}You can add your perfered mirrors for `-T` option to try them first, for example: `-T hub.xdark.top -T dockerpull.org`\n");
 	} else {
 		error("{red}Invalid subcommand!\n");
 	}
@@ -409,22 +409,22 @@ void lxc(int argc, char **_Nonnull argv)
 		}
 		lxc_search_arch(mirror, os);
 	} else if (strcmp(argv[0], "help") == 0 || strcmp(argv[0], "-h") == 0 || strcmp(argv[0], "--help") == 0) {
-		cprintf("{green}Usage: lxc [subcommand] [options]\n");
-		cprintf("{green}Subcommands:\n");
-		cprintf("{green}  pull: Pull image from LXC image server.\n");
-		cprintf("{green}  list: List images from LXC image server.\n");
-		cprintf("{green}  search: Search images from LXC image server.\n");
-		cprintf("{green}  arch: Search architecture of images from LXC image server.\n");
-		cprintf("{green}  help: Show help message.\n");
-		cprintf("{green}Options:\n");
-		cprintf("{green}  -m, --mirror: Mirror of LXC image server.\n");
-		cprintf("{green}  -o, --os: OS of image.\n");
-		cprintf("{green}  -v, --version: Version of image.\n");
-		cprintf("{green}  -a, --arch: Architecture of image.\n");
-		cprintf("{green}  -t, --type: Type of image.\n");
-		cprintf("{green}  -s, --savedir: Save directory of image.\n");
-		cprintf("\n{green}Note: please remove `https://` prefix from mirror url.\n");
-		cprintf("{green}For example: `-m images.linuxcontainers.org`\n");
+		cprintf("{base}Usage: lxc [subcommand] [options]\n");
+		cprintf("{base}Subcommands:\n");
+		cprintf("{base}  pull: Pull image from LXC image server.\n");
+		cprintf("{base}  list: List images from LXC image server.\n");
+		cprintf("{base}  search: Search images from LXC image server.\n");
+		cprintf("{base}  arch: Search architecture of images from LXC image server.\n");
+		cprintf("{base}  help: Show help message.\n");
+		cprintf("{base}Options:\n");
+		cprintf("{base}  -m, --mirror: Mirror of LXC image server.\n");
+		cprintf("{base}  -o, --os: OS of image.\n");
+		cprintf("{base}  -v, --version: Version of image.\n");
+		cprintf("{base}  -a, --arch: Architecture of image.\n");
+		cprintf("{base}  -t, --type: Type of image.\n");
+		cprintf("{base}  -s, --savedir: Save directory of image.\n");
+		cprintf("\n{base}Note: please remove `https://` prefix from mirror url.\n");
+		cprintf("{base}For example: `-m images.linuxcontainers.org`\n");
 	} else {
 		error("{red}Invalid subcommand!\n");
 	}
@@ -449,11 +449,11 @@ void unpack(int argc, char **_Nonnull argv)
 			check_dir_deny_list(argv[i + 1]);
 			dir = argv[i + 1];
 		} else if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
-			cprintf("{green}Usage: unpack [options]\n");
-			cprintf("{green}Options:\n");
-			cprintf("{green}  -f, --file: File to unpack.\n");
-			cprintf("{green}  -d, --dir: Directory to unpack.\n");
-			cprintf("{green}  -h, --help: Show help message.\n");
+			cprintf("{base}Usage: unpack [options]\n");
+			cprintf("{base}Options:\n");
+			cprintf("{base}  -f, --file: File to unpack.\n");
+			cprintf("{base}  -d, --dir: Directory to unpack.\n");
+			cprintf("{base}  -h, --help: Show help message.\n");
 			return;
 		} else {
 			error("{red}Unknown argument!\n");

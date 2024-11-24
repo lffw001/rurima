@@ -38,18 +38,18 @@ struct RURIMA_CONFIG gloal_config = {
 // clang-format on
 static void show_help(void)
 {
-	cprintf("{green}Usage: rurima [subcommand] [options]\n");
-	cprintf("{green}Subcommands:\n");
-	cprintf("{green}  docker: DockerHub support.\n");
-	cprintf("{green}  lxc: LXC mirror support.\n");
-	cprintf("{green}  unpack: Unpack rootfs.\n");
-	cprintf("{green}  ruri: Built-in ruri command.\n");
-	cprintf("{green}  help: Show help message.\n");
-	cprintf("{green}Options:\n");
-	cprintf("{green}  -h, --help: Show help message.\n");
-	cprintf("{green}  -v, --version: Show version info.\n");
-	cprintf("{green}  -V, --version-code: Show version code.\n");
-	cprintf("{green}See rurima [subcommand] help for further information.\n");
+	cprintf("{base}Usage: rurima [subcommand] [options]\n");
+	cprintf("{base}Subcommands:\n");
+	cprintf("{base}  docker: DockerHub support.\n");
+	cprintf("{base}  lxc: LXC mirror support.\n");
+	cprintf("{base}  unpack: Unpack rootfs.\n");
+	cprintf("{base}  ruri: Built-in ruri command.\n");
+	cprintf("{base}  help: Show help message.\n");
+	cprintf("{base}Options:\n");
+	cprintf("{base}  -h, --help: Show help message.\n");
+	cprintf("{base}  -v, --version: Show version info.\n");
+	cprintf("{base}  -V, --version-code: Show version code.\n");
+	cprintf("{base}See rurima [subcommand] help for further information.\n");
 }
 static void detect_suid_or_capability(void)
 {

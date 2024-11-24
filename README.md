@@ -1,7 +1,14 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14099730.svg)](https://doi.org/10.5281/zenodo.14099730)
+# WARNING:      
+```
+* Your warranty is void.
+* I am not responsible for anything that may happen to your device by using this program.
+* You do it at your own risk and take the responsibility upon yourself.
+* Docker is a registered trademark of Docker, Inc. This program has no relationship with it.
+* This program has no Super Cow Powers.
+```
 # About:
-With the `docker` and `lxc` subcommand of rurima, you can search & get & unpack images from dockerhub or LXC mirror easily.      
-Since the dockerhub and lxc support is done, I made them to be subcommands of rurima, so you can use these feature directly.      
+With the `docker` and `lxc` subcommand of rurima, you can search & get & unpack images from dockerhub or LXC mirror easily.       
 # Not Only Ruri Container Manager:
 Rurima was planned to be the ruri container manager, but as rurima has a full integration of ruri now, you can just use it as a more powerful version of ruri, although the container manager function is still WIP.               
 For more info about ruri, see [ruri](https://github.com/Moe-hacker/ruri)      
@@ -50,19 +57,6 @@ Rurima does not allow to set any suid/sgid (with root) or capability on it, it w
 So, please always use sudo instead.     
 # Reporting bugs:
 Please use the debug version(rurima-dbg) in release to get debug logs, and please tell me the command you run to cause the unexpected behavior you think!                     
-# Update for docker subcommand:
-`docker` subcommand now supports auto convert docker config to ruri command, to make it more esay to start the container.        
-But if you just want to pull the image but don't want to see the config, use `-q` arg to  disable showing that info.      
-`docker` subcommand added `config` command to just get the config of a docker image, you can use `rurima docker config -q -i [image] -t [tag]` to get ruri command to start the container.      
-# Using 
-# WARNING:      
-```
-* Your warranty is void.
-* I am not responsible for anything that may happen to your device by using this program.
-* You do it at your own risk and take the responsibility upon yourself.
-* Docker is a registered trademark of Docker, Inc. This program has no relationship with it.
-* This program has no Super Cow Powers.
-```
 # NOTICE:
 This program is not official tool of docker or dockerhub, you can report bugs here, but this program has no relation with docker.      
 Docker is a registered trademark of Docker, Inc.      
@@ -88,6 +82,7 @@ Subcommands:
   docker: DockerHub support.
   lxc: LXC mirror support.
   unpack: Unpack rootfs.
+  ruri: Built-in ruri command.
   help: Show help message.
 Options:
   -h, --help: Show help message.
