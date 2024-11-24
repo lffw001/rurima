@@ -45,7 +45,7 @@ void *default_hook(const char *_Nonnull container_dir)
 		int fd = open(hook_script_path, O_CREAT | O_WRONLY, 0777);
 		write(fd, hook_script, strlen(hook_script));
 		close(fd);
-		if (geteuid == 0) {
+		if (run_with_root()) {
 			char *argv[] = { "ruri", "-j", container_dir, "sh", "/tmp/hook.sh", NULL };
 			fork_rexec(5, argv);
 		} else {
@@ -62,7 +62,7 @@ void *default_hook(const char *_Nonnull container_dir)
 		sendfile(fd, fd2, NULL, get_file_size(gloal_config.hook_script));
 		close(fd);
 		close(fd2);
-		if (geteuid == 0) {
+		if (run_with_root()) {
 			char *argv[] = { "ruri", "-j", container_dir, "sh", "/tmp/hook.sh", NULL };
 			fork_rexec(5, argv);
 		} else {
