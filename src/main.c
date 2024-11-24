@@ -28,7 +28,13 @@
  *
  */
 #include "include/rurima.h"
-struct RURIMA_CONFIG gloal_config = { .docker_mirror = "registry-1.docker.io", .lxc_mirror = "images.linuxcontainers.org" };
+// clang-format off
+struct RURIMA_CONFIG gloal_config = {
+	.docker_mirror = "registry-1.docker.io",
+	.lxc_mirror = "images.linuxcontainers.org",
+	.hook_script = NULL
+};
+// clang-format on
 static void show_help(void)
 {
 	cprintf("{green}Usage: rurima [subcommand] [options]\n");

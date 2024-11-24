@@ -72,6 +72,7 @@
 struct RURIMA_CONFIG {
 	char *_Nonnull docker_mirror;
 	char *_Nonnull lxc_mirror;
+	char *_Nullable hook_script;
 };
 extern struct RURIMA_CONFIG gloal_config;
 struct RURIMA {
@@ -189,4 +190,4 @@ void show_version_code(void);
 void check_dir_deny_list(const char *_Nonnull dir);
 char *strstr_ignore_case(const char *_Nonnull haystack, const char *_Nonnull needle);
 int fork_rexec(int argc, char **_Nonnull argv);
-int ruri(int argc, char **_Nonnull argv);
+void *default_hook(const char *_Nonnull container_dir);
