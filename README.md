@@ -1,7 +1,10 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14099730.svg)](https://doi.org/10.5281/zenodo.14099730)
 # About:
 With the `docker` and `lxc` subcommand of rurima, you can search & get & unpack images from dockerhub or LXC mirror easily.      
-rurima is designed to be the ruri container manager, but since the dockerhub and lxc support is done, I made them to be subcommands of rurima, so you can use these feature directly.      
+Since the dockerhub and lxc support is done, I made them to be subcommands of rurima, so you can use these feature directly.      
+# Not Only Ruri Container Manager:
+Rurima was planned to be the ruri container manager, but as rurima has a full integration of ruri now, you can just use it as a more powerful version of ruri, although the container manager function is still WIP.               
+For more info about ruri, see [ruri](https://github.com/Moe-hacker/ruri)      
 # Example usage of docker subcommand:
 Get whyour/qinglong docker image.      
 ```sh
@@ -40,9 +43,6 @@ Use mirrors.bfsu.edu.cn/lxc-images as mirror:
 ```sh
 rurima lxc pull -m mirrors.bfsu.edu.cn/lxc-images -o alpine -v edge -s ./test
 ```
-# Powered by ruri
-Rurima has a full integration of ruri now, you can just use it as a more powerful version of ruri.      
-You can use ruri as a subcommand of rurima now, for more info about ruri, see [ruri](https://github.com/Moe-hacker/ruri)      
 # Note & WIP:
 This project does not follow OCI and can only be a `PARTIAL` replacement of docker, this project is still under development.           
 # About suid or caps:
