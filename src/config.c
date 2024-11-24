@@ -46,25 +46,7 @@ struct RURIMA *init_config(void)
 	ret->host_dir = NULL;
 	ret->hook_script = NULL;
 	ret->hook_command[0] = NULL;
-	ret->container.container_dir = NULL;
-	ret->container.enable_seccomp = false;
-	ret->container.no_new_privs = false;
-	ret->container.no_warnings = false;
-	ret->container.enable_unshare = false;
-	ret->container.rootless = false;
-	ret->container.mount_host_runtime = false;
-	ret->container.command[0] = NULL;
-	ret->container.env[0] = NULL;
-	ret->container.extra_mountpoint[0] = NULL;
-	ret->container.extra_ro_mountpoint[0] = NULL;
-	ret->container.cross_arch = NULL;
-	ret->container.qemu_path = NULL;
-	ret->container.use_rurienv = true;
-	ret->container.ro_root = false;
-	ret->container.cpuset = NULL;
-	ret->container.memory = NULL;
-	ret->container.work_dir = NULL;
-	ret->container.just_chroot = false;
+	ruri_init_config(&ret->container);
 	return ret;
 }
 char *dump_ruri_config(struct RURIMA *_Nonnull config)

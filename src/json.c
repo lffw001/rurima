@@ -44,6 +44,7 @@ static char *unicode_to_char(const char *_Nonnull str)
 	 */
 	size_t len = strlen(str);
 	char *result = malloc(len + 1);
+	result[0] = '\0';
 	if (!result) {
 		return NULL;
 	}
@@ -76,6 +77,7 @@ static char *format_json(const char *_Nonnull buf)
 	 */
 	char *tmp = unicode_to_char(buf);
 	char *ret = malloc(strlen(tmp) + 1);
+	ret[0] = '\0';
 	size_t j = 0;
 	bool in_string = false;
 	for (size_t i = 0; i < strlen(tmp); i++) {
@@ -137,7 +139,8 @@ static char *next_key(const char *_Nullable buf)
 		if (p[i] == '\\') {
 			i++;
 			continue;
-		} else if (p[i] == '"') {
+		}
+		if (p[i] == '"') {
 			p = &p[i];
 			break;
 		}
@@ -149,7 +152,8 @@ static char *next_key(const char *_Nullable buf)
 		if (p[i] == '\\') {
 			i++;
 			continue;
-		} else if (p[i] == '"') {
+		}
+		if (p[i] == '"') {
 			in_string = !in_string;
 		} else if ((p[i] == '{' || p[i] == '[') && !in_string) {
 			level++;
@@ -161,9 +165,8 @@ static char *next_key(const char *_Nullable buf)
 		} else if (p[i] == ',' && !in_string && level == 0) {
 			if (i < strlen(p) - 1) {
 				return (char *)&p[i + 1];
-			} else {
-				return NULL;
 			}
+			return NULL;
 		}
 	}
 	return NULL;
@@ -187,7 +190,8 @@ static char *next_layer(const char *_Nullable buf)
 		if (p[i] == '\\') {
 			i++;
 			continue;
-		} else if (p[i] == '{') {
+		}
+		if (p[i] == '{') {
 			p = &p[i];
 			break;
 		}
@@ -199,7 +203,8 @@ static char *next_layer(const char *_Nullable buf)
 		if (p[i] == '\\') {
 			i++;
 			continue;
-		} else if (p[i] == '"') {
+		}
+		if (p[i] == '"') {
 			in_string = !in_string;
 		} else if ((p[i] == '{' || p[i] == '[') && !in_string) {
 			level++;
@@ -211,9 +216,8 @@ static char *next_layer(const char *_Nullable buf)
 		} else if (p[i] == ',' && !in_string && level == 0) {
 			if (i < strlen(p) - 1) {
 				return (char *)&p[i + 1];
-			} else {
-				return NULL;
 			}
+			return NULL;
 		}
 	}
 	return NULL;
@@ -235,7 +239,8 @@ static char *current_key(const char *_Nonnull buf)
 		if (tmp[i] == '\\') {
 			i++;
 			continue;
-		} else if (tmp[i] == '"') {
+		}
+		if (tmp[i] == '"') {
 			ret = &tmp[i + 1];
 			break;
 		}
@@ -248,7 +253,8 @@ static char *current_key(const char *_Nonnull buf)
 		if (ret[i] == '\\') {
 			i++;
 			continue;
-		} else if (ret[i] == '"' && i < strlen(ret)) {
+		}
+		if (ret[i] == '"' && i < strlen(ret)) {
 			ret[i] = '\0';
 			break;
 		}
@@ -331,21 +337,22 @@ static char *parse_value(const char *_Nullable buf)
 		if (tmp[i] == '\\') {
 			i++;
 			continue;
-		} else if (tmp[i] == ' ') {
+		}
+		if (tmp[i] == ' ') {
 			continue;
-		} else if (tmp[i] == '[' || tmp[i] == '{') {
+		}
+		if (tmp[i] == '[' || tmp[i] == '{') {
 			ret = strdup(&tmp[i]);
 			free(tmp);
 			return ret;
-		} else if (tmp[i] == '"' && i < strlen(tmp)) {
+		}
+		if (tmp[i] == '"' && i < strlen(tmp)) {
 			ret = &tmp[i + 1];
 			break;
-		} else {
-			ret = strdup(&tmp[i]);
-			free(tmp);
-			return ret;
-			break;
 		}
+		ret = strdup(&tmp[i]);
+		free(tmp);
+		return ret;
 	}
 	if (ret == NULL) {
 		free(tmp);
@@ -355,7 +362,8 @@ static char *parse_value(const char *_Nullable buf)
 		if (ret[i] == '\\') {
 			i++;
 			continue;
-		} else if (ret[i] == '"') {
+		}
+		if (ret[i] == '"') {
 			ret[i] = '\0';
 			break;
 		}
@@ -383,13 +391,14 @@ static char *current_value(const char *_Nonnull buf)
 	char *ret = NULL;
 	// Skip key.
 	bool in_string = false;
-	for (size_t i = 0; i < strlen(buf); i++) {
-		if (buf[i] == '\\') {
+	for (size_t i = 0; i < strlen(tmp); i++) {
+		if (tmp[i] == '\\') {
 			i++;
 			continue;
-		} else if (buf[i] == '"') {
+		}
+		if (tmp[i] == '"') {
 			in_string = !in_string;
-		} else if (buf[i] == ':' && !in_string) {
+		} else if (tmp[i] == ':' && !in_string) {
 			ret = &tmp[i + 1];
 			break;
 		}
@@ -403,7 +412,8 @@ static char *current_value(const char *_Nonnull buf)
 		if (ret[i] == '\\') {
 			i++;
 			continue;
-		} else if (ret[i] != ' ' && ret[i] != '\n') {
+		}
+		if (ret[i] != ' ' && ret[i] != '\n') {
 			ret = &ret[i];
 			break;
 		}
@@ -412,7 +422,8 @@ static char *current_value(const char *_Nonnull buf)
 		if (ret[i] == '\\') {
 			i++;
 			continue;
-		} else if (ret[i] == '"') {
+		}
+		if (ret[i] == '"') {
 			in_string = !in_string;
 		} else if ((ret[i] == '{' || ret[i] == '[') && !in_string) {
 			level++;
@@ -427,10 +438,9 @@ static char *current_value(const char *_Nonnull buf)
 			if (i < strlen(ret) - 1) {
 				ret[i] = '\0';
 				break;
-			} else {
-				free(tmp);
-				return NULL;
 			}
+			free(tmp);
+			return NULL;
 		}
 	}
 	ret = parse_value(ret);
@@ -647,6 +657,7 @@ char *json_open_file(const char *_Nonnull path)
 	char *ret = malloc((size_t)st.st_size + 3);
 	int fd = open(path, O_RDONLY | O_CLOEXEC);
 	if (fd == -1) {
+		free(ret);
 		return NULL;
 	}
 	ssize_t size = read(fd, ret, (size_t)st.st_size);

@@ -91,32 +91,37 @@ int main(int argc, char **argv)
 			}
 			docker(argc - i - 1, &argv[i + 1]);
 			return 0;
-		} else if (strcmp(argv[i], "lxc") == 0 || strcmp(argv[i], "l") == 0) {
+		}
+		if (strcmp(argv[i], "lxc") == 0 || strcmp(argv[i], "l") == 0) {
 			if (i + 1 >= argc) {
 				error("{red}No subcommand specified!\n");
 			}
 			lxc(argc - i - 1, &argv[i + 1]);
 			return 0;
-		} else if (strcmp(argv[i], "unpack") == 0 || strcmp(argv[i], "u") == 0) {
+		}
+		if (strcmp(argv[i], "unpack") == 0 || strcmp(argv[i], "u") == 0) {
 			unpack(argc - i - 1, &argv[i + 1]);
 			return 0;
-		} else if (strcmp(argv[i], "help") == 0 || strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
+		}
+		if (strcmp(argv[i], "help") == 0 || strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
 			show_help();
 			return 0;
-		} else if (strcmp(argv[i], "version") == 0 || strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--version") == 0) {
+		}
+		if (strcmp(argv[i], "version") == 0 || strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--version") == 0) {
 			show_version_info();
 			return 0;
-		} else if (strcmp(argv[i], "-V") == 0 || strcmp(argv[i], "--version-code") == 0) {
+		}
+		if (strcmp(argv[i], "-V") == 0 || strcmp(argv[i], "--version-code") == 0) {
 			show_version_code();
 			return 0;
-		} else if (strcmp(argv[i], "ruri") == 0 || strcmp(argv[i], "r") == 0) {
+		}
+		if (strcmp(argv[i], "ruri") == 0 || strcmp(argv[i], "r") == 0) {
 			ruri(argc - i, &argv[i]);
 			return 0;
-		} else {
-			show_help();
-			error("{red}Invalid subcommand `%s`!\n", argv[i]);
-			return 1;
 		}
+		show_help();
+		error("{red}Invalid subcommand `%s`!\n", argv[i]);
+		return 1;
 	}
 	return 0;
 }

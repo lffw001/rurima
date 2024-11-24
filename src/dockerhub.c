@@ -1017,18 +1017,22 @@ static char *__docker_search_tag(const char *_Nonnull image, const char *_Nonnul
 	log("{base}next_url: {cyan}%s{clear}\n", next_url);
 	char *results = json_get_key(response, "[results]");
 	char **images = NULL;
-	size_t len = json_anon_layer_get_key_array(results, "[images]", &images);
+	size_t len = json_anon_layer_get_key_array_allow_null_val(results, "[images]", &images);
 	if (len == 0) {
 		error("{red}No results found!\n");
 	}
 	char **tags = NULL;
-	size_t len2 = json_anon_layer_get_key_array(results, "[name]", &tags);
+	size_t len2 = json_anon_layer_get_key_array_allow_null_val(results, "[name]", &tags);
 	if (len2 != len) {
+		printf("len: %zu, len2: %zu\n", len, len2);
 		error("{red}Incorrect json!\n");
 	}
 	bool found = false;
 	char *tmp = NULL;
 	for (size_t i = 0; i < len; i++) {
+		if (images[i] == NULL || tags[i] == NULL) {
+			continue;
+		}
 		tmp = json_anon_layer_get_key(images[i], "[architecture]", architecture, "[digest]");
 		if (tmp != NULL) {
 			found = true;
