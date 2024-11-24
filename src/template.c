@@ -28,78 +28,78 @@
  *
  */
 #include "include/rurima.h"
-static void ubuntu(const char *_Nonnull dir)
+static void ubuntu(const char *_Nonnull dir, int argc, char **argv)
 {
-	char *argv[] = { "docker", "pull", "-i", "ubuntu", "-s", (char *)dir, NULL };
-	if (fork_rexec(6, argv) != 0) {
+	char *rexec_argv[] = { "docker", "pull", "-i", "ubuntu", "-s", (char *)dir, NULL };
+	if (fork_rexec(6, rexec_argv) != 0) {
 		error("Failed to pull ubuntu image");
 	}
 	default_hook(dir);
 }
-static void debian(const char *_Nonnull dir)
+static void debian(const char *_Nonnull dir, int argc, char **argv)
 {
-	char *argv[] = { "docker", "pull", "-i", "debian", "-s", (char *)dir, NULL };
-	if (fork_rexec(6, argv) != 0) {
+	char *rexec_argv[] = { "docker", "pull", "-i", "debian", "-s", (char *)dir, NULL };
+	if (fork_rexec(6, rexec_argv) != 0) {
 		error("Failed to pull debian image");
 	}
 	default_hook(dir);
 }
-static void centos(const char *_Nonnull dir)
+static void centos(const char *_Nonnull dir, int argc, char **argv)
 {
-	char *argv[] = { "docker", "pull", "-i", "centos", "-s", (char *)dir, NULL };
-	if (fork_rexec(6, argv) != 0) {
+	char *rexec_argv[] = { "docker", "pull", "-i", "centos", "-s", (char *)dir, NULL };
+	if (fork_rexec(6, rexec_argv) != 0) {
 		error("Failed to pull centos image");
 	}
 	default_hook(dir);
 }
-static void fedora(const char *_Nonnull dir)
+static void fedora(const char *_Nonnull dir, int argc, char **argv)
 {
-	char *argv[] = { "docker", "pull", "-i", "fedora", "-s", (char *)dir, NULL };
-	if (fork_rexec(6, argv) != 0) {
+	char *rexec_argv[] = { "docker", "pull", "-i", "fedora", "-s", (char *)dir, NULL };
+	if (fork_rexec(6, rexec_argv) != 0) {
 		error("Failed to pull fedora image");
 	}
 	default_hook(dir);
 }
-static void alpine(const char *_Nonnull dir)
+static void alpine(const char *_Nonnull dir, int argc, char **argv)
 {
-	char *argv[] = { "docker", "pull", "-i", "alpine", "-s", (char *)dir, NULL };
-	if (fork_rexec(6, argv) != 0) {
+	char *rexec_argv[] = { "docker", "pull", "-i", "alpine", "-s", (char *)dir, NULL };
+	if (fork_rexec(6, rexec_argv) != 0) {
 		error("Failed to pull alpine image");
 	}
 	default_hook(dir);
 }
-static void almalinux(const char *_Nonnull dir)
+static void almalinux(const char *_Nonnull dir, int argc, char **argv)
 {
-	char *argv[] = { "docker", "pull", "-i", "almalinux", "-s", (char *)dir, NULL };
-	if (fork_rexec(6, argv) != 0) {
+	char *rexec_argv[] = { "docker", "pull", "-i", "almalinux", "-s", (char *)dir, NULL };
+	if (fork_rexec(6, rexec_argv) != 0) {
 		error("Failed to pull almalinux image");
 	}
 	default_hook(dir);
 }
-static void busybox(const char *_Nonnull dir)
+static void busybox(const char *_Nonnull dir, int argc, char **argv)
 {
-	char *argv[] = { "docker", "pull", "-i", "busybox", "-s", (char *)dir, NULL };
-	if (fork_rexec(6, argv) != 0) {
+	char *rexec_argv[] = { "docker", "pull", "-i", "busybox", "-s", (char *)dir, NULL };
+	if (fork_rexec(6, rexec_argv) != 0) {
 		error("Failed to pull busybox image");
 	}
 	default_hook(dir);
 }
-void template(const char *_Nonnull name, const char *_Nonnull dir)
+void template(const char *_Nonnull name, const char *_Nonnull dir, int argc, char **argv)
 {
 	if (strcmp(name, "ubuntu") == 0) {
-		ubuntu(dir);
+		ubuntu(dir, argc, argv);
 	} else if (strcmp(name, "debian") == 0) {
-		debian(dir);
+		debian(dir, argc, argv);
 	} else if (strcmp(name, "centos") == 0) {
-		centos(dir);
+		centos(dir, argc, argv);
 	} else if (strcmp(name, "fedora") == 0) {
-		fedora(dir);
+		fedora(dir, argc, argv);
 	} else if (strcmp(name, "almalinux") == 0) {
-		almalinux(dir);
+		almalinux(dir, argc, argv);
 	} else if (strcmp(name, "alpine") == 0) {
-		alpine(dir);
+		alpine(dir, argc, argv);
 	} else if (strcmp(name, "busybox") == 0) {
-		busybox(dir);
+		busybox(dir, argc, argv);
 	} else {
 		fprintf(stderr, "Unknown template: %s\n", name);
 		exit(1);
