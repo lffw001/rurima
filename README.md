@@ -12,6 +12,12 @@ With the `docker` and `lxc` subcommand of rurima, you can search & get & unpack 
 # Not Only Ruri Container Manager:
 Rurima was planned to be the ruri container manager, but as rurima has a full integration of ruri now, you can just use it as a more powerful version of ruri, although the container manager function is still WIP.               
 For more info about ruri, see [ruri](https://github.com/Moe-hacker/ruri)      
+# Download:
+You can get rurima binary (staticly linked) for arm64, armv7, armhf, riscv64, i386, loong64, s390x, ppc64le and x86_64 from the release page.     
+Or run the follwing command to get rurima to ./rurima and ./rurima-dbg(debug version):     
+```
+wget -q -O - https://getrurima.crack.moe | bash -s -- -s
+```   
 # Example usage of docker subcommand:
 Get whyour/qinglong docker image.      
 ```sh
@@ -60,9 +66,6 @@ Please use the debug version(rurima-dbg) in release to get debug logs, and pleas
 # NOTICE:
 This program is not official tool of docker or dockerhub, you can report bugs here, but this program has no relation with docker.      
 Docker is a registered trademark of Docker, Inc.      
-# Download:
-You can get rurima binary (staticly linked) for arm64, armv7, armhf, riscv64, i386, loong64, s390x, ppc64le and x86_64 from the release page.     
-https://github.com/Moe-hacker/rurima/releases/tag/null          
 # Dependent:   
 rurima needs tar, xz, gzip, file, you can find these static binary for aarch64, armv7, x86_64, i386 or riscv64 in：      
 [tar-static](https://github.com/Moe-sushi/tar-static)      
