@@ -191,3 +191,6 @@ void check_dir_deny_list(const char *_Nonnull dir);
 char *strstr_ignore_case(const char *_Nonnull haystack, const char *_Nonnull needle);
 int fork_rexec(int argc, char **_Nonnull argv);
 void *default_hook(const char *_Nonnull container_dir);
+void list_template(void);
+void template(const char *_Nonnull name, const char *_Nonnull dir);
+void read_global_config(void);

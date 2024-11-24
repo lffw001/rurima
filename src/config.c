@@ -59,3 +59,6 @@ char *dump_ruri_config(struct RURIMA *_Nonnull config)
 	char *ret = ruri_container_info_to_k2v(&config->container);
 	return ret;
 }
+void read_global_config(void)
+{
+}

@@ -75,6 +75,7 @@ static void detect_suid_or_capability(void)
 int main(int argc, char **argv)
 {
 	detect_suid_or_capability();
+	read_global_config();
 #ifdef RURIMA_DEV
 	warning("{red}You are using dev/debug build, if you think this is wrong, please rebuild rurima or get it from release page.\n");
 #endif
