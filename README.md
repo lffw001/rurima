@@ -12,6 +12,8 @@ With the `docker` and `lxc` subcommand of rurima, you can search & get & unpack 
 # Not Only Ruri Container Manager:
 Rurima was planned to be the ruri container manager, but as rurima has a full integration of ruri now, you can just use it as a more powerful version of ruri, although the container manager function is still WIP.               
 For more info about ruri, see [ruri](https://github.com/Moe-hacker/ruri)      
+# Note & WIP:
+This project does not follow OCI and can only be a `PARTIAL` replacement of docker, this project is still under development.       
 # Download:
 You can get rurima binary (staticly linked) for arm64, armv7, armhf, riscv64, i386, loong64, s390x, ppc64le and x86_64 from the release page.     
 Or run the follwing command to get rurima to ./rurima and ./rurima-dbg(debug version):     
@@ -55,9 +57,7 @@ rurima lxc pull -o alpine -v edge -s ./test
 Use mirrors.bfsu.edu.cn/lxc-images as mirror:   
 ```sh
 rurima lxc pull -m mirrors.bfsu.edu.cn/lxc-images -o alpine -v edge -s ./test
-```
-# Note & WIP:
-This project does not follow OCI and can only be a `PARTIAL` replacement of docker, this project is still under development.           
+```    
 # About suid or caps:
 Rurima does not allow to set any suid/sgid (with root) or capability on it, it will check it in main() and error() if detected these unsafe settings.      
 So, please always use sudo instead.     
