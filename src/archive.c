@@ -337,10 +337,10 @@ int backup_dir(const char *_Nonnull file, const char *_Nonnull dir)
 		while (WIFEXITED(status) == 0) {
 			off_t currentsize = get_file_size(file);
 			totalsize = totalsize_bk;
-			while (totalsize > 10 ^ 305) {
+			while (totalsize > FLT_MAX) {
 				totalsize = totalsize / 1024;
 				currentsize = currentsize / 1024;
-				if (totalsize < 10 ^ 305) {
+				if (totalsize < FLT_MAX) {
 					break;
 				}
 			}

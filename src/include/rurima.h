@@ -48,6 +48,7 @@
 #include <limits.h>
 #include <dirent.h>
 #include <sys/time.h>
+#include <float.h>
 // This program need be linked with -lcap.
 #include <sys/capability.h>
 // Bool!!!
@@ -154,9 +155,7 @@ struct DOCKER {
 		cfprintf(stdout, ##__VA_ARGS__)                                                                                       \
 	}
 #else
-#define log(...) \
-	{        \
-	}
+#define log(...)
 #endif
 // Functions.
 int fork_execvp(const char *_Nonnull argv[]);
@@ -199,5 +198,4 @@ bool rootless_supported(void);
 off_t get_dir_file_size(const char *_Nonnull target);
 int backup_dir(const char *_Nonnull file, const char *_Nonnull dir);
 void backup(int argc, char **_Nonnull argv);
-
 char *fork_execvp_get_stdout_ignore_err(const char *_Nonnull argv[]);
