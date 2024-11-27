@@ -804,7 +804,7 @@ struct DOCKER *get_docker_config(const char *_Nonnull image, const char *_Nonnul
 	free(config);
 	return ret;
 }
-struct DOCKER *docker_pull_failback(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nonnull savedir, const char *_Nullable mirror)
+static struct DOCKER *docker_pull_failback(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nonnull savedir, const char *_Nullable mirror)
 {
 	/*
 	 * Warning: free() the return value after use.

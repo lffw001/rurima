@@ -28,7 +28,7 @@
  *
  */
 #include "include/rurima.h"
-bool proot_exist(void)
+static bool proot_exist(void)
 {
 	/*
 	 * Test if proot exist.
@@ -44,7 +44,7 @@ bool proot_exist(void)
 	log("{green}proot found.\n");
 	return true;
 }
-bool proot_support_link2symlink(void)
+static bool proot_support_link2symlink(void)
 {
 	/*
 	 * Test if proot support link2symlink.
@@ -288,8 +288,11 @@ int extract_archive(const char *_Nonnull file, const char *_Nonnull dir)
 	free(command);
 	return 0;
 }
-int __tar_backup(const char *_Nonnull file, const char *_Nonnull dir)
+static int __tar_backup(const char *_Nonnull file, const char *_Nonnull dir)
 {
+	/*
+	 * Backup dir as file(.tar format).
+	 */
 	mkdirs(file, 0755);
 	rmdir(file);
 	close(open(file, O_CLOEXEC | O_CREAT, 0755));
@@ -316,6 +319,7 @@ int backup_dir(const char *_Nonnull file, const char *_Nonnull dir)
 {
 	/*
 	 * Backup container as *.tar file.
+	 * We compare the size of file and dir to show progress.
 	 */
 	struct stat st;
 	if (stat(file, &st) == 0) {
