@@ -51,6 +51,7 @@ void show_version_info(void)
 	cprintf("{base}%s%s%s", "rurima lxc-subcommand version ...:  ", RURIMA_LXC_VERSION, "\n");
 	cprintf("{base}%s%s%s", "rurima docker-subcommand version :  ", RURIMA_DOCKER_VERSION, "\n");
 	cprintf("{base}%s%s%s", "rurima unpack-subcommand version :  ", RURIMA_UNPACK_VERSION, "\n");
+	cprintf("{base}%s%s%s", "rurima backup-subcommand version :  ", RURIMA_BACKUP_VERSION, "\n");
 	cprintf("{base}%s%s%s", "built-in ruri version ...........:  ", RURI_VERSION, "\n");
 #if defined(RURI_COMMIT_ID)
 	cprintf("{base}%s%s%s", "built-in ruri commit id .........:  ", RURI_COMMIT_ID, "\n");
