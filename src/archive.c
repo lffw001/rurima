@@ -317,6 +317,10 @@ int backup_dir(const char *_Nonnull file, const char *_Nonnull dir)
 	/*
 	 * Backup container as *.tar file.
 	 */
+	struct stat st;
+	if (stat(file, &st) == 0) {
+		error("{red}File already exist!\n");
+	}
 	DIR *test = opendir(dir);
 	if (test == NULL) {
 		error("{red}Failed to open directory!\n");

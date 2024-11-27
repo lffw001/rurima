@@ -83,6 +83,7 @@ char *fork_execvp_get_stdout_ignore_err(const char *_Nonnull argv[])
 		size_t buffer_size = 1024;
 		size_t total_read = 0;
 		char *output = malloc(buffer_size);
+		output[0] = '\0';
 		ssize_t bytes_read;
 		while ((bytes_read = read(pipefd[0], output + total_read, buffer_size - total_read - 1)) > 0) {
 			total_read += (size_t)bytes_read;
