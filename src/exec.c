@@ -45,6 +45,67 @@ int fork_execvp(const char *_Nonnull argv[])
 	waitpid(pid, &status, 0);
 	return WEXITSTATUS(status);
 }
+char *fork_execvp_get_stdout_ignore_err(const char *_Nonnull argv[])
+{
+	/*
+	 * Warning: free() after use.
+	 * We will fork(2) and then execvp(3).
+	 * And then we will get the stdout of the child process.
+	 * Return the stdout of the child process.
+	 * If failed, return NULL.
+	 */
+	// Create a pipe.
+	int pipefd[2];
+	if (pipe(pipefd) == -1) {
+		perror("pipe");
+		return NULL;
+	}
+	// fork(2) and then execvp(3).
+	int pid = fork();
+	if (pid == -1) {
+		perror("fork");
+		return NULL;
+	}
+	if (pid == 0) {
+		// Close the read end of the pipe.
+		close(pipefd[0]);
+		// Redirect stdout and stderr to the write end of the pipe.
+		dup2(pipefd[1], STDOUT_FILENO);
+		int nullfd = open("/dev/null", O_WRONLY);
+		dup2(nullfd, STDERR_FILENO);
+		close(pipefd[1]);
+		execvp(argv[0], (char **)argv);
+		exit(114);
+	} else {
+		// Close the write end of the pipe.
+		close(pipefd[1]);
+		// Get the output from the read end of the pipe.
+		size_t buffer_size = 1024;
+		size_t total_read = 0;
+		char *output = malloc(buffer_size);
+		ssize_t bytes_read;
+		while ((bytes_read = read(pipefd[0], output + total_read, buffer_size - total_read - 1)) > 0) {
+			total_read += (size_t)bytes_read;
+			if (total_read >= buffer_size - 1) {
+				buffer_size *= 2;
+				char *new_output = realloc(output, buffer_size);
+				output = new_output;
+			}
+		}
+		if (bytes_read == -1) {
+			perror("read");
+			free(output);
+			close(pipefd[0]);
+			return NULL;
+		}
+		output[total_read] = '\0';
+		close(pipefd[0]);
+		int status = 0;
+		waitpid(pid, &status, 0);
+		return output;
+	}
+	return NULL;
+}
 char *fork_execvp_get_stdout(const char *_Nonnull argv[])
 {
 	/*
@@ -71,7 +132,8 @@ char *fork_execvp_get_stdout(const char *_Nonnull argv[])
 		close(pipefd[0]);
 		// Redirect stdout and stderr to the write end of the pipe.
 		dup2(pipefd[1], STDOUT_FILENO);
-		dup2(pipefd[1], STDERR_FILENO);
+		int nullfd = open("/dev/null", O_WRONLY);
+		dup2(nullfd, STDERR_FILENO);
 		close(pipefd[1]);
 		execvp(argv[0], (char **)argv);
 		exit(114);

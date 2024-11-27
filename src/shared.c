@@ -429,3 +429,17 @@ bool rootless_supported(void)
 	}
 	return false;
 }
+off_t get_dir_file_size(const char *_Nonnull target)
+{
+	/*
+	 * Get the size of the directory or file.
+	 */
+	const char *command[] = { "du", "-s", target, NULL };
+	char *result = fork_execvp_get_stdout_ignore_err(command);
+	if (result == NULL) {
+		return 0;
+	}
+	off_t ret = 0;
+	ret = atol(result);
+	return ret * 1024;
+}

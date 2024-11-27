@@ -196,3 +196,8 @@ void list_template(void);
 void template(const char *_Nonnull name, const char *_Nonnull dir, int argc, char **argv);
 void read_global_config(void);
 bool rootless_supported(void);
+off_t get_dir_file_size(const char *_Nonnull target);
+int backup_dir(const char *_Nonnull file, const char *_Nonnull dir);
+void backup(int argc, char **_Nonnull argv);
+
+char *fork_execvp_get_stdout_ignore_err(const char *_Nonnull argv[]);

@@ -288,3 +288,68 @@ int extract_archive(const char *_Nonnull file, const char *_Nonnull dir)
 	free(command);
 	return 0;
 }
+int __tar_backup(const char *_Nonnull file, const char *_Nonnull dir)
+{
+	mkdirs(file, 0755);
+	rmdir(file);
+	close(open(file, O_CLOEXEC | O_CREAT, 0755));
+	char *file_realpath = realpath(file, NULL);
+	char *dir_realpath = realpath(dir, NULL);
+	int nullfd = open("/dev/null", O_RDWR);
+	dup2(nullfd, STDOUT_FILENO);
+	dup2(nullfd, STDERR_FILENO);
+	if (strstr(file_realpath, dir_realpath) != NULL) {
+		chdir(dir);
+		char exclude[PATH_MAX + 12] = { '\0' };
+		sprintf(exclude, "--exclude=%s", file_realpath);
+		char exclude2[PATH_MAX + 12] = { '\0' };
+		sprintf(exclude2, "--exclude=%s", file);
+		const char *command[] = { "tar", exclude, exclude2, "-cpf", file_realpath, ".", NULL };
+		fork_execvp(command);
+	} else {
+		chdir(dir);
+		const char *command[] = { "tar", "-cpf", file_realpath, ".", NULL };
+		fork_execvp(command);
+	}
+}
+int backup_dir(const char *_Nonnull file, const char *_Nonnull dir)
+{
+	/*
+	 * Backup container as *.tar file.
+	 */
+	DIR *test = opendir(dir);
+	if (test == NULL) {
+		error("{red}Failed to open directory!\n");
+	}
+	closedir(test);
+	cprintf("{base}Getting total size to backup\n");
+	off_t totalsize = get_dir_file_size(dir);
+	cprintf("{base}Backing up to {cyan}%s\n", file);
+	pid_t pid = fork();
+	if (pid > 0) {
+		int status;
+		waitpid(pid, &status, WNOHANG);
+		off_t totalsize_bk = totalsize;
+		while (WIFEXITED(status) == 0) {
+			off_t currentsize = get_file_size(file);
+			totalsize = totalsize_bk;
+			while (totalsize > 10 ^ 305) {
+				totalsize = totalsize / 1024;
+				currentsize = currentsize / 1024;
+				if (totalsize < 10 ^ 305) {
+					break;
+				}
+			}
+			double progress = ((double)currentsize / (double)totalsize);
+			show_progress(progress);
+			usleep(100);
+			waitpid(pid, &status, WNOHANG);
+		}
+		show_progress(1.0);
+		return status;
+	} else {
+		__tar_backup(file, dir);
+		exit(0);
+	}
+	return 0;
+}

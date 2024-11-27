@@ -85,6 +85,7 @@ Subcommands:
   docker: DockerHub support.
   lxc: LXC mirror support.
   unpack: Unpack rootfs.
+  backup: Backup rootfs.
   ruri: Built-in ruri command.
   help: Show help message.
 Options:

@@ -43,6 +43,7 @@ static void show_help(void)
 	cprintf("{base}  docker: DockerHub support.\n");
 	cprintf("{base}  lxc: LXC mirror support.\n");
 	cprintf("{base}  unpack: Unpack rootfs.\n");
+	cprintf("{base}  backup: Backup rootfs.\n");
 	cprintf("{base}  ruri: Built-in ruri command.\n");
 	cprintf("{base}  help: Show help message.\n");
 	cprintf("{base}Options:\n");
@@ -99,6 +100,10 @@ int main(int argc, char **argv)
 				error("{red}No subcommand specified!\n");
 			}
 			lxc(argc - i - 1, &argv[i + 1]);
+			return 0;
+		}
+		if (strcmp(argv[i], "backup") == 0 || strcmp(argv[i], "b") == 0) {
+			backup(argc - i - 1, &argv[i + 1]);
 			return 0;
 		}
 		if (strcmp(argv[i], "unpack") == 0 || strcmp(argv[i], "u") == 0) {

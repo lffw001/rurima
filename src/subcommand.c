@@ -442,12 +442,14 @@ void unpack(int argc, char **_Nonnull argv)
 				error("{red}No file specified!\n");
 			}
 			file = argv[i + 1];
+			i++;
 		} else if (strcmp(argv[i], "-d") == 0 || strcmp(argv[i], "--dir") == 0) {
 			if (i + 1 >= argc) {
 				error("{red}No directory specified!\n");
 			}
 			check_dir_deny_list(argv[i + 1]);
 			dir = argv[i + 1];
+			i++;
 		} else if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
 			cprintf("{base}Usage: unpack [options]\n");
 			cprintf("{base}Options:\n");
@@ -470,5 +472,46 @@ void unpack(int argc, char **_Nonnull argv)
 	}
 	if (extract_archive(file, dir) != 0) {
 		error("{red}Failed to extract archive!\n");
+	}
+}
+void backup(int argc, char **_Nonnull argv)
+{
+	char *file = NULL;
+	char *dir = NULL;
+	if (argc == 0) {
+		error("{red}Unknown argument!\n");
+	}
+	for (int i = 0; i < argc; i++) {
+		if (strcmp(argv[i], "-f") == 0 || strcmp(argv[i], "--file") == 0) {
+			if (i + 1 >= argc) {
+				error("{red}No file specified!\n");
+			}
+			file = argv[i + 1];
+			i++;
+		} else if (strcmp(argv[i], "-d") == 0 || strcmp(argv[i], "--dir") == 0) {
+			if (i + 1 >= argc) {
+				error("{red}No directory specified!\n");
+			}
+			dir = argv[i + 1];
+			i++;
+		} else if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
+			cprintf("{base}Usage: unpack [options]\n");
+			cprintf("{base}Options:\n");
+			cprintf("{base}  -f, --file: output file, tar format.\n");
+			cprintf("{base}  -d, --dir: Directory to backup.\n");
+			cprintf("{base}  -h, --help: Show help message.\n");
+			return;
+		} else {
+			error("{red}Unknown argument!\n");
+		}
+	}
+	if (file == NULL) {
+		error("{red}No file specified!\n");
+	}
+	if (dir == NULL) {
+		error("{red}No directory specified!\n");
+	}
+	if (backup_dir(file, dir) != 0) {
+		warning("{yellow}tar exited with error status!\n");
 	}
 }
