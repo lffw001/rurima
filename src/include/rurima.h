@@ -104,7 +104,7 @@ struct RURIMA {
 	// Hook script, will be copied into /tmp.
 	char *_Nullable hook_script;
 	// Hook command.
-	char *_Nullable hook_command[MAX_COMMANDS + 1];
+	char *_Nullable hook_command[RURI_MAX_COMMANDS + 1];
 	// Full ruri container config.
 	struct RURI_CONTAINER container;
 };
@@ -115,11 +115,11 @@ struct DOCKER {
 	// Workdir.
 	char *_Nullable workdir;
 	// ENV.
-	char *_Nullable env[MAX_ENVS + 2];
+	char *_Nullable env[RURI_MAX_ENVS + 2];
 	// Command.
-	char *_Nullable command[MAX_COMMANDS + 1];
+	char *_Nullable command[RURI_MAX_COMMANDS + 1];
 	// Entry point.
-	char *_Nullable entrypoint[MAX_COMMANDS + 1];
+	char *_Nullable entrypoint[RURI_MAX_COMMANDS + 1];
 	// Architecture.
 	char *_Nullable architecture;
 };

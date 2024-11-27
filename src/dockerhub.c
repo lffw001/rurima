@@ -730,9 +730,9 @@ static struct DOCKER *get_image_config(const char *_Nonnull image, const char *_
 		if (env_from_json != NULL) {
 			char *tmp = malloc(strlen(env_from_json) + 114);
 			sprintf(tmp, "env=%s\n", env_from_json);
-			char *env[MAX_ENVS / 2];
+			char *env[RURI_MAX_ENVS / 2];
 			env[0] = NULL;
-			int len = k2v_get_key(char_array, "env", tmp, env, MAX_ENVS / 2);
+			int len = k2v_get_key(char_array, "env", tmp, env, RURI_MAX_ENVS / 2);
 			parse_env(env, ret->env, len);
 			for (int i = 0; i < len; i++) {
 				log("{base}Env[%d]: {cyan}%s{clear}\n", i, env[i]);
@@ -750,7 +750,7 @@ static struct DOCKER *get_image_config(const char *_Nonnull image, const char *_
 		if (entrypoint != NULL) {
 			char *tmp = malloc(strlen(entrypoint) + 114);
 			sprintf(tmp, "entrypoint=%s\n", entrypoint);
-			int len = k2v_get_key(char_array, "entrypoint", tmp, ret->entrypoint, MAX_COMMANDS);
+			int len = k2v_get_key(char_array, "entrypoint", tmp, ret->entrypoint, RURI_MAX_COMMANDS);
 			for (int i = 0; i < len; i++) {
 				log("{base}Entrypoint[%d]: {cyan}%s{clear}\n", i, ret->entrypoint[i]);
 			}
@@ -766,7 +766,7 @@ static struct DOCKER *get_image_config(const char *_Nonnull image, const char *_
 		if (cmdline != NULL) {
 			char *tmp = malloc(strlen(cmdline) + 114);
 			sprintf(tmp, "cmdline=%s\n", cmdline);
-			int len = k2v_get_key(char_array, "cmdline", tmp, ret->command, MAX_COMMANDS);
+			int len = k2v_get_key(char_array, "cmdline", tmp, ret->command, RURI_MAX_COMMANDS);
 			for (int i = 0; i < len; i++) {
 				log("{base}Cmdline[%d]: {cyan}%s{clear}\n", i, ret->command[i]);
 			}
