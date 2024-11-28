@@ -512,6 +512,6 @@ void backup(int argc, char **_Nonnull argv)
 		error("{red}No directory specified!\n");
 	}
 	if (backup_dir(file, dir) != 0) {
-		warning("{yellow}tar exited with error status!\n");
+		warning("{yellow}tar exited with error status, but never mind, this might be fine\n");
 	}
 }

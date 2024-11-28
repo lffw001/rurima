@@ -44,7 +44,6 @@ void check_dep(void)
 	const char *gz_command[] = { "gzip", "--version", NULL };
 	const char *xz_command[] = { "xz", "-V", NULL };
 	const char *file_command_2[] = { "file", "--brief", "--mime-type", "/proc/self/exe", NULL };
-	const char *du_command[] = { "du", "--version", NULL };
 	char *result = NULL;
 	result = fork_execvp_get_stdout(tar_command);
 	if (result == NULL) {
@@ -74,11 +73,6 @@ void check_dep(void)
 	result = fork_execvp_get_stdout(file_command_2);
 	if (result == NULL) {
 		error("{red}file does not support --brief --mime-type!\nIf you are aarch64, armv7, x86_64, i386 or riscv64 user\nYou can find a support version in\nhttps://github.com/Moe-sushi/file-static\n");
-	}
-	free(result);
-	result = fork_execvp_get_stdout(du_command);
-	if (result == NULL) {
-		error("{red}du not found!\n");
 	}
 	free(result);
 }

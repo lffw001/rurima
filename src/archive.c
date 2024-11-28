@@ -301,6 +301,7 @@ static int __tar_backup(const char *_Nonnull file, const char *_Nonnull dir)
 	int nullfd = open("/dev/null", O_RDWR);
 	dup2(nullfd, STDOUT_FILENO);
 	dup2(nullfd, STDERR_FILENO);
+	int ret = 0;
 	if (strstr(file_realpath, dir_realpath) != NULL) {
 		chdir(dir);
 		char exclude[PATH_MAX + 12] = { '\0' };
@@ -308,12 +309,28 @@ static int __tar_backup(const char *_Nonnull file, const char *_Nonnull dir)
 		char exclude2[PATH_MAX + 12] = { '\0' };
 		sprintf(exclude2, "--exclude=%s", file);
 		const char *command[] = { "tar", exclude, exclude2, "-cpf", file_realpath, ".", NULL };
-		fork_execvp(command);
+		ret = fork_execvp(command);
 	} else {
 		chdir(dir);
 		const char *command[] = { "tar", "-cpf", file_realpath, ".", NULL };
-		fork_execvp(command);
+		ret = fork_execvp(command);
 	}
+	close(nullfd);
+	free(file_realpath);
+	free(dir_realpath);
+	return ret;
+}
+static bool du_found(void)
+{
+	const char *command[] = { "du", "--version", NULL };
+	char *ret = fork_execvp_get_stdout(command);
+	if (ret == NULL) {
+		log("{red}du not found.\n");
+		return false;
+	}
+	free(ret);
+	log("{green}du found.\n");
+	return true;
 }
 int backup_dir(const char *_Nonnull file, const char *_Nonnull dir)
 {
@@ -330,6 +347,11 @@ int backup_dir(const char *_Nonnull file, const char *_Nonnull dir)
 		error("{red}Failed to open directory!\n");
 	}
 	closedir(test);
+	if (!du_found()) {
+		warning("{yellow}du not found, progress will not be shown.\n");
+		int exstat = __tar_backup(file, dir);
+		return exstat;
+	}
 	cprintf("{base}Getting total size to backup\n");
 	off_t totalsize = get_dir_file_size(dir);
 	cprintf("{base}Backing up to {cyan}%s\n", file);
@@ -356,8 +378,8 @@ int backup_dir(const char *_Nonnull file, const char *_Nonnull dir)
 		show_progress(1.0);
 		return status;
 	} else {
-		__tar_backup(file, dir);
-		exit(0);
+		int exstat = __tar_backup(file, dir);
+		exit(exstat);
 	}
 	return 0;
 }
