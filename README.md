@@ -83,7 +83,8 @@ You got:
 <tr><td class="link"><a href="proot-static-5.4.0-r1.apk" title="proot-static-5.4.0-r1.apk">proot-static-5.4.0-r1.apk</a></td><td class="size">118.8 KiB</td><td class="date">25 Oct 2024 19:10:30 +0000</td></tr>
 ```
 So that you download:      
-```https://mirrors.tuna.tsinghua.edu.cn/alpine/edge/testing/aarch64/proot-static-5.4.0-r1.apk
+```
+https://mirrors.tuna.tsinghua.edu.cn/alpine/edge/testing/aarch64/proot-static-5.4.0-r1.apk
 ```
 and finally, tar -xvf *.apk to unpack it. So you got proot.static, rename it to proot and put it in your $PATH.           
 # TODO:
