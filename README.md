@@ -72,8 +72,20 @@ rurima needs tar, xz, gzip, file, you can find these static binary for aarch64, 
 [xz-static](https://github.com/Moe-sushi/xz-static)     
 [gzip-static](https://github.com/Moe-sushi/gzip-static)     
 [file-static](https://github.com/Moe-sushi/file-static)      
-rurima also need `curl`, but th static build have bugs, and I found that Android 15 has a built-in curl: `/bin/curl`.          
-rurima also need proot for rootless support, without proot, it might cause bugs unpacking rootfs, sadly, I failed to build proot-static, please install it manually.      
+rurima need `curl` for downloading images, you can find a third party build here (Thanks stunnel) [stunnel/static-curl](https://github.com/stunnel/static-curl).      
+rurima also need proot if you are unpacking rootfs without root privileges, you can find it by the following way:      
+First, you know your cpu arch, then, for example for aarch64:      
+```sh
+curl -sL https://mirrors.tuna.tsinghua.edu.cn/alpine/edge/testing/aarch64/ | grep proot-static
+```
+You got:      
+```
+<tr><td class="link"><a href="proot-static-5.4.0-r1.apk" title="proot-static-5.4.0-r1.apk">proot-static-5.4.0-r1.apk</a></td><td class="size">118.8 KiB</td><td class="date">25 Oct 2024 19:10:30 +0000</td></tr>
+```
+So that you download:      
+```https://mirrors.tuna.tsinghua.edu.cn/alpine/edge/testing/aarch64/proot-static-5.4.0-r1.apk
+```
+and finally, tar -xvf *.apk to unpack it. So you got proot.static, rename it to proot and put it in your $PATH.           
 # TODO:
 Manage ruri containers and configs.   
 Config support, a bit like Dockerfile.   
