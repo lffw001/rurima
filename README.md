@@ -21,11 +21,15 @@ Or run the follwing command to get rurima to ./rurima and ./rurima-dbg(debug ver
 wget -q -O - https://getrurima.crack.moe | bash -s -- -s
 ```   
 # Example usage of docker subcommand:
-Get whyour/qinglong docker image.      
+Get `alpine` image, use tag `edge`, save to `./test`     
+```sh
+rurima docker pull -i alpine -t edge -s ./test
+```     
+Get `whyour/qinglong` docker image.      
 ```sh
 rurima docker pull -i whyour/qinglong -s ./test
 ```
-Get ubuntu docker image.      
+Get `ubuntu` docker image.      
 ```sh
 rurima docker pull -i ubuntu -s ./test
 ```
@@ -33,7 +37,7 @@ Search for image `ubuntu`:
 ```sh
 rurima docker search -i ubuntu
 ```
-Search tag for ubuntu:      
+Search tag for `ubuntu`:      
 ```sh
 rurima docker tag -i ubuntu
 ```
@@ -50,11 +54,11 @@ Try failback mode:
 rurima docker pull -T -f -i ubuntu -s ./test
 ```
 # Example usage of lxc subcommand:
-Pull alpine edge.      
+Pull `alpine` version `edge`.      
 ```sh
 rurima lxc pull -o alpine -v edge -s ./test
 ```
-Use mirrors.bfsu.edu.cn/lxc-images as mirror:   
+Use `mirrors.bfsu.edu.cn/lxc-images` as mirror:   
 ```sh
 rurima lxc pull -m mirrors.bfsu.edu.cn/lxc-images -o alpine -v edge -s ./test
 ```    
