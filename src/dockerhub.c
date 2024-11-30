@@ -216,7 +216,7 @@ void show_docker_config(struct DOCKER *_Nonnull config, char *_Nullable savedir,
 		}
 	}
 }
-static char *get_auth_server_from_header(const char *_Nonnull header, bool failback)
+static char *get_auth_server_from_header(const char *_Nonnull header, bool fallback)
 {
 	/*
 	 * Warning: free() the return value after use.
@@ -229,21 +229,21 @@ static char *get_auth_server_from_header(const char *_Nonnull header, bool failb
 	// Just to show you how ugly if we don't lowercase the header.
 	const char *p = strstr_ignore_case(header, "wWw-aUthEntIcAtE: ");
 	if (p == NULL) {
-		if (failback) {
+		if (fallback) {
 			return NULL;
 		}
 		error("{red}No auth server found!\n");
 	}
 	p = strstr(p, "realm=");
 	if (p == NULL) {
-		if (failback) {
+		if (fallback) {
 			return NULL;
 		}
 		error("{red}No auth server found!\n");
 	}
 	p = strstr(p, "\"");
 	if (p == NULL) {
-		if (failback) {
+		if (fallback) {
 			return NULL;
 		}
 		error("{red}No auth server found!\n");
@@ -251,7 +251,7 @@ static char *get_auth_server_from_header(const char *_Nonnull header, bool failb
 	p++;
 	const char *q = strstr(p, "\"");
 	if (q == NULL) {
-		if (failback) {
+		if (fallback) {
 			return NULL;
 		}
 		error("{red}No auth server found!\n");
@@ -261,7 +261,7 @@ static char *get_auth_server_from_header(const char *_Nonnull header, bool failb
 	ret[q - p] = '\0';
 	return ret;
 }
-static char *get_service_from_header(const char *_Nonnull header, bool failback)
+static char *get_service_from_header(const char *_Nonnull header, bool fallback)
 {
 	/*
 	 * Warning: free() the return value after use.
@@ -272,21 +272,21 @@ static char *get_service_from_header(const char *_Nonnull header, bool failback)
 	 */
 	const char *p = strstr_ignore_case(header, "wWw-aUthEntIcAtE: ");
 	if (p == NULL) {
-		if (failback) {
+		if (fallback) {
 			return NULL;
 		}
 		error("{red}No service found!\n");
 	}
 	p = strstr(p, "service=");
 	if (p == NULL) {
-		if (failback) {
+		if (fallback) {
 			return NULL;
 		}
 		error("{red}No service found!\n");
 	}
 	p = strstr(p, "\"");
 	if (p == NULL) {
-		if (failback) {
+		if (fallback) {
 			return NULL;
 		}
 		error("{red}No service found!\n");
@@ -294,7 +294,7 @@ static char *get_service_from_header(const char *_Nonnull header, bool failback)
 	p++;
 	const char *q = strstr(p, "\"");
 	if (q == NULL) {
-		if (failback) {
+		if (fallback) {
 			return NULL;
 		}
 		error("{red}No service found!\n");
@@ -304,7 +304,7 @@ static char *get_service_from_header(const char *_Nonnull header, bool failback)
 	ret[q - p] = '\0';
 	return ret;
 }
-static char *get_auth_server_url(const char *_Nullable mirror, bool failback)
+static char *get_auth_server_url(const char *_Nullable mirror, bool fallback)
 {
 	/*
 	 * Warning: free() the return value after use.
@@ -322,22 +322,22 @@ static char *get_auth_server_url(const char *_Nullable mirror, bool failback)
 	const char *curl_command[] = { "curl", "--max-time", "5", "-s", "-L", "-I", url, NULL };
 	char *response = fork_execvp_get_stdout(curl_command);
 	if (response == NULL) {
-		if (failback) {
+		if (fallback) {
 			return NULL;
 		}
 		error("{red}Failed to get auth server!\n");
 	}
-	char *server = get_auth_server_from_header(response, failback);
+	char *server = get_auth_server_from_header(response, fallback);
 	if (server == NULL) {
-		if (failback) {
+		if (fallback) {
 			free(response);
 			return NULL;
 		}
 		error("{red}Failed to get auth server!\n");
 	}
-	char *service = get_service_from_header(response, failback);
+	char *service = get_service_from_header(response, fallback);
 	if (service == NULL) {
-		if (failback) {
+		if (fallback) {
 			free(response);
 			free(server);
 			return NULL;
@@ -352,7 +352,7 @@ static char *get_auth_server_url(const char *_Nullable mirror, bool failback)
 	log("{base}Auth server url: {cyan}%s{clear}\n", ret);
 	return ret;
 }
-static char *get_token(const char *_Nonnull image, const char *_Nullable mirror, bool failback)
+static char *get_token(const char *_Nonnull image, const char *_Nullable mirror, bool fallback)
 {
 	/*
 	 * Warning: free() the return value after use.
@@ -365,9 +365,9 @@ static char *get_token(const char *_Nonnull image, const char *_Nullable mirror,
 	if (mirror == NULL) {
 		mirror = gloal_config.docker_mirror;
 	}
-	char *auth_server_url = get_auth_server_url(mirror, failback);
+	char *auth_server_url = get_auth_server_url(mirror, fallback);
 	if (auth_server_url == NULL) {
-		if (failback) {
+		if (fallback) {
 			log("{red}No auth server found, using homo magic token 1145141919810\n");
 			// We hope the server administrator is homo.
 			return strdup("1145141919810");
@@ -388,7 +388,7 @@ static char *get_token(const char *_Nonnull image, const char *_Nullable mirror,
 	}
 	char *ret = json_get_key(token_json, "[token]");
 	if (ret == NULL) {
-		if (failback) {
+		if (fallback) {
 			free(token_json);
 			log("{red}Can not get token, using homo magic token 1145141919810\n");
 			// We hope the server administrator is homo.
@@ -502,14 +502,14 @@ static char *get_short_sha(const char *_Nonnull sha)
 	ret[16] = '\0';
 	return ret;
 }
-static void pull_images(const char *_Nonnull image, char *const *_Nonnull blobs, const char *_Nonnull token, const char *_Nonnull savedir, const char *_Nullable mirror, bool failback)
+static void pull_images(const char *_Nonnull image, char *const *_Nonnull blobs, const char *_Nonnull token, const char *_Nonnull savedir, const char *_Nullable mirror, bool fallback)
 {
 	/*
 	 * Pull images.
 	 *
 	 * This function will pull all layers of image,
 	 * and extract them to savedir.
-	 * Failback mode will get token every time pull a layer.
+	 * Fallback mode will get token every time pull a layer.
 	 *
 	 */
 	check_dir_deny_list(savedir);
@@ -532,8 +532,8 @@ static void pull_images(const char *_Nonnull image, char *const *_Nonnull blobs,
 		free(sha);
 		sprintf(url, "https://%s/v2/%s/blobs/%s", mirror, image, blobs[i]);
 		sprintf(filename, "layer-%d", i);
-		if (failback) {
-			token_tmp = get_token(image, mirror, failback);
+		if (fallback) {
+			token_tmp = get_token(image, mirror, fallback);
 		} else {
 			token_tmp = strdup(token);
 		}
@@ -555,12 +555,12 @@ static void pull_images(const char *_Nonnull image, char *const *_Nonnull blobs,
 		remove(filename);
 	}
 }
-static char *get_config_digest_failback(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nonnull token, const char *_Nullable mirror)
+static char *get_config_digest_fallback(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nonnull token, const char *_Nullable mirror)
 {
 	/*
 	 * Warning: free() the return value after use.
 	 *
-	 * Failback to get config.
+	 * Fallback to get config.
 	 *
 	 */
 	if (mirror == NULL) {
@@ -574,7 +574,7 @@ static char *get_config_digest_failback(const char *_Nonnull image, const char *
 	free(manifests);
 	return ret;
 }
-static char *get_config_digest(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nullable digest, const char *_Nonnull token, const char *_Nullable mirror, bool failback)
+static char *get_config_digest(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nullable digest, const char *_Nonnull token, const char *_Nullable mirror, bool fallback)
 {
 	/*
 	 * Warning: free() the return value after use.
@@ -586,10 +586,10 @@ static char *get_config_digest(const char *_Nonnull image, const char *_Nonnull 
 		mirror = gloal_config.docker_mirror;
 	}
 	if (digest == NULL) {
-		if (!failback) {
+		if (!fallback) {
 			error("{red}No digest found!\n");
 		}
-		return get_config_digest_failback(image, tag, token, mirror);
+		return get_config_digest_fallback(image, tag, token, mirror);
 	}
 	char url[4096] = { '\0' };
 	sprintf(url, "https://%s/v2/%s/manifests/%s", mirror, image, digest);
@@ -604,10 +604,10 @@ static char *get_config_digest(const char *_Nonnull image, const char *_Nonnull 
 	if (config == NULL) {
 		free(response);
 		free(auth);
-		if (!failback) {
+		if (!fallback) {
 			error("{red}Failed to get config!\n");
 		}
-		return get_config_digest_failback(image, tag, token, mirror);
+		return get_config_digest_fallback(image, tag, token, mirror);
 	}
 	log("{base}Config: %s{clear}\n", config);
 	free(response);
@@ -780,7 +780,7 @@ static struct DOCKER *get_image_config(const char *_Nonnull image, const char *_
 	free(auth);
 	return ret;
 }
-struct DOCKER *get_docker_config(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nullable architecture, const char *_Nullable mirror, bool failback)
+struct DOCKER *get_docker_config(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nullable architecture, const char *_Nullable mirror, bool fallback)
 {
 	/*
 	 * Warning: free() the return value after use.
@@ -789,11 +789,11 @@ struct DOCKER *get_docker_config(const char *_Nonnull image, const char *_Nonnul
 	 * This function is called by subcommand.c
 	 *
 	 */
-	char *token = get_token(image, mirror, failback);
+	char *token = get_token(image, mirror, fallback);
 	char *manifests = get_tag_manifests(image, tag, token, mirror);
 	char *digest = get_tag_digest(manifests, architecture);
-	// digest can be NULL, then we go to failback.
-	char *config = get_config_digest(image, tag, digest, token, mirror, failback);
+	// digest can be NULL, then we go to fallback.
+	char *config = get_config_digest(image, tag, digest, token, mirror, fallback);
 	if (config == NULL) {
 		error("{red}Failed to get config!\n");
 	}
@@ -804,12 +804,12 @@ struct DOCKER *get_docker_config(const char *_Nonnull image, const char *_Nonnul
 	free(config);
 	return ret;
 }
-static struct DOCKER *docker_pull_failback(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nonnull savedir, const char *_Nullable mirror)
+static struct DOCKER *docker_pull_fallback(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nonnull savedir, const char *_Nullable mirror)
 {
 	/*
 	 * Warning: free() the return value after use.
 	 *
-	 * Failback to pull image.
+	 * Fallback to pull image.
 	 *
 	 */
 	if (mirror == NULL) {
@@ -826,7 +826,7 @@ static struct DOCKER *docker_pull_failback(const char *_Nonnull image, const cha
 	pull_images(image, blobs, token, savedir, mirror, true);
 	free(token);
 	token = get_token(image, mirror, true);
-	char *config = get_config_digest_failback(image, tag, token, mirror);
+	char *config = get_config_digest_fallback(image, tag, token, mirror);
 	struct DOCKER *ret = get_image_config(image, config, token, mirror);
 	free(manifests);
 	free(token);
@@ -838,7 +838,7 @@ static struct DOCKER *docker_pull_failback(const char *_Nonnull image, const cha
 	free(layers);
 	return ret;
 }
-struct DOCKER *docker_pull(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nullable architecture, const char *_Nonnull savedir, const char *_Nullable mirror, bool failback)
+struct DOCKER *docker_pull(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nullable architecture, const char *_Nonnull savedir, const char *_Nullable mirror, bool fallback)
 {
 	/*
 	 * Warning: free() the return value after use.
@@ -851,28 +851,28 @@ struct DOCKER *docker_pull(const char *_Nonnull image, const char *_Nonnull tag,
 	if (mirror == NULL) {
 		mirror = gloal_config.docker_mirror;
 	}
-	char *token = get_token(image, mirror, failback);
+	char *token = get_token(image, mirror, fallback);
 	char *manifests = get_tag_manifests(image, tag, token, mirror);
 	char *digest = get_tag_digest(manifests, architecture);
 	if (digest == NULL) {
 		free(manifests);
 		free(token);
-		if (!failback) {
+		if (!fallback) {
 			error("{red}Failed to get digest!\n");
 		}
-		return docker_pull_failback(image, tag, savedir, mirror);
+		return docker_pull_fallback(image, tag, savedir, mirror);
 	}
 	char **blobs = get_blobs(image, digest, token, mirror);
 	if (blobs == NULL) {
 		error("{red}Failed to get blobs!\n");
 	}
-	pull_images(image, blobs, token, savedir, mirror, failback);
-	if (failback) {
+	pull_images(image, blobs, token, savedir, mirror, fallback);
+	if (fallback) {
 		free(token);
 		token = get_token(image, mirror, true);
 	}
-	char *config = get_config_digest(image, tag, digest, token, mirror, failback);
-	if (failback) {
+	char *config = get_config_digest(image, tag, digest, token, mirror, fallback);
+	if (fallback) {
 		free(token);
 		token = get_token(image, mirror, true);
 	}
@@ -1168,7 +1168,7 @@ static void docker_print_arch(const char *_Nonnull image, char *const *_Nonnull 
 	}
 	free(archlist);
 }
-int docker_search_arch(const char *_Nonnull image, const char *_Nonnull tag, char *_Nullable mirror, bool failback)
+int docker_search_arch(const char *_Nonnull image, const char *_Nonnull tag, char *_Nullable mirror, bool fallback)
 {
 	/*
 	 * Get architecture of image:tag.
@@ -1180,7 +1180,7 @@ int docker_search_arch(const char *_Nonnull image, const char *_Nonnull tag, cha
 	if (mirror == NULL) {
 		mirror = gloal_config.docker_mirror;
 	}
-	char *token = get_token(image, mirror, failback);
+	char *token = get_token(image, mirror, fallback);
 	char *manifests = get_tag_manifests(image, tag, token, mirror);
 	char **arch = NULL;
 	char *tmp = json_get_key(manifests, "[manifests]");

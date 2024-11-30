@@ -49,7 +49,7 @@ Try every mirrorlist:
 ```sh
 rurima docker pull -T -i ubuntu -s ./test
 ```
-Try failback mode:      
+Try fallback mode:      
 ```sh
 rurima docker pull -T -f -i ubuntu -s ./test
 ```

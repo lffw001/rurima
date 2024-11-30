@@ -46,7 +46,7 @@ static char *add_library_prefix(char *_Nonnull image)
 	free(image);
 	return ret;
 }
-static void docker_pull_try_mirrors(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nonnull architecture, const char *_Nonnull savedir, char *_Nonnull try_mirrorlist[], bool failback)
+static void docker_pull_try_mirrors(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nonnull architecture, const char *_Nonnull savedir, char *_Nonnull try_mirrorlist[], bool fallback)
 {
 	/*
 	 * Try mirrors.
@@ -66,7 +66,7 @@ static void docker_pull_try_mirrors(const char *_Nonnull image, const char *_Non
 		rexec_argv[9] = (char *)savedir;
 		rexec_argv[10] = "-m";
 		rexec_argv[11] = (char *)try_mirrorlist[i];
-		if (failback) {
+		if (fallback) {
 			rexec_argv[12] = "-f";
 			rexec_argv[13] = NULL;
 			if (fork_rexec(13, rexec_argv) == 0) {
@@ -98,7 +98,7 @@ static void docker_pull_try_mirrors(const char *_Nonnull image, const char *_Non
 		rexec_argv[9] = (char *)savedir;
 		rexec_argv[10] = "-m";
 		rexec_argv[11] = (char *)mirrorlist_builtin[i];
-		if (failback) {
+		if (fallback) {
 			rexec_argv[12] = "-f";
 			rexec_argv[13] = NULL;
 			if (fork_rexec(13, rexec_argv) == 0) {
@@ -132,7 +132,7 @@ void docker(int argc, char **_Nonnull argv)
 	char *mirror = NULL;
 	char *runtime = NULL;
 	bool quiet = false;
-	bool failback = false;
+	bool fallback = false;
 	bool try_mirrors = false;
 	char *try_mirrorlist[1024] = { NULL };
 	if (argc == 0) {
@@ -197,8 +197,8 @@ void docker(int argc, char **_Nonnull argv)
 		} else if (strcmp(argv[i], "-q") == 0 || strcmp(argv[i], "--quiet") == 0) {
 			quiet = true;
 			gloal_config.quiet = true;
-		} else if (strcmp(argv[i], "-f") == 0 || strcmp(argv[i], "--failback") == 0) {
-			failback = true;
+		} else if (strcmp(argv[i], "-f") == 0 || strcmp(argv[i], "--fallback") == 0) {
+			fallback = true;
 		} else if (strcmp(argv[i], "-m") == 0 || strcmp(argv[i], "--mirror") == 0) {
 			if (i + 1 >= argc) {
 				error("{red}No mirror specified!\n");
@@ -252,19 +252,19 @@ void docker(int argc, char **_Nonnull argv)
 			architecture = docker_get_host_arch();
 		}
 		if (try_mirrors) {
-			docker_pull_try_mirrors(image, tag, architecture, savedir, try_mirrorlist, failback);
+			docker_pull_try_mirrors(image, tag, architecture, savedir, try_mirrorlist, fallback);
 			exit(0);
 		}
 		if (!run_with_root()) {
 			warning("{yellow}You are not running as root, might cause bug unpacking rootfs!\n");
 		}
 		image = add_library_prefix(image);
-		struct DOCKER *config = docker_pull(image, tag, architecture, savedir, mirror, failback);
+		struct DOCKER *config = docker_pull(image, tag, architecture, savedir, mirror, fallback);
 		if (!quiet) {
 			show_docker_config(config, savedir, runtime, quiet);
 			if (config->architecture != NULL) {
 				if (strcmp(config->architecture, architecture) != 0) {
-					warning("{yellow}\nWarning: failback mode detected!\n");
+					warning("{yellow}\nWarning: fallback mode detected!\n");
 					warning("{yellow}The architecture of the image is not the same as the specified architecture!\n");
 				}
 			}
@@ -278,12 +278,12 @@ void docker(int argc, char **_Nonnull argv)
 			error("{red}No image specified!\n");
 		}
 		image = add_library_prefix(image);
-		struct DOCKER *config = get_docker_config(image, tag, architecture, mirror, failback);
+		struct DOCKER *config = get_docker_config(image, tag, architecture, mirror, fallback);
 		show_docker_config(config, savedir, runtime, quiet);
 		if (!quiet) {
 			if (config->architecture != NULL) {
 				if (strcmp(config->architecture, architecture) != 0) {
-					warning("{yellow}Warning: failback mode detected!\n");
+					warning("{yellow}Warning: fallback mode detected!\n");
 					warning("{yellow}The architecture of the image is not the same as the specified architecture!\n");
 				}
 			}
@@ -297,7 +297,7 @@ void docker(int argc, char **_Nonnull argv)
 		if (tag == NULL) {
 			error("{red}No tag specified!\n");
 		}
-		docker_search_arch(image, tag, mirror, failback);
+		docker_search_arch(image, tag, mirror, fallback);
 	} else if (strcmp(argv[0], "help") == 0 || strcmp(argv[0], "-h") == 0 || strcmp(argv[0], "--help") == 0) {
 		cprintf("{base}Usage: docker [subcommand] [options]\n");
 		cprintf("{base}Subcommands:\n");
@@ -316,7 +316,7 @@ void docker(int argc, char **_Nonnull argv)
 		cprintf("{base}  -m, --mirror: Mirror of DockerHub.\n");
 		cprintf("{base}  -r, --runtime: runtime of container, support [ruri/proot/chroot].\n");
 		cprintf("{base}  -q, --quiet: Quiet mode.\n");
-		cprintf("{base}  -f, --failback: Failback mode.\n");
+		cprintf("{base}  -f, --fallback: Fallback mode.\n");
 		cprintf("{base}  -T, --try-mirrors <mirror>: Try mirrors.\n");
 		cprintf("\n{base}Note: please remove `https://` prefix from mirror url.\n");
 		cprintf("{base}For example: `-m registry-1.docker.io`\n");

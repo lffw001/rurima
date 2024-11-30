@@ -138,7 +138,7 @@ struct DOCKER {
 		cfprintf(stderr, "{base}%s{clear}\n", "Hint:");                                                        \
 		cfprintf(stderr, "{base}%s{clear}\n", "  If you have network problems for lxc or docker subcommand,"); \
 		cfprintf(stderr, "{base}%s{clear}\n", "  please use -m option to change the mirror.");                 \
-		cfprintf(stderr, "{base}%s{clear}\n", "  For docker subcommand, try -f to enable failback mode.");     \
+		cfprintf(stderr, "{base}%s{clear}\n", "  For docker subcommand, try -f to enable fallback mode.");     \
 		cfprintf(stderr, "{base}%s{clear}\n", "If you think something is wrong, please report at:");           \
 		cfprintf(stderr, "\033[4m{base}%s{clear}\n", "https://github.com/Moe-hacker/rurima/issues");           \
 		exit(114);                                                                                             \
@@ -165,7 +165,7 @@ int mkdirs(const char *_Nonnull path, mode_t mode);
 bool run_with_root(void);
 int docker_search(const char *_Nonnull image, const char *_Nonnull page_size, bool quiet);
 int docker_search_tag(const char *_Nonnull image, const char *_Nonnull page_size, const char *_Nullable architecture, bool quiet);
-struct DOCKER *docker_pull(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nullable architecture, const char *_Nonnull savedir, const char *_Nullable mirror, bool failback);
+struct DOCKER *docker_pull(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nullable architecture, const char *_Nonnull savedir, const char *_Nullable mirror, bool fallback);
 void rurima_register_signal(void);
 char *docker_get_host_arch(void);
 char *lxc_get_host_arch(void);
@@ -178,11 +178,11 @@ void unpack(int argc, char **_Nonnull argv);
 struct RURIMA *init_config(void);
 void get_input(char *_Nonnull message, char *_Nonnull buf);
 void check_dep(void);
-struct DOCKER *get_docker_config(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nullable architecture, const char *_Nullable mirror, bool failback);
+struct DOCKER *get_docker_config(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nullable architecture, const char *_Nullable mirror, bool fallback);
 void show_docker_config(struct DOCKER *_Nonnull config, char *_Nullable savedir, char *_Nullable runtime, bool quiet);
 void free_docker_config(struct DOCKER *_Nonnull config);
 void lxc_search_arch(const char *_Nullable mirror, const char *_Nonnull os);
-int docker_search_arch(const char *_Nonnull image, const char *_Nonnull tag, char *_Nullable mirror, bool failback);
+int docker_search_arch(const char *_Nonnull image, const char *_Nonnull tag, char *_Nullable mirror, bool fallback);
 void show_version_info(void);
 void show_version_code(void);
 void check_dir_deny_list(const char *_Nonnull dir);
