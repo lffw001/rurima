@@ -66,8 +66,6 @@
 #define _Nonnull
 #endif
 #include "version.h"
-#include "k2v.h"
-#include "cprintf.h"
 #include "jsonv.h"
 #include "../ruri/src/include/ruri.h"
 struct RURIMA_CONFIG {
