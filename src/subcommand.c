@@ -197,7 +197,7 @@ void docker(int argc, char **_Nonnull argv)
 		} else if (strcmp(argv[i], "-q") == 0 || strcmp(argv[i], "--quiet") == 0) {
 			quiet = true;
 			gloal_config.quiet = true;
-		} else if (strcmp(argv[i], "-f") == 0 || strcmp(argv[i], "--fallback") == 0) {
+		} else if (strcmp(argv[i], "-f") == 0 || strcmp(argv[i], "--fallback") == 0 || strcmp(argv[i], "--failback") == 0) {
 			fallback = true;
 		} else if (strcmp(argv[i], "-m") == 0 || strcmp(argv[i], "--mirror") == 0) {
 			if (i + 1 >= argc) {
