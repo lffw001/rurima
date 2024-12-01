@@ -37,11 +37,11 @@ static bool proot_exist(void)
 	const char *cmd[] = { "proot", "ls", NULL };
 	char *ret = fork_execvp_get_stdout(cmd);
 	if (ret == NULL) {
-		log("{red}proot not found.\n");
+		rurima_log("{red}proot not found.\n");
 		return false;
 	}
 	free(ret);
-	log("{green}proot found.\n");
+	rurima_log("{green}proot found.\n");
 	return true;
 }
 static bool proot_support_link2symlink(void)
@@ -53,11 +53,11 @@ static bool proot_support_link2symlink(void)
 	const char *cmd[] = { "proot", "--link2symlink", "ls", NULL };
 	char *ret = fork_execvp_get_stdout(cmd);
 	if (ret == NULL) {
-		log("{red}proot not support --link2symlink.\n");
+		rurima_log("{red}proot not support --link2symlink.\n");
 		return false;
 	}
 	free(ret);
-	log("{green}proot support --link2symlink.\n");
+	rurima_log("{green}proot support --link2symlink.\n");
 	return true;
 }
 static char **get_extract_command(const char *_Nonnull file, const char *_Nonnull dir)
@@ -328,11 +328,11 @@ static bool du_found(void)
 	const char *command[] = { "du", "--version", NULL };
 	char *ret = fork_execvp_get_stdout(command);
 	if (ret == NULL) {
-		log("{red}du not found.\n");
+		rurima_log("{red}du not found.\n");
 		return false;
 	}
 	free(ret);
-	log("{green}du found.\n");
+	rurima_log("{green}du found.\n");
 	return true;
 }
 int backup_dir(const char *_Nonnull file, const char *_Nonnull dir)

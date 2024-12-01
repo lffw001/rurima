@@ -146,7 +146,7 @@ struct DOCKER {
 	}
 // Log system.
 #if defined(RURIMA_DEBUG)
-#define log(...)                                                                                                                      \
+#define rurima_log(...)                                                                                                               \
 	{                                                                                                                             \
 		struct timeval tv;                                                                                                    \
 		gettimeofday(&tv, NULL);                                                                                              \
@@ -154,7 +154,7 @@ struct DOCKER {
 		cfprintf(stdout, ##__VA_ARGS__)                                                                                       \
 	}
 #else
-#define log(...)
+#define rurima_log(...)
 #endif
 // Functions.
 int fork_execvp(const char *_Nonnull argv[]);

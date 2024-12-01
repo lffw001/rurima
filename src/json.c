@@ -28,7 +28,6 @@
  *
  */
 #include "include/jsonv.h"
-#include "include/rurima.h"
 /*
  * If there's no bugs, do not care how it works,
  * just use it.
@@ -53,14 +52,12 @@ static char *unicode_to_char(const char *_Nonnull str)
 		if (str[i] == '\\' && i < len - 5 && str[i + 1] == 'u' && isxdigit(str[i + 2]) && isxdigit(str[i + 3]) && isxdigit(str[i + 4]) && isxdigit(str[i + 5])) {
 			char hex[5] = { str[i + 2], str[i + 3], str[i + 4], str[i + 5], '\0' };
 			result[j++] = (char)strtol(hex, NULL, 16);
-			log("{base}unicode: {cyan}%s{clear}\n", hex);
 			i += 5;
 		} else {
 			result[j++] = str[i];
 		}
 	}
 	result[j] = '\0';
-	log("{base}Result:\n{cyan}%s\n", result);
 	return result;
 }
 static char *format_json(const char *_Nonnull buf)
@@ -115,7 +112,6 @@ static char *format_json(const char *_Nonnull buf)
 		j++;
 	}
 	free(tmp);
-	log("{base}ret:{cyan}\n%s\n", ret);
 	return ret;
 }
 static char *next_key(const char *_Nullable buf)
@@ -292,7 +288,6 @@ static char *correct_backslash(const char *_Nullable buf)
 	char *tmp = ret;
 	ret = strdup(tmp);
 	free(tmp);
-	log("{base}ret: \n{cyan}%s\n", ret);
 	return ret;
 }
 static char *parse_value(const char *_Nullable buf)
@@ -307,7 +302,6 @@ static char *parse_value(const char *_Nullable buf)
 	 * Remove quotes if the value is a string.
 	 *
 	 */
-	log("{base}buf:\n{cyan}%s\n", buf);
 	if (buf == NULL) {
 		return NULL;
 	}
@@ -445,11 +439,6 @@ static char *current_value(const char *_Nonnull buf)
 	}
 	ret = parse_value(ret);
 	free(tmp);
-	if (ret != NULL) {
-		log("{base}Current value: {cyan}%s{clear}\n", ret);
-	} else {
-		log("{base}Current value: {cyan}NULL{clear}\n");
-	}
 	return ret;
 }
 static char *json_get_key_one_level(const char *_Nonnull buf, const char *_Nonnull key)
@@ -568,7 +557,6 @@ size_t json_anon_layer_get_key_array(const char *_Nonnull buf, const char *_Nonn
 		p = next_layer(p);
 	}
 	free(tmp);
-	log("{base}ret: {cyan}%ld{clear}\n", ret);
 	return ret;
 }
 size_t json_anon_layer_get_key_array_allow_null_val(const char *_Nonnull buf, const char *_Nonnull key, char ***_Nullable array)
@@ -604,7 +592,6 @@ size_t json_anon_layer_get_key_array_allow_null_val(const char *_Nonnull buf, co
 		p = next_layer(p);
 	}
 	free(tmp);
-	log("{base}ret: {cyan}%ld{clear}\n", ret);
 	return ret;
 }
 char *json_anon_layer_get_key(const char *_Nonnull buf, const char *_Nonnull key, const char *_Nonnull value, const char *_Nonnull key_to_get)

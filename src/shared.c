@@ -80,7 +80,7 @@ void check_dir_deny_list(const char *_Nonnull dir)
 	 * To protect the host system, we refuse to extract rootfs to unsafe directories.
 	 */
 	char *path = get_dir_realpath(dir);
-	log("{base}Realpath: {cyan}%s{clear}\n", path);
+	rurima_log("{base}Realpath: {cyan}%s{clear}\n", path);
 	if (strcmp(path, "/") == 0) {
 		error("{red}Refuse to extract rootfs to /\n");
 	}

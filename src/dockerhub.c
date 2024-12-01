@@ -349,7 +349,7 @@ static char *get_auth_server_url(const char *_Nullable mirror, bool fallback)
 	sprintf(ret, "%s?service=%s", server, service);
 	free(server);
 	free(service);
-	log("{base}Auth server url: {cyan}%s{clear}\n", ret);
+	rurima_log("{base}Auth server url: {cyan}%s{clear}\n", ret);
 	return ret;
 }
 static char *get_token(const char *_Nonnull image, const char *_Nullable mirror, bool fallback)
@@ -368,7 +368,7 @@ static char *get_token(const char *_Nonnull image, const char *_Nullable mirror,
 	char *auth_server_url = get_auth_server_url(mirror, fallback);
 	if (auth_server_url == NULL) {
 		if (fallback) {
-			log("{red}No auth server found, using homo magic token 1145141919810\n");
+			rurima_log("{red}No auth server found, using homo magic token 1145141919810\n");
 			// We hope the server administrator is homo.
 			return strdup("1145141919810");
 		} else {
@@ -380,7 +380,7 @@ static char *get_token(const char *_Nonnull image, const char *_Nullable mirror,
 	strcat(url, "&scope=repository%3A");
 	strcat(url, image);
 	strcat(url, "%3Apull");
-	log("{base}url: {cyan}%s{clear}\n", url);
+	rurima_log("{base}url: {cyan}%s{clear}\n", url);
 	const char *curl_command[] = { "curl", "-L", "-s", url, NULL };
 	char *token_json = fork_execvp_get_stdout(curl_command);
 	if (token_json == NULL) {
@@ -390,7 +390,7 @@ static char *get_token(const char *_Nonnull image, const char *_Nullable mirror,
 	if (ret == NULL) {
 		if (fallback) {
 			free(token_json);
-			log("{red}Can not get token, using homo magic token 1145141919810\n");
+			rurima_log("{red}Can not get token, using homo magic token 1145141919810\n");
 			// We hope the server administrator is homo.
 			return strdup("1145141919810");
 		} else {
@@ -398,7 +398,7 @@ static char *get_token(const char *_Nonnull image, const char *_Nullable mirror,
 		}
 	}
 	free(token_json);
-	log("{base}Token: {cyan}%s{clear}\n", ret);
+	rurima_log("{base}Token: {cyan}%s{clear}\n", ret);
 	return ret;
 }
 static char *get_tag_manifests(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nonnull token, const char *_Nullable mirror)
@@ -423,7 +423,7 @@ static char *get_tag_manifests(const char *_Nonnull image, const char *_Nonnull 
 	if (ret == NULL) {
 		error("{red}Failed to get manifests!\n");
 	}
-	log("{base}Manifests: \n{cyan}%s{clear}\n", ret);
+	rurima_log("{base}Manifests: \n{cyan}%s{clear}\n", ret);
 	free(auth);
 	return ret;
 }
@@ -445,7 +445,7 @@ static char *get_tag_digest(const char *_Nonnull manifests, const char *_Nullabl
 		free(tmp);
 		return NULL;
 	}
-	log("{base}Digest: %s{clear}\n", digest);
+	rurima_log("{base}Digest: %s{clear}\n", digest);
 	free(tmp);
 	return digest;
 }
@@ -464,13 +464,13 @@ static char **get_blobs(const char *_Nonnull image, const char *_Nonnull digest,
 		mirror = gloal_config.docker_mirror;
 	}
 	sprintf(url, "https://%s/v2/%s/manifests/%s", mirror, image, digest);
-	log("{base}url: {cyan}%s{clear}\n", url);
+	rurima_log("{base}url: {cyan}%s{clear}\n", url);
 	char *auth = malloc(strlen(token) + 114);
 	auth[0] = '\0';
 	sprintf(auth, "Authorization: Bearer %s", token);
 	const char *curl_command[] = { "curl", "-L", "-s", "-H", "Accept: application/vnd.oci.image.manifest.v1+json", "-H", auth, url, NULL };
 	char *response = fork_execvp_get_stdout(curl_command);
-	log("{base}Response: \n{cyan}%s{clear}\n", response);
+	rurima_log("{base}Response: \n{cyan}%s{clear}\n", response);
 	if (response == NULL) {
 		error("{red}Failed to get blobs!\n");
 	}
@@ -541,7 +541,7 @@ static void pull_images(const char *_Nonnull image, char *const *_Nonnull blobs,
 		auth[0] = '\0';
 		sprintf(auth, "Authorization: Bearer %s", token_tmp);
 		free(token_tmp);
-		log("{base}Command:\n{cyan}curl -L -s -H \"%s\" %s -o %s\n", auth, url, filename);
+		rurima_log("{base}Command:\n{cyan}curl -L -s -H \"%s\" %s -o %s\n", auth, url, filename);
 		const char *curl_command[] = { "curl", "-L", "-s", "-H", auth, url, "-o", filename, NULL };
 		int ret = fork_execvp(curl_command);
 		if (ret != 0) {
@@ -609,7 +609,7 @@ static char *get_config_digest(const char *_Nonnull image, const char *_Nonnull 
 		}
 		return get_config_digest_fallback(image, tag, token, mirror);
 	}
-	log("{base}Config: %s{clear}\n", config);
+	rurima_log("{base}Config: %s{clear}\n", config);
 	free(response);
 	free(auth);
 	return config;
@@ -705,10 +705,10 @@ static struct DOCKER *get_image_config(const char *_Nonnull image, const char *_
 	if (response == NULL) {
 		error("{red}Failed to get config!\n");
 	}
-	log("{base}Config:\n{cyan} %s\n", response);
+	rurima_log("{base}Config:\n{cyan} %s\n", response);
 	{
 		char *architecture = json_get_key(response, "[architecture]");
-		log("{base}Env: {cyan}%s{clear}\n", architecture == NULL ? "NULL" : architecture);
+		rurima_log("{base}Env: {cyan}%s{clear}\n", architecture == NULL ? "NULL" : architecture);
 		if (architecture == NULL) {
 			ret->architecture = NULL;
 		} else {
@@ -717,7 +717,7 @@ static struct DOCKER *get_image_config(const char *_Nonnull image, const char *_
 	}
 	{
 		char *workdir = json_get_key(response, "[config][WorkingDir]");
-		log("{base}Env: {cyan}%s{clear}\n", workdir == NULL ? "NULL" : workdir);
+		rurima_log("{base}Env: {cyan}%s{clear}\n", workdir == NULL ? "NULL" : workdir);
 		if (workdir == NULL) {
 			ret->workdir = NULL;
 		} else {
@@ -726,7 +726,7 @@ static struct DOCKER *get_image_config(const char *_Nonnull image, const char *_
 	}
 	{
 		char *env_from_json = json_get_key(response, "[config][Env]");
-		log("{base}Env: {cyan}%s{clear}\n", env_from_json == NULL ? "NULL" : env_from_json);
+		rurima_log("{base}Env: {cyan}%s{clear}\n", env_from_json == NULL ? "NULL" : env_from_json);
 		if (env_from_json != NULL) {
 			char *tmp = malloc(strlen(env_from_json) + 114);
 			sprintf(tmp, "env=%s\n", env_from_json);
@@ -735,7 +735,7 @@ static struct DOCKER *get_image_config(const char *_Nonnull image, const char *_
 			int len = k2v_get_key(char_array, "env", tmp, env, RURI_MAX_ENVS / 2);
 			parse_env(env, ret->env, len);
 			for (int i = 0; i < len; i++) {
-				log("{base}Env[%d]: {cyan}%s{clear}\n", i, env[i]);
+				rurima_log("{base}Env[%d]: {cyan}%s{clear}\n", i, env[i]);
 				free(env[i]);
 			}
 			free(tmp);
@@ -746,13 +746,13 @@ static struct DOCKER *get_image_config(const char *_Nonnull image, const char *_
 	}
 	{
 		char *entrypoint = json_get_key(response, "[config][Entrypoint]");
-		log("{base}Entrypoint: {cyan}%s{clear}\n", entrypoint == NULL ? "NULL" : entrypoint);
+		rurima_log("{base}Entrypoint: {cyan}%s{clear}\n", entrypoint == NULL ? "NULL" : entrypoint);
 		if (entrypoint != NULL) {
 			char *tmp = malloc(strlen(entrypoint) + 114);
 			sprintf(tmp, "entrypoint=%s\n", entrypoint);
 			int len = k2v_get_key(char_array, "entrypoint", tmp, ret->entrypoint, RURI_MAX_COMMANDS);
 			for (int i = 0; i < len; i++) {
-				log("{base}Entrypoint[%d]: {cyan}%s{clear}\n", i, ret->entrypoint[i]);
+				rurima_log("{base}Entrypoint[%d]: {cyan}%s{clear}\n", i, ret->entrypoint[i]);
 			}
 			free(tmp);
 			free(entrypoint);
@@ -762,13 +762,13 @@ static struct DOCKER *get_image_config(const char *_Nonnull image, const char *_
 	}
 	{
 		char *cmdline = json_get_key(response, "[config][Cmd]");
-		log("{base}Cmdline: {cyan}%s{clear}\n", cmdline == NULL ? "NULL" : cmdline);
+		rurima_log("{base}Cmdline: {cyan}%s{clear}\n", cmdline == NULL ? "NULL" : cmdline);
 		if (cmdline != NULL) {
 			char *tmp = malloc(strlen(cmdline) + 114);
 			sprintf(tmp, "cmdline=%s\n", cmdline);
 			int len = k2v_get_key(char_array, "cmdline", tmp, ret->command, RURI_MAX_COMMANDS);
 			for (int i = 0; i < len; i++) {
-				log("{base}Cmdline[%d]: {cyan}%s{clear}\n", i, ret->command[i]);
+				rurima_log("{base}Cmdline[%d]: {cyan}%s{clear}\n", i, ret->command[i]);
 			}
 			free(tmp);
 			free(cmdline);
@@ -901,13 +901,13 @@ static char *__docker_search(const char *_Nonnull url)
 	if (response == NULL) {
 		error("{red}Failed to get response from dockerhub!\n");
 	}
-	log("{base}Response from dockerhub:\n{cyan}%s{clear}\n", response);
+	rurima_log("{base}Response from dockerhub:\n{cyan}%s{clear}\n", response);
 	char *next_url = json_get_key(response, "[next]");
 	char *results = json_get_key(response, "[results]");
 	if (results == NULL) {
 		error("{red}No results found!\n");
 	}
-	log("{base}Results:\n{cyan}%s{clear}\n", results);
+	rurima_log("{base}Results:\n{cyan}%s{clear}\n", results);
 	char **name = NULL;
 	size_t len = json_anon_layer_get_key_array_allow_null_val(results, "[repo_name]", &name);
 	if (len == 0) {
@@ -976,12 +976,12 @@ int docker_search(const char *_Nonnull image, const char *_Nonnull page_size, bo
 	strcat(url, "&query=");
 	strcat(url, image);
 	while (true) {
-		log("{base}url: {cyan}%s{clear}\n", url);
+		rurima_log("{base}url: {cyan}%s{clear}\n", url);
 		char *next_url = __docker_search(url);
 		if (next_url == NULL) {
 			exit(EXIT_SUCCESS);
 		}
-		log("{base}nexturl: {cyan}%s{clear}\n", next_url);
+		rurima_log("{base}nexturl: {cyan}%s{clear}\n", next_url);
 		if (quiet) {
 			free(url);
 			free(next_url);
@@ -989,11 +989,11 @@ int docker_search(const char *_Nonnull image, const char *_Nonnull page_size, bo
 		}
 		char goto_next[114] = { '\0' };
 		get_input("\n{purple}Continue see more results? (y/n): ", goto_next);
-		log("{base}goto_next: {cyan}%s{clear}\n", goto_next);
+		rurima_log("{base}goto_next: {cyan}%s{clear}\n", goto_next);
 		if (strcmp(goto_next, "y") == 0) {
 			free(url);
 			url = next_url;
-			log("{base}next_url: {cyan}%s{clear}\n", next_url);
+			rurima_log("{base}next_url: {cyan}%s{clear}\n", next_url);
 		} else {
 			free(url);
 			free(next_url);
@@ -1011,18 +1011,18 @@ static char *__docker_search_tag(const char *_Nonnull image, const char *_Nonnul
 	 * It will read info from url, and return next url.
 	 *
 	 */
-	log("{base}url: {cyan}%s{clear}\n", url);
+	rurima_log("{base}url: {cyan}%s{clear}\n", url);
 	const char *curl_command[] = { "curl", "-L", "-s", url, NULL };
 	char *response = fork_execvp_get_stdout(curl_command);
 	if (response == NULL) {
 		error("{red}Failed to get response from dockerhub!\n");
 	}
-	log("{base}Response from dockerhub:\n{cyan}%s{clear}\n", response);
+	rurima_log("{base}Response from dockerhub:\n{cyan}%s{clear}\n", response);
 	if (architecture == NULL) {
 		architecture = docker_get_host_arch();
 	}
 	char *next_url = json_get_key(response, "[next]");
-	log("{base}next_url: {cyan}%s{clear}\n", next_url);
+	rurima_log("{base}next_url: {cyan}%s{clear}\n", next_url);
 	char *results = json_get_key(response, "[results]");
 	char **images = NULL;
 	size_t len = json_anon_layer_get_key_array_allow_null_val(results, "[images]", &images);
@@ -1081,12 +1081,12 @@ int docker_search_tag(const char *_Nonnull image, const char *_Nonnull page_size
 	strcat(url, "/tags/?page_size=");
 	strcat(url, page_size);
 	while (true) {
-		log("{base}url: {cyan}%s{clear}\n", url);
+		rurima_log("{base}url: {cyan}%s{clear}\n", url);
 		char *next_url = __docker_search_tag(image, url, architecture);
 		if (next_url == NULL) {
 			exit(EXIT_SUCCESS);
 		}
-		log("{base}nexturl: {cyan}%s{clear}\n", next_url);
+		rurima_log("{base}nexturl: {cyan}%s{clear}\n", next_url);
 		if (quiet) {
 			free(url);
 			free(next_url);
@@ -1094,11 +1094,11 @@ int docker_search_tag(const char *_Nonnull image, const char *_Nonnull page_size
 		}
 		char goto_next[114] = { '\0' };
 		get_input("\n{purple}Continue see more results? (y/n): ", goto_next);
-		log("{base}goto_next: {cyan}%s{clear}\n", goto_next);
+		rurima_log("{base}goto_next: {cyan}%s{clear}\n", goto_next);
 		if (strcmp(goto_next, "y") == 0) {
 			free(url);
 			url = next_url;
-			log("{base}next_url: {cyan}%s{clear}\n", next_url);
+			rurima_log("{base}next_url: {cyan}%s{clear}\n", next_url);
 		} else {
 			free(url);
 			free(next_url);

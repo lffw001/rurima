@@ -136,14 +136,14 @@ static char *lxc_get_image_dir(const char *_Nullable mirror, const char *_Nonnul
 	if (architecture == NULL) {
 		architecture = lxc_get_host_arch();
 	}
-	log("arch: %s\n", architecture);
+	rurima_log("arch: %s\n", architecture);
 	if (type == NULL) {
 		type = "default";
 	}
-	log("p: %s\n", p);
+	rurima_log("p: %s\n", p);
 	char *str_to_find = malloc(strlen(os) + strlen(version) + strlen(architecture) + strlen(type) + 10);
 	sprintf(str_to_find, "%s;%s;%s;%s", os, version, architecture, type);
-	log("str to find: %s\n", str_to_find);
+	rurima_log("str to find: %s\n", str_to_find);
 	if (strstr(p, str_to_find) == NULL) {
 		free(str_to_find);
 		free(buf);

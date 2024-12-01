@@ -43,8 +43,9 @@
 #include <termios.h>
 #include <limits.h>
 #include <dirent.h>
+#include <ctype.h>
 #define LIBJSONV_MAJOR 1
-#define LIBJSONV_MINOR 0
+#define LIBJSONV_MINOR 1
 #if __STDC_VERSION__ < 202000L
 #ifndef bool
 #define bool _Bool
