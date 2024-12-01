@@ -193,6 +193,9 @@ static void show_progress(double per)
 	/*
 	 * Show progress bar.
 	 */
+	if (gloal_config.no_process) {
+		return;
+	}
 	struct winsize size;
 	ioctl(STDOUT_FILENO, TIOCGWINSZ, &size);
 	unsigned short width = size.ws_col - 10;

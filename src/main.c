@@ -34,6 +34,7 @@ struct RURIMA_CONFIG gloal_config = {
 	.lxc_mirror = "images.linuxcontainers.org",
 	.hook_script = NULL,
 	.quiet = false,
+	.no_process = false,
 };
 // clang-format on
 static void show_help(void)

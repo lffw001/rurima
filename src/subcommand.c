@@ -151,6 +151,8 @@ void docker(int argc, char **_Nonnull argv)
 			}
 			tag = argv[i + 1];
 			i++;
+		} else if (strcmp(argv[i], "-n") == 0 || strcmp(argv[i], "--no-process") == 0) {
+			gloal_config.no_process = true;
 		} else if (strcmp(argv[i], "-T") == 0 || strcmp(argv[i], "--try-mirrors") == 0) {
 			try_mirrors = true;
 			if (i + 1 < argc) {
@@ -345,6 +347,8 @@ void lxc(int argc, char **_Nonnull argv)
 			}
 			mirror = argv[i + 1];
 			i++;
+		} else if (strcmp(argv[i], "-n") == 0 || strcmp(argv[i], "--no-process") == 0) {
+			gloal_config.no_process = true;
 		} else if (strcmp(argv[i], "-o") == 0 || strcmp(argv[i], "--os") == 0) {
 			if (i + 1 >= argc) {
 				error("{red}No os specified!\n");
@@ -450,6 +454,8 @@ void unpack(int argc, char **_Nonnull argv)
 			check_dir_deny_list(argv[i + 1]);
 			dir = argv[i + 1];
 			i++;
+		} else if (strcmp(argv[i], "-n") == 0 || strcmp(argv[i], "--no-process") == 0) {
+			gloal_config.no_process = true;
 		} else if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
 			cprintf("{base}Usage: unpack [options]\n");
 			cprintf("{base}Options:\n");
@@ -494,6 +500,8 @@ void backup(int argc, char **_Nonnull argv)
 			}
 			dir = argv[i + 1];
 			i++;
+		} else if (strcmp(argv[i], "-n") == 0 || strcmp(argv[i], "--no-process") == 0) {
+			gloal_config.no_process = true;
 		} else if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
 			cprintf("{base}Usage: unpack [options]\n");
 			cprintf("{base}Options:\n");
