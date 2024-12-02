@@ -124,7 +124,12 @@ static void print_ruri_command(struct DOCKER *_Nonnull config, char *_Nullable s
 		printf("-q /path/to/qemu-%s-static ", config->architecture);
 	}
 	for (int i = 0; config->env[i] != NULL && config->env[i + 1] != NULL; i += 2) {
-		printf("-e \"%s\" \"%s\" ", config->env[i], config->env[i + 1]);
+		printf("-e \"%s\" ", config->env[i]);
+		if (strcmp(config->env[i + 1], "") != 0) {
+			printf("\"%s\" ", config->env[i + 1]);
+		} else {
+			printf("\" \" ");
+		}
 	}
 	printf("%s ", savedir == NULL ? "/path/to/container" : savedir);
 	if (config->command[0] != NULL) {
