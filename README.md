@@ -8,6 +8,10 @@
 * This program has no Super Cow Powers.
 ```
 # About:
+So, what is rurima?       
+The enhanced version of ruri.          
+ruri only focus on running container, but rurima can also provide the function of getting rootfs image and backup/restore.          
+And it will be a more powerful container manager in the fulture.            
 With the `docker` and `lxc` subcommand of rurima, you can search & get & unpack images from dockerhub or LXC mirror easily.       
 # Not Only Ruri Container Manager:
 Rurima was planned to be the ruri container manager, but as rurima has a full integration of ruri now, you can just use it as a more powerful version of ruri, although the container manager function is still WIP.               
