@@ -145,13 +145,17 @@ struct DOCKER {
 		exit(114);                                                                                             \
 	}
 // Log system.
+// We use a global variable to disable log in runtime.
+extern bool disable_rurima_log;
 #if defined(RURIMA_DEBUG)
-#define rurima_log(...)                                                                                                               \
-	{                                                                                                                             \
-		struct timeval tv;                                                                                                    \
-		gettimeofday(&tv, NULL);                                                                                              \
-		cfprintf(stdout, "{green}[%ld.%06ld] in %s() in %s line %d:\n", tv.tv_sec, tv.tv_usec, __func__, __FILE__, __LINE__); \
-		cfprintf(stdout, ##__VA_ARGS__)                                                                                       \
+#define rurima_log(...)                                                                                                                       \
+	{                                                                                                                                     \
+		if (!disable_rurima_log) {                                                                                                    \
+			struct timeval tv;                                                                                                    \
+			gettimeofday(&tv, NULL);                                                                                              \
+			cfprintf(stdout, "{green}[%ld.%06ld] in %s() in %s line %d:\n", tv.tv_sec, tv.tv_usec, __func__, __FILE__, __LINE__); \
+			cfprintf(stdout, ##__VA_ARGS__)                                                                                       \
+		}                                                                                                                             \
 	}
 #else
 #define rurima_log(...)

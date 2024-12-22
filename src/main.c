@@ -28,6 +28,7 @@
  *
  */
 #include "include/rurima.h"
+bool disable_rurima_log = false;
 // clang-format off
 struct RURIMA_CONFIG gloal_config = {
 	.docker_mirror = "registry-1.docker.io",
@@ -52,6 +53,7 @@ static void show_help(void)
 	cprintf("{base}  -v, --version: Show version info.\n");
 	cprintf("{base}  -V, --version-code: Show version code.\n");
 	cprintf("{base}See rurima [subcommand] help for further information.\n");
+	cprintf("{base}Use `rurima -q subcommand` to disable log in rurima-dbg.\n");
 }
 static void detect_suid_or_capability(void)
 {
@@ -83,13 +85,17 @@ int main(int argc, char **argv)
 	warning("{red}You are using dev/debug build, if you think this is wrong, please rebuild rurima or get it from release page.\n");
 #endif
 	rurima_register_signal();
-	check_dep();
 	if (argc == 1) {
 		show_help();
 		return 0;
 	}
 	for (int i = 1; i < argc; i++) {
+		if (strcmp(argv[i], "-q") == 0 || strcmp(argv[i], "--quiet") == 0) {
+			disable_rurima_log = true;
+			continue;
+		}
 		if (strcmp(argv[i], "docker") == 0 || strcmp(argv[i], "d") == 0) {
+			check_dep();
 			if (i + 1 >= argc) {
 				error("{red}No subcommand specified!\n");
 			}
@@ -97,6 +103,7 @@ int main(int argc, char **argv)
 			return 0;
 		}
 		if (strcmp(argv[i], "lxc") == 0 || strcmp(argv[i], "l") == 0) {
+			check_dep();
 			if (i + 1 >= argc) {
 				error("{red}No subcommand specified!\n");
 			}
@@ -104,10 +111,12 @@ int main(int argc, char **argv)
 			return 0;
 		}
 		if (strcmp(argv[i], "backup") == 0 || strcmp(argv[i], "b") == 0) {
+			check_dep();
 			backup(argc - i - 1, &argv[i + 1]);
 			return 0;
 		}
 		if (strcmp(argv[i], "unpack") == 0 || strcmp(argv[i], "u") == 0) {
+			check_dep();
 			unpack(argc - i - 1, &argv[i + 1]);
 			return 0;
 		}

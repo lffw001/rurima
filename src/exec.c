@@ -103,6 +103,7 @@ char *fork_execvp_get_stdout_ignore_err(const char *_Nonnull argv[])
 		close(pipefd[0]);
 		int status = 0;
 		waitpid(pid, &status, 0);
+		rurima_log("{base}Exec {green}%s{base} result: {purple}\n%s\n", argv[0], output);
 		return output;
 	}
 	return NULL;
@@ -168,6 +169,7 @@ char *fork_execvp_get_stdout(const char *_Nonnull argv[])
 			free(output);
 			return NULL;
 		}
+		rurima_log("{base}Exec {green}%s{base} result: {purple}\n%s\n", argv[0], output);
 		return output;
 	}
 	return NULL;

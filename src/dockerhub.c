@@ -197,7 +197,7 @@ void show_docker_config(struct DOCKER *_Nonnull config, char *_Nullable savedir,
 		}
 		print_proot_command(config, savedir);
 		if (!quiet) {
-			cprintf("\n{yellow}Please replace <other args> with your proot args!");
+			cprintf("\n{yellow}Please replace [OTHER_ARGS] with your proot args!");
 		}
 	} else if (strcmp(runtime, "chroot") == 0) {
 		if (!quiet) {
