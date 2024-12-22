@@ -90,12 +90,14 @@ static void print_proot_command(struct DOCKER *_Nonnull config, char *_Nullable 
 	 * Print command to use proot as runtime.
 	 */
 	print_export_env(config);
-	printf("proot <other args> -0 ");
+	printf("OTHER_ARGS=\"\"\n");
+	printf("QEMU_PATH=\"\"\n");
+	printf("proot $OTHER_ARGS -0 ");
 	if (config->workdir != NULL) {
 		printf("-w %s ", config->workdir);
 	}
 	if (strcmp(config->architecture, docker_get_host_arch()) != 0) {
-		printf("-q /path/to/qemu-%s-static ", config->architecture);
+		printf("-q $QEMU_PATH ");
 	}
 	printf("-r %s ", savedir == NULL ? "/path/to/container" : savedir);
 	if (config->command[0] != NULL) {
@@ -231,7 +233,7 @@ static char *get_auth_server_from_header(const char *_Nonnull header, bool fallb
 	 * www-authenticate: Bearer realm="https://auth.docker.io/token",service="registry.docker.io"
 	 *
 	 */
-	// Just to show you how ugly if we don't lowercase the header.
+	// Just to show you how ugly if we don't force lowercase the header.
 	const char *p = strstr_ignore_case(header, "wWw-aUthEntIcAtE: ");
 	if (p == NULL) {
 		if (fallback) {
