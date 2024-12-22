@@ -197,7 +197,7 @@ void show_docker_config(struct DOCKER *_Nonnull config, char *_Nullable savedir,
 		}
 		print_proot_command(config, savedir);
 		if (!quiet) {
-			cprintf("\n{yellow}Please replace [OTHER_ARGS] with your proot args!");
+			warning("\n{yellow}Please replace [OTHER_ARGS] with your proot args!");
 		}
 	} else if (strcmp(runtime, "chroot") == 0) {
 		if (!quiet) {
@@ -216,10 +216,10 @@ void show_docker_config(struct DOCKER *_Nonnull config, char *_Nullable savedir,
 	if (!quiet) {
 		printf("\n\033[0m");
 		if (savedir == NULL) {
-			cprintf("{yellow}Please replace /path/to/container with your container path!\n");
+			warning("{yellow}Please replace /path/to/container with your container path!\n");
 		}
 		if (strcmp(config->architecture, docker_get_host_arch()) != 0) {
-			cprintf("{yellow}Please replace /path/to/qemu-%s-static with your qemu binary path!\n", config->architecture);
+			warning("{yellow}Please replace /path/to/qemu-%s-static with your qemu binary path!\n", config->architecture);
 		}
 	}
 }
