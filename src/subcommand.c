@@ -83,7 +83,7 @@ static void docker_pull_try_mirrors(const char *_Nonnull image, const char *_Non
 			}
 		}
 	}
-	char *mirrorlist_builtin[] = { gloal_config.docker_mirror, "hub.xdark.top", "dockerpull.org", "hub.crdz.gq", "docker.1panel.live", "docker.unsee.tech", "docker.m.daocloud.io", "docker.kejinlion.pro", "registry.dockermirror.com", "hub.rat.dev", "dhub.kubesre.xyz", "docker.nastool.de", "docker.udayun.com", "docker.rainbond.cc", "hub.geekery.cn", "registry.hub.docker.com", NULL };
+	char *mirrorlist_builtin[] = { global_config.docker_mirror, "hub.xdark.top", "dockerpull.org", "hub.crdz.gq", "docker.1panel.live", "docker.unsee.tech", "docker.m.daocloud.io", "docker.kejinlion.pro", "registry.dockermirror.com", "hub.rat.dev", "dhub.kubesre.xyz", "docker.nastool.de", "docker.udayun.com", "docker.rainbond.cc", "hub.geekery.cn", "registry.hub.docker.com", NULL };
 	for (int i = 0; mirrorlist_builtin[i] != NULL; i++) {
 		cprintf("{base}Trying mirror: {cyan}%s\n", mirrorlist_builtin[i]);
 		rexec_argv[0] = "docker";
@@ -152,7 +152,7 @@ void docker(int argc, char **_Nonnull argv)
 			tag = argv[i + 1];
 			i++;
 		} else if (strcmp(argv[i], "-n") == 0 || strcmp(argv[i], "--no-process") == 0) {
-			gloal_config.no_process = true;
+			global_config.no_process = true;
 		} else if (strcmp(argv[i], "-T") == 0 || strcmp(argv[i], "--try-mirrors") == 0) {
 			try_mirrors = true;
 			if (i + 1 < argc) {
@@ -198,7 +198,7 @@ void docker(int argc, char **_Nonnull argv)
 			i++;
 		} else if (strcmp(argv[i], "-q") == 0 || strcmp(argv[i], "--quiet") == 0) {
 			quiet = true;
-			gloal_config.quiet = true;
+			global_config.quiet = true;
 		} else if (strcmp(argv[i], "-f") == 0 || strcmp(argv[i], "--fallback") == 0 || strcmp(argv[i], "--failback") == 0) {
 			fallback = true;
 		} else if (strcmp(argv[i], "-m") == 0 || strcmp(argv[i], "--mirror") == 0) {
@@ -215,7 +215,7 @@ void docker(int argc, char **_Nonnull argv)
 		architecture = docker_get_host_arch();
 	}
 	if (mirror == NULL) {
-		mirror = gloal_config.docker_mirror;
+		mirror = global_config.docker_mirror;
 	}
 	if (strcmp(mirror, "registry-1.docker.io") != 0) {
 		if (!quiet) {
@@ -348,7 +348,7 @@ void lxc(int argc, char **_Nonnull argv)
 			mirror = argv[i + 1];
 			i++;
 		} else if (strcmp(argv[i], "-n") == 0 || strcmp(argv[i], "--no-process") == 0) {
-			gloal_config.no_process = true;
+			global_config.no_process = true;
 		} else if (strcmp(argv[i], "-o") == 0 || strcmp(argv[i], "--os") == 0) {
 			if (i + 1 >= argc) {
 				error("{red}No os specified!\n");
@@ -381,7 +381,7 @@ void lxc(int argc, char **_Nonnull argv)
 			savedir = argv[i + 1];
 			i++;
 		} else if (strcmp(argv[i], "-q") == 0 || strcmp(argv[i], "--quiet") == 0) {
-			gloal_config.quiet = true;
+			global_config.quiet = true;
 		} else {
 			error("{red}Unknown argument!\n");
 		}
@@ -455,7 +455,7 @@ void unpack(int argc, char **_Nonnull argv)
 			dir = argv[i + 1];
 			i++;
 		} else if (strcmp(argv[i], "-n") == 0 || strcmp(argv[i], "--no-process") == 0) {
-			gloal_config.no_process = true;
+			global_config.no_process = true;
 		} else if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
 			cprintf("{base}Usage: unpack [options]\n");
 			cprintf("{base}Options:\n");
@@ -501,7 +501,7 @@ void backup(int argc, char **_Nonnull argv)
 			dir = argv[i + 1];
 			i++;
 		} else if (strcmp(argv[i], "-n") == 0 || strcmp(argv[i], "--no-process") == 0) {
-			gloal_config.no_process = true;
+			global_config.no_process = true;
 		} else if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
 			cprintf("{base}Usage: unpack [options]\n");
 			cprintf("{base}Options:\n");

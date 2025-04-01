@@ -193,7 +193,7 @@ static void show_progress(double per)
 	/*
 	 * Show progress bar.
 	 */
-	if (gloal_config.no_process) {
+	if (global_config.no_process) {
 		return;
 	}
 	struct winsize size;

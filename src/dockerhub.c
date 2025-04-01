@@ -322,7 +322,7 @@ static char *get_auth_server_url(const char *_Nullable mirror, bool fallback)
 	 *
 	 */
 	if (mirror == NULL) {
-		mirror = gloal_config.docker_mirror;
+		mirror = global_config.docker_mirror;
 	}
 	char url[4096] = { '\0' };
 	sprintf(url, "https://%s/v2/", mirror);
@@ -370,7 +370,7 @@ static char *get_token(const char *_Nonnull image, const char *_Nullable mirror,
 	 */
 	char url[4096] = { '\0' };
 	if (mirror == NULL) {
-		mirror = gloal_config.docker_mirror;
+		mirror = global_config.docker_mirror;
 	}
 	char *auth_server_url = get_auth_server_url(mirror, fallback);
 	if (auth_server_url == NULL) {
@@ -418,7 +418,7 @@ static char *get_tag_manifests(const char *_Nonnull image, const char *_Nonnull 
 	 *
 	 */
 	if (mirror == NULL) {
-		mirror = gloal_config.docker_mirror;
+		mirror = global_config.docker_mirror;
 	}
 	char url[4096] = { '\0' };
 	sprintf(url, "https://%s/v2/%s/manifests/%s", mirror, image, tag);
@@ -468,7 +468,7 @@ static char **get_blobs(const char *_Nonnull image, const char *_Nonnull digest,
 	 */
 	char url[4096] = { '\0' };
 	if (mirror == NULL) {
-		mirror = gloal_config.docker_mirror;
+		mirror = global_config.docker_mirror;
 	}
 	sprintf(url, "https://%s/v2/%s/manifests/%s", mirror, image, digest);
 	rurima_log("{base}url: {cyan}%s{clear}\n", url);
@@ -528,7 +528,7 @@ static void pull_images(const char *_Nonnull image, char *const *_Nonnull blobs,
 	}
 	chdir(savedir);
 	if (mirror == NULL) {
-		mirror = gloal_config.docker_mirror;
+		mirror = global_config.docker_mirror;
 	}
 	for (int i = 0;; i++) {
 		if (blobs[i] == NULL) {
@@ -555,6 +555,23 @@ static void pull_images(const char *_Nonnull image, char *const *_Nonnull blobs,
 			error("{red}Failed to pull image!\n");
 		}
 		free(auth);
+		if (!fallback) {
+			const char *sha256_command[] = { "sha256sum", filename, NULL };
+			char *sha256 = fork_execvp_get_stdout(sha256_command);
+			if (sha256 == NULL) {
+				error("{red}Failed to get sha256!\n");
+			}
+			if (strchr(sha256, ' ') == NULL) {
+				error("{red}Failed to get sha256!\n");
+			}
+			*strchr(sha256, ' ') = '\0';
+			rurima_log("{base}SHA256: %s\n", sha256);
+			if (strcmp(sha256, &(blobs[i][7])) != 0) {
+				error("{red}SHA256 mismatch!\n");
+			}
+			rurima_log("{base}SHA256 match!\n");
+			free(sha256);
+		}
 		ret = extract_archive(filename, ".");
 		if (ret != 0) {
 			error("{red}Failed to extract archive!\n");
@@ -571,7 +588,7 @@ static char *get_config_digest_fallback(const char *_Nonnull image, const char *
 	 *
 	 */
 	if (mirror == NULL) {
-		mirror = gloal_config.docker_mirror;
+		mirror = global_config.docker_mirror;
 	}
 	char *manifests = get_tag_manifests(image, tag, token, mirror);
 	char *ret = json_get_key(manifests, "[config][digest]");
@@ -590,7 +607,7 @@ static char *get_config_digest(const char *_Nonnull image, const char *_Nonnull 
 	 *
 	 */
 	if (mirror == NULL) {
-		mirror = gloal_config.docker_mirror;
+		mirror = global_config.docker_mirror;
 	}
 	if (digest == NULL) {
 		if (!fallback) {
@@ -700,7 +717,7 @@ static struct DOCKER *get_image_config(const char *_Nonnull image, const char *_
 	 */
 	struct DOCKER *ret = malloc(sizeof(struct DOCKER));
 	if (mirror == NULL) {
-		mirror = gloal_config.docker_mirror;
+		mirror = global_config.docker_mirror;
 	}
 	char url[4096] = { '\0' };
 	sprintf(url, "https://%s/v2/%s/blobs/%s", mirror, image, config);
@@ -745,6 +762,7 @@ static struct DOCKER *get_image_config(const char *_Nonnull image, const char *_
 				rurima_log("{base}Env[%d]: {cyan}%s{clear}\n", i, env[i]);
 				free(env[i]);
 			}
+			ret->env[len * 2] = NULL;
 			free(tmp);
 			free(env_from_json);
 		} else {
@@ -761,6 +779,7 @@ static struct DOCKER *get_image_config(const char *_Nonnull image, const char *_
 			for (int i = 0; i < len; i++) {
 				rurima_log("{base}Entrypoint[%d]: {cyan}%s{clear}\n", i, ret->entrypoint[i]);
 			}
+			ret->entrypoint[len] = NULL;
 			free(tmp);
 			free(entrypoint);
 		} else {
@@ -777,6 +796,7 @@ static struct DOCKER *get_image_config(const char *_Nonnull image, const char *_
 			for (int i = 0; i < len; i++) {
 				rurima_log("{base}Cmdline[%d]: {cyan}%s{clear}\n", i, ret->command[i]);
 			}
+			ret->command[len] = NULL;
 			free(tmp);
 			free(cmdline);
 		} else {
@@ -820,7 +840,7 @@ static struct DOCKER *docker_pull_fallback(const char *_Nonnull image, const cha
 	 *
 	 */
 	if (mirror == NULL) {
-		mirror = gloal_config.docker_mirror;
+		mirror = global_config.docker_mirror;
 	}
 	char *token = get_token(image, mirror, true);
 	char *manifests = get_tag_manifests(image, tag, token, mirror);
@@ -856,7 +876,7 @@ struct DOCKER *docker_pull(const char *_Nonnull image, const char *_Nonnull tag,
 	 *
 	 */
 	if (mirror == NULL) {
-		mirror = gloal_config.docker_mirror;
+		mirror = global_config.docker_mirror;
 	}
 	char *token = get_token(image, mirror, fallback);
 	char *manifests = get_tag_manifests(image, tag, token, mirror);
@@ -932,7 +952,7 @@ static char *__docker_search(const char *_Nonnull url)
 	}
 	for (size_t i = 0; i < len; i++) {
 		if (strcmp(is_offical[i], "true") == 0) {
-			if (!gloal_config.quiet) {
+			if (!global_config.quiet) {
 				cprintf("{yellow}%s {green}[official]\n", name[i]);
 				if (description[i] != NULL) {
 					cprintf("  {cyan}Description: %s\n", description[i]);
@@ -943,7 +963,7 @@ static char *__docker_search(const char *_Nonnull url)
 				printf("%s [official]\n", name[i]);
 			}
 		} else {
-			if (!gloal_config.quiet) {
+			if (!global_config.quiet) {
 				cprintf("{yellow}%s\n", name[i]);
 				if (description[i] != NULL) {
 					cprintf("  {cyan}Description: %s\n", description[i]);
@@ -1051,7 +1071,7 @@ static char *__docker_search_tag(const char *_Nonnull image, const char *_Nonnul
 		tmp = json_anon_layer_get_key(images[i], "[architecture]", architecture, "[digest]");
 		if (tmp != NULL) {
 			found = true;
-			if (!gloal_config.quiet) {
+			if (!global_config.quiet) {
 				cprintf("{yellow}[%s]: {cyan}%s{clear}\n", image, tags[i]);
 			} else {
 				printf("[%s]: %s\n", image, tags[i]);
@@ -1164,7 +1184,7 @@ static void docker_print_arch(const char *_Nonnull image, char *const *_Nonnull 
 		error("{red}No results found!\n");
 	}
 	for (int i = 0; archlist[i] != NULL; i++) {
-		if (!gloal_config.quiet) {
+		if (!global_config.quiet) {
 			cprintf("{yellow}[%s]: {cyan}%s{clear}\n", image, archlist[i]);
 		} else {
 			printf("[%s]: %s\n", image, archlist[i]);
@@ -1185,7 +1205,7 @@ int docker_search_arch(const char *_Nonnull image, const char *_Nonnull tag, cha
 	 *
 	 */
 	if (mirror == NULL) {
-		mirror = gloal_config.docker_mirror;
+		mirror = global_config.docker_mirror;
 	}
 	char *token = get_token(image, mirror, fallback);
 	char *manifests = get_tag_manifests(image, tag, token, mirror);

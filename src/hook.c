@@ -37,7 +37,7 @@ void *default_hook(const char *_Nonnull container_dir)
 			    "rm /etc/resolv.conf"
 			    "echo \"nameserver 1.1.1.1\" > /etc/resolv.conf"
 			    "exit 0\n";
-	if (gloal_config.hook_script == NULL) {
+	if (global_config.hook_script == NULL) {
 		char hook_script_path[PATH_MAX] = { '\0' };
 		snprintf(hook_script_path, PATH_MAX, "%s/tmp/hook.sh", container_dir);
 		chdir(container_dir);
@@ -61,8 +61,8 @@ void *default_hook(const char *_Nonnull container_dir)
 		chdir(container_dir);
 		mkdir("tmp", 0666);
 		int fd = open(hook_script_path, O_CREAT | O_WRONLY, 0777);
-		int fd2 = open(gloal_config.hook_script, O_RDONLY);
-		sendfile(fd, fd2, NULL, get_file_size(gloal_config.hook_script));
+		int fd2 = open(global_config.hook_script, O_RDONLY);
+		sendfile(fd, fd2, NULL, get_file_size(global_config.hook_script));
 		close(fd);
 		close(fd2);
 		if (run_with_root()) {

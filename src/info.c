@@ -48,10 +48,6 @@ void show_version_info(void)
 #if defined(RURIMA_COMMIT_ID)
 	cprintf("{base}%s%s%s", "rurima commit id ................:  ", RURIMA_COMMIT_ID, "\n");
 #endif
-	cprintf("{base}%s%s%s", "rurima lxc-subcommand version ...:  ", RURIMA_LXC_VERSION, "\n");
-	cprintf("{base}%s%s%s", "rurima docker-subcommand version :  ", RURIMA_DOCKER_VERSION, "\n");
-	cprintf("{base}%s%s%s", "rurima unpack-subcommand version :  ", RURIMA_UNPACK_VERSION, "\n");
-	cprintf("{base}%s%s%s", "rurima backup-subcommand version :  ", RURIMA_BACKUP_VERSION, "\n");
 	cprintf("{base}%s%s%s", "built-in ruri version ...........:  ", RURI_VERSION, "\n");
 #if defined(RURI_COMMIT_ID)
 	cprintf("{base}%s%s%s", "built-in ruri commit id .........:  ", RURI_COMMIT_ID, "\n");
@@ -59,9 +55,6 @@ void show_version_info(void)
 #if defined(LIBCAP_MAJOR) && defined(LIBCAP_MINOR)
 	cprintf("{base}%s%d%s%d%s", "libcap ..........................:  ", LIBCAP_MAJOR, ".", LIBCAP_MINOR, "\n");
 #endif
-	cprintf("{base}%s%d%s%d%s", "libk2v ..........................:  ", LIBK2V_MAJOR, ".", LIBK2V_MINOR, "\n");
-	cprintf("{base}%s%d%s%d%s", "cprintf .........................:  ", CPRINTF_MAJOR, ".", CPRINTF_MINOR, "\n");
-	cprintf("{base}%s%d%s%d%s", "libjsonv ........................:  ", LIBJSONV_MAJOR, ".", LIBJSONV_MINOR, "\n");
 	cprintf("{base}%s%s\n", "Compiler version ................:  ", __VERSION__);
 	cprintf("{base}%s%s\n", "Build date ......................:  ", __TIMESTAMP__);
 	cprintf("{base}\nThere is NO WARRANTY, to the extent permitted by law\n");

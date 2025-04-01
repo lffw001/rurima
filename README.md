@@ -85,6 +85,7 @@ rurima needs tar, xz, gzip, file, you can find these static binary for aarch64, 
 [gzip-static](https://github.com/Moe-sushi/gzip-static)     
 [file-static](https://github.com/Moe-sushi/file-static)      
 rurima need `curl` for downloading images, you can find a third party build here (Thanks stunnel) [stunnel/static-curl](https://github.com/stunnel/static-curl).      
+rurima need `sha256sum` for checking downloaded file from dockerhub, use `--fallback` option can disable this.      
 rurima also need proot if you are unpacking rootfs without root privileges, you can find it by the following way:      
 First, you know your cpu arch, then, for example for aarch64:      
 ```sh

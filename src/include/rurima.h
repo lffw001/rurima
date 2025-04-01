@@ -75,7 +75,7 @@ struct RURIMA_CONFIG {
 	bool quiet;
 	bool no_process;
 };
-extern struct RURIMA_CONFIG gloal_config;
+extern struct RURIMA_CONFIG global_config;
 struct RURIMA {
 	/*
 	 * This is full rurima config.
@@ -123,7 +123,12 @@ struct DOCKER {
 	char *_Nullable architecture;
 };
 // Warnings.
-#define warning(...) cfprintf(stderr, ##__VA_ARGS__)
+#define warning(...)                                    \
+	{                                               \
+		if (!global_config.quiet) {             \
+			cfprintf(stderr, ##__VA_ARGS__) \
+		}                                       \
+	}
 // Show error msg and exit.
 #define error(...)                                                                                                     \
 	{                                                                                                              \

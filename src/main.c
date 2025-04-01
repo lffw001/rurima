@@ -30,7 +30,7 @@
 #include "include/rurima.h"
 bool disable_rurima_log = false;
 // clang-format off
-struct RURIMA_CONFIG gloal_config = {
+struct RURIMA_CONFIG global_config = {
 	.docker_mirror = "registry-1.docker.io",
 	.lxc_mirror = "images.linuxcontainers.org",
 	.hook_script = NULL,
