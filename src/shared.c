@@ -443,3 +443,16 @@ off_t get_dir_file_size(const char *_Nonnull target)
 	ret = atol(result);
 	return ret * 1024;
 }
+bool sha256sum_exists(void)
+{
+	/*
+	 * Check if sha256sum exists.
+	 */
+	const char *command[] = { "sha256sum", "-v", NULL };
+	char *result = fork_execvp_get_stdout_ignore_err(command);
+	if (result == NULL) {
+		return false;
+	}
+	free(result);
+	return true;
+}

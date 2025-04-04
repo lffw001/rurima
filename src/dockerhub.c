@@ -555,7 +555,7 @@ static void pull_images(const char *_Nonnull image, char *const *_Nonnull blobs,
 			error("{red}Failed to pull image!\n");
 		}
 		free(auth);
-		if (!fallback) {
+		if (!fallback && sha256sum_exists()) {
 			const char *sha256_command[] = { "sha256sum", filename, NULL };
 			char *sha256 = fork_execvp_get_stdout(sha256_command);
 			if (sha256 == NULL) {
