@@ -22,11 +22,7 @@ This project does not follow OCI and can only be a `PARTIAL` replacement of dock
 You can get rurima binary (staticly linked) for arm64, armv7, armhf, riscv64, i386, loong64, s390x, ppc64le and x86_64 from the release page.     
 Or run the follwing command to get rurima to ./rurima and ./rurima-dbg(debug version):     
 ```sh
-wget -q -O - https://getrurima.crack.moe | bash -s -- -s
-```   
-or:    
-```sh
-wget -q -O - https://rurima.nekofeng.com | bash -s -- -s
+. <(curl -sL https://get.ruri.zip/rurima)
 ```   
 # Example usage of docker subcommand:
 Get `alpine` image, use tag `edge`, save to `./test`     
