@@ -8,13 +8,13 @@ mkdir output
 git clone https://github.com/moe-hacker/rurima
 cd rurima
 git submodule update --init
-./configure -s
+./gen-config -s
 make
 strip rurima
 upx rurima
 cp rurima ../output/rurima
 cp LICENSE ../output/LICENSE
-./configure -s -D
+./gen-config -s -D
 make
 upx rurima
 cp rurima ../output/rurima-dbg 

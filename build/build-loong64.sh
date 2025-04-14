@@ -9,10 +9,10 @@ apt install -y upx
 git clone https://github.com/moe-hacker/rurima
 cd rurima
 git submodule update --init
-./configure -s -D
+./gen-config -s -D
 make
 mv rurima rurima-dbg
-./configure -s
+./gen-config -s
 make
 tar -cvf ../loong64.tar ./rurima ./LICENSE
 EOF
