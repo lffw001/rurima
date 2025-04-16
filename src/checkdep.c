@@ -28,12 +28,12 @@
  *
  */
 #include "include/rurima.h"
-void check_dep(void)
+void rurima_check_dep(void)
 {
 	/*
 	 * Check dependencies.
 	 * We need tar, curl, file, gzip, xz and file with --brief --mime-type support.
-	 * If not found, we will error() directly.
+	 * If not found, we will rurima_error() directly.
 	 * We also need proot, but it's only for unpacking rootfs without root privilege.
 	 * So we will not check it here.
 	 *
@@ -45,34 +45,34 @@ void check_dep(void)
 	const char *xz_command[] = { "xz", "-V", NULL };
 	const char *file_command_2[] = { "file", "--brief", "--mime-type", "/proc/self/exe", NULL };
 	char *result = NULL;
-	result = fork_execvp_get_stdout(tar_command);
+	result = rurima_fork_execvp_get_stdout(tar_command);
 	if (result == NULL) {
-		error("{red}tar not found!\nIf you are aarch64, armv7, x86_64, i386 or riscv64 user\nYou can find it in\nhttps://github.com/Moe-sushi/tar-static\n");
+		rurima_error("{red}tar not found!\nIf you are aarch64, armv7, x86_64, i386 or riscv64 user\nYou can find it in\nhttps://github.com/Moe-sushi/tar-static\n");
 	}
 	free(result);
-	result = fork_execvp_get_stdout(curl_command);
+	result = rurima_fork_execvp_get_stdout(curl_command);
 	if (result == NULL) {
-		error("{red}curl not found!\n");
+		rurima_error("{red}curl not found!\n");
 	}
 	free(result);
-	result = fork_execvp_get_stdout(file_command);
+	result = rurima_fork_execvp_get_stdout(file_command);
 	if (result == NULL) {
-		error("{red}file not found!\nIf you are aarch64, armv7, x86_64, i386 or riscv64 user\nYou can find it in\nhttps://github.com/Moe-sushi/file-static\n");
+		rurima_error("{red}file not found!\nIf you are aarch64, armv7, x86_64, i386 or riscv64 user\nYou can find it in\nhttps://github.com/Moe-sushi/file-static\n");
 	}
 	free(result);
-	result = fork_execvp_get_stdout(gz_command);
+	result = rurima_fork_execvp_get_stdout(gz_command);
 	if (result == NULL) {
-		error("{red}gzip not found!\nIf you are aarch64, armv7, x86_64, i386 or riscv64 user\nYou can find it in\nhttps://github.com/Moe-sushi/gzip-static\n");
+		rurima_error("{red}gzip not found!\nIf you are aarch64, armv7, x86_64, i386 or riscv64 user\nYou can find it in\nhttps://github.com/Moe-sushi/gzip-static\n");
 	}
 	free(result);
-	result = fork_execvp_get_stdout(xz_command);
+	result = rurima_fork_execvp_get_stdout(xz_command);
 	if (result == NULL) {
-		error("{red}xz not found!\nIf you are aarch64, armv7, x86_64, i386 or riscv64 user\nYou can find it in\nhttps://github.com/Moe-sushi/xz-static\n");
+		rurima_error("{red}xz not found!\nIf you are aarch64, armv7, x86_64, i386 or riscv64 user\nYou can find it in\nhttps://github.com/Moe-sushi/xz-static\n");
 	}
 	free(result);
-	result = fork_execvp_get_stdout(file_command_2);
+	result = rurima_fork_execvp_get_stdout(file_command_2);
 	if (result == NULL) {
-		error("{red}file does not support --brief --mime-type!\nIf you are aarch64, armv7, x86_64, i386 or riscv64 user\nYou can find a support version in\nhttps://github.com/Moe-sushi/file-static\n");
+		rurima_error("{red}file does not support --brief --mime-type!\nIf you are aarch64, armv7, x86_64, i386 or riscv64 user\nYou can find a support version in\nhttps://github.com/Moe-sushi/file-static\n");
 	}
 	free(result);
 }

@@ -59,8 +59,7 @@
 #ifndef _Nonnull
 #define _Nonnull
 #endif
-char *json_get_key(const char *_Nonnull buf, const char *_Nonnull key);
-size_t json_anon_layer_get_key_array(const char *_Nonnull buf, const char *_Nonnull key, char ***_Nullable array);
-char *json_anon_layer_get_key(const char *_Nonnull buf, const char *_Nonnull key, const char *_Nonnull value, const char *_Nonnull key_to_get);
-char *json_open_file(const char *_Nonnull path);
-size_t json_anon_layer_get_key_array_allow_null_val(const char *_Nonnull buf, const char *_Nonnull key, char ***_Nullable array);
+char *libjsonv_get_key(const char *_Nonnull buf, const char *_Nonnull key);
+size_t libjsonv_anon_layer_get_key_array(const char *_Nonnull buf, const char *_Nonnull key, char ***_Nullable array);
+char *libjsonv_anon_layer_get_key(const char *_Nonnull buf, const char *_Nonnull key, const char *_Nonnull value, const char *_Nonnull key_to_get);
+size_t libjsonv_anon_layer_get_key_array_allow_null_val(const char *_Nonnull buf, const char *_Nonnull key, char ***_Nullable array);

@@ -30,7 +30,7 @@
 #include "include/rurima.h"
 bool disable_rurima_log = false;
 // clang-format off
-struct RURIMA_CONFIG global_config = {
+struct RURIMA_CONFIG rurima_global_config = {
 	.docker_mirror = "registry-1.docker.io",
 	.lxc_mirror = "images.linuxcontainers.org",
 	.hook_script = NULL,
@@ -60,7 +60,7 @@ static void detect_suid_or_capability(void)
 	struct stat st;
 	if (stat("/proc/self/exe", &st) == 0) {
 		if (((st.st_mode & S_ISUID) || (st.st_mode & S_ISGID)) && (geteuid() == 0 || getegid() == 0)) {
-			error("{red}SUID or SGID bit detected on rurima, this is unsafe desu QwQ\n");
+			rurima_error("{red}SUID or SGID bit detected on rurima, this is unsafe desu QwQ\n");
 		}
 	}
 	cap_t caps = cap_get_file("/proc/self/exe");
@@ -72,7 +72,7 @@ static void detect_suid_or_capability(void)
 		return;
 	}
 	if (strlen(caps_str) > 0) {
-		error("{red}Capabilities detected on rurima, this is unsafe desu QwQ\n");
+		rurima_error("{red}Capabilities detected on rurima, this is unsafe desu QwQ\n");
 	}
 	cap_free(caps);
 	cap_free(caps_str);
@@ -80,9 +80,9 @@ static void detect_suid_or_capability(void)
 int main(int argc, char **argv)
 {
 	detect_suid_or_capability();
-	read_global_config();
+	rurima_read_global_config();
 #ifdef RURIMA_DEV
-	warning("{red}You are using dev/debug build, if you think this is wrong, please rebuild rurima or get it from release page.\n");
+	rurima_warning("{red}You are using dev/debug build, if you think this is wrong, please rebuild rurima or get it from release page.\n");
 #endif
 	rurima_register_signal();
 	if (argc == 1) {
@@ -95,29 +95,29 @@ int main(int argc, char **argv)
 			continue;
 		}
 		if (strcmp(argv[i], "docker") == 0 || strcmp(argv[i], "d") == 0) {
-			check_dep();
+			rurima_check_dep();
 			if (i + 1 >= argc) {
-				error("{red}No subcommand specified!\n");
+				rurima_error("{red}No subcommand specified!\n");
 			}
-			docker(argc - i - 1, &argv[i + 1]);
+			rurima_docker(argc - i - 1, &argv[i + 1]);
 			return 0;
 		}
 		if (strcmp(argv[i], "lxc") == 0 || strcmp(argv[i], "l") == 0) {
-			check_dep();
+			rurima_check_dep();
 			if (i + 1 >= argc) {
-				error("{red}No subcommand specified!\n");
+				rurima_error("{red}No subcommand specified!\n");
 			}
-			lxc(argc - i - 1, &argv[i + 1]);
+			rurima_lxc(argc - i - 1, &argv[i + 1]);
 			return 0;
 		}
 		if (strcmp(argv[i], "backup") == 0 || strcmp(argv[i], "b") == 0) {
-			check_dep();
-			backup(argc - i - 1, &argv[i + 1]);
+			rurima_check_dep();
+			rurima_backup(argc - i - 1, &argv[i + 1]);
 			return 0;
 		}
 		if (strcmp(argv[i], "unpack") == 0 || strcmp(argv[i], "u") == 0) {
-			check_dep();
-			unpack(argc - i - 1, &argv[i + 1]);
+			rurima_check_dep();
+			rurima_unpack(argc - i - 1, &argv[i + 1]);
 			return 0;
 		}
 		if (strcmp(argv[i], "help") == 0 || strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
@@ -125,11 +125,11 @@ int main(int argc, char **argv)
 			return 0;
 		}
 		if (strcmp(argv[i], "version") == 0 || strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--version") == 0) {
-			show_version_info();
+			rurima_show_version_info();
 			return 0;
 		}
 		if (strcmp(argv[i], "-V") == 0 || strcmp(argv[i], "--version-code") == 0) {
-			show_version_code();
+			rurima_show_version_code();
 			return 0;
 		}
 		if (strcmp(argv[i], "ruri") == 0 || strcmp(argv[i], "r") == 0) {
@@ -145,7 +145,7 @@ int main(int argc, char **argv)
 			return 0;
 		}
 		show_help();
-		error("{red}Invalid subcommand `%s`!\n", argv[i]);
+		rurima_error("{red}Invalid subcommand `%s`!\n", argv[i]);
 		return 1;
 	}
 	return 0;

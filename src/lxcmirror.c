@@ -112,12 +112,12 @@ static char *get_lxc_index(const char *_Nullable mirror)
 	 */
 	char url[4096];
 	if (mirror == NULL) {
-		sprintf(url, "https://%s/meta/1.0/index-system", global_config.lxc_mirror);
+		sprintf(url, "https://%s/meta/1.0/index-system", rurima_global_config.lxc_mirror);
 	} else {
 		sprintf(url, "https://%s/meta/1.0/index-system", mirror);
 	}
 	const char *command[] = { "curl", "-L", "-s", url, NULL };
-	return fork_execvp_get_stdout(command);
+	return rurima_fork_execvp_get_stdout(command);
 }
 static char *lxc_get_image_dir(const char *_Nullable mirror, const char *_Nonnull os, const char *_Nonnull version, const char *_Nullable architecture, const char *_Nullable type)
 {
@@ -134,7 +134,7 @@ static char *lxc_get_image_dir(const char *_Nullable mirror, const char *_Nonnul
 		return NULL;
 	}
 	if (architecture == NULL) {
-		architecture = lxc_get_host_arch();
+		architecture = rurima_lxc_get_host_arch();
 	}
 	rurima_log("arch: %s\n", architecture);
 	if (type == NULL) {
@@ -164,24 +164,24 @@ static char *lxc_get_image_dir(const char *_Nullable mirror, const char *_Nonnul
 	free(buf);
 	return ret;
 }
-void lxc_get_image_list(const char *_Nullable mirror, const char *_Nullable architecture)
+void rurima_lxc_get_image_list(const char *_Nullable mirror, const char *_Nullable architecture)
 {
 	/*
 	 * Get the image list from mirror,
 	 * and show them.
 	 */
 	if (architecture == NULL) {
-		architecture = lxc_get_host_arch();
+		architecture = rurima_lxc_get_host_arch();
 	}
 	if (mirror == NULL) {
-		mirror = global_config.lxc_mirror;
+		mirror = rurima_global_config.lxc_mirror;
 	}
 	char *buf = get_lxc_index(mirror);
 	const char *p = buf;
 	char *line = NULL;
 	if (p == NULL) {
 		free(buf);
-		error("{red}Failed to get index.\n");
+		rurima_error("{red}Failed to get index.\n");
 	}
 	bool found = false;
 	while ((line = get_current_line(p)) != NULL) {
@@ -199,7 +199,7 @@ void lxc_get_image_list(const char *_Nullable mirror, const char *_Nullable arch
 			continue;
 		}
 		found = true;
-		if (!global_config.quiet) {
+		if (!rurima_global_config.quiet) {
 			cprintf("{yellow}%-13s {green}: {purple}%-10s {green}: {cyan}%-8s\n", os, version, type);
 		} else {
 			printf("%-13s : %-10s : %-8s\n", os, version, type);
@@ -212,28 +212,28 @@ void lxc_get_image_list(const char *_Nullable mirror, const char *_Nullable arch
 		p = goto_next_line(p);
 	}
 	if (!found) {
-		error("{red}No image found.\n");
+		rurima_error("{red}No image found.\n");
 	}
 	free(buf);
 }
-void lxc_search_image(const char *_Nullable mirror, const char *_Nonnull os, const char *_Nullable architecture)
+void rurima_lxc_search_image(const char *_Nullable mirror, const char *_Nonnull os, const char *_Nullable architecture)
 {
 	/*
 	 * Search the image from mirror,
 	 * and show them.
 	 */
 	if (architecture == NULL) {
-		architecture = lxc_get_host_arch();
+		architecture = rurima_lxc_get_host_arch();
 	}
 	if (mirror == NULL) {
-		mirror = global_config.lxc_mirror;
+		mirror = rurima_global_config.lxc_mirror;
 	}
 	char *buf = get_lxc_index(mirror);
 	const char *p = buf;
 	char *line = NULL;
 	if (p == NULL) {
 		free(buf);
-		error("{red}Failed to get index.\n");
+		rurima_error("{red}Failed to get index.\n");
 	}
 	bool found = false;
 	while ((line = get_current_line(p)) != NULL) {
@@ -251,7 +251,7 @@ void lxc_search_image(const char *_Nullable mirror, const char *_Nonnull os, con
 			continue;
 		}
 		found = true;
-		if (!global_config.quiet) {
+		if (!rurima_global_config.quiet) {
 			cprintf("{yellow}%-13s {green}: {purple}%-10s {green}: {cyan}%-8s\n", os, version, type);
 		} else {
 			printf("%-13s : %-10s : %-8s\n", os, version, type);
@@ -265,52 +265,52 @@ void lxc_search_image(const char *_Nullable mirror, const char *_Nonnull os, con
 	}
 	free(buf);
 	if (!found) {
-		error("{red}No image found.\n");
+		rurima_error("{red}No image found.\n");
 	}
 }
-void lxc_pull_image(const char *_Nullable mirror, const char *_Nonnull os, const char *_Nonnull version, const char *_Nullable architecture, const char *_Nullable type, const char *_Nonnull savedir)
+void rurima_lxc_pull_image(const char *_Nullable mirror, const char *_Nonnull os, const char *_Nonnull version, const char *_Nullable architecture, const char *_Nullable type, const char *_Nonnull savedir)
 {
 	/*
 	 * Pull the rootfs.tar.xz from mirror,
 	 * and extract it to savedir.
 	 */
-	check_dir_deny_list(savedir);
+	rurima_check_dir_deny_list(savedir);
 	char *dir = lxc_get_image_dir(mirror, os, version, architecture, type);
 	if (dir == NULL) {
-		error("{red}Image not found.\n");
+		rurima_error("{red}Image not found.\n");
 	}
-	if (mkdirs(savedir, 0755) == -1) {
-		error("{red}Failed to create directory.\n");
+	if (rurima_mkdirs(savedir, 0755) == -1) {
+		rurima_error("{red}Failed to create directory.\n");
 	}
 	chdir(savedir);
 	if (mirror == NULL) {
-		mirror = global_config.lxc_mirror;
+		mirror = rurima_global_config.lxc_mirror;
 	}
 	char *url = malloc(strlen(mirror) + strlen(dir) + 114);
 	sprintf(url, "https://%s/%srootfs.tar.xz", mirror, dir);
 	cprintf("{base}Pulling {cyan}rootfs.tar.xz\n");
 	const char *command[] = { "curl", "-L", "-s", url, "-o", "rootfs.tar.xz", NULL };
-	fork_execvp(command);
-	extract_archive("rootfs.tar.xz", ".");
+	rurima_fork_execvp(command);
+	rurima_extract_archive("rootfs.tar.xz", ".");
 	remove("rootfs.tar.xz");
 	free(url);
 	free(dir);
 }
-void lxc_search_arch(const char *_Nullable mirror, const char *_Nonnull os)
+void rurima_lxc_search_arch(const char *_Nullable mirror, const char *_Nonnull os)
 {
 	/*
 	 * Search the architecture of the image from mirror,
 	 * and show them.
 	 */
 	if (mirror == NULL) {
-		mirror = global_config.lxc_mirror;
+		mirror = rurima_global_config.lxc_mirror;
 	}
 	char *buf = get_lxc_index(mirror);
 	const char *p = buf;
 	char *line = NULL;
 	if (p == NULL) {
 		free(buf);
-		error("{red}Failed to get index.\n");
+		rurima_error("{red}Failed to get index.\n");
 	}
 	bool found = false;
 	while ((line = get_current_line(p)) != NULL) {
@@ -328,7 +328,7 @@ void lxc_search_arch(const char *_Nullable mirror, const char *_Nonnull os)
 			continue;
 		}
 		found = true;
-		if (!global_config.quiet) {
+		if (!rurima_global_config.quiet) {
 			cprintf("{yellow}%-13s {green}: {purple}%-10s {green}: {cyan}%-8s\n", os, version, arch);
 		} else {
 			printf("%-13s : %-10s : %-8s\n", os, version, arch);
@@ -342,6 +342,6 @@ void lxc_search_arch(const char *_Nullable mirror, const char *_Nonnull os)
 	}
 	free(buf);
 	if (!found) {
-		error("{red}No image found.\n");
+		rurima_error("{red}No image found.\n");
 	}
 }

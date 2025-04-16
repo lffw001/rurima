@@ -269,7 +269,7 @@ static char *correct_backslash(const char *_Nullable buf)
 	 * Warning: free() after use.
 	 *
 	 * Correct backslashes, `\\` to `\`.
-	 * This function is used by json_get_key().
+	 * This function is used by libjsonv_get_key().
 	 *
 	 */
 	if (buf == NULL) {
@@ -473,7 +473,7 @@ static char *json_get_key_one_level(const char *_Nonnull buf, const char *_Nonnu
 	}
 	return NULL;
 }
-char *json_get_key(const char *_Nonnull buf, const char *_Nonnull key)
+char *libjsonv_get_key(const char *_Nonnull buf, const char *_Nonnull key)
 {
 	/*
 	 * Example json:
@@ -522,7 +522,7 @@ char *json_get_key(const char *_Nonnull buf, const char *_Nonnull key)
 	free(tmp);
 	return ret;
 }
-size_t json_anon_layer_get_key_array(const char *_Nonnull buf, const char *_Nonnull key, char ***_Nullable array)
+size_t libjsonv_anon_layer_get_key_array(const char *_Nonnull buf, const char *_Nonnull key, char ***_Nullable array)
 {
 	/*
 	 * Warning: free() after use.
@@ -536,7 +536,7 @@ size_t json_anon_layer_get_key_array(const char *_Nonnull buf, const char *_Nonn
 	 * So we return ["bar", "buz"].
 	 *
 	 * It allows to use [foo][bar] to get the value of bar,
-	 * because it calls json_get_key() directly.
+	 * because it calls libjsonv_get_key() directly.
 	 *
 	 */
 	if (buf == NULL || key == NULL) {
@@ -548,7 +548,7 @@ size_t json_anon_layer_get_key_array(const char *_Nonnull buf, const char *_Nonn
 	size_t ret = 0;
 	const char *p = tmp;
 	while (p != NULL) {
-		(*array)[ret] = json_get_key(p, key);
+		(*array)[ret] = libjsonv_get_key(p, key);
 		if ((*array)[ret] != NULL) {
 			ret++;
 			(*array) = realloc((*array), sizeof(char *) * (ret + 1));
@@ -559,7 +559,7 @@ size_t json_anon_layer_get_key_array(const char *_Nonnull buf, const char *_Nonn
 	free(tmp);
 	return ret;
 }
-size_t json_anon_layer_get_key_array_allow_null_val(const char *_Nonnull buf, const char *_Nonnull key, char ***_Nullable array)
+size_t libjsonv_anon_layer_get_key_array_allow_null_val(const char *_Nonnull buf, const char *_Nonnull key, char ***_Nullable array)
 {
 	/*
 	 * Warning: free() after use.
@@ -573,7 +573,7 @@ size_t json_anon_layer_get_key_array_allow_null_val(const char *_Nonnull buf, co
 	 * So we return ["bar", "buz"].
 	 *
 	 * It allows to use [foo][bar] to get the value of bar,
-	 * because it calls json_get_key() directly.
+	 * because it calls libjsonv_get_key() directly.
 	 *
 	 */
 	if (buf == NULL || key == NULL) {
@@ -585,7 +585,7 @@ size_t json_anon_layer_get_key_array_allow_null_val(const char *_Nonnull buf, co
 	size_t ret = 0;
 	const char *p = tmp;
 	while (p != NULL) {
-		(*array)[ret] = json_get_key(p, key);
+		(*array)[ret] = libjsonv_get_key(p, key);
 		ret++;
 		(*array) = realloc((*array), sizeof(char *) * (ret + 1));
 		(*array)[ret] = NULL;
@@ -594,7 +594,7 @@ size_t json_anon_layer_get_key_array_allow_null_val(const char *_Nonnull buf, co
 	free(tmp);
 	return ret;
 }
-char *json_anon_layer_get_key(const char *_Nonnull buf, const char *_Nonnull key, const char *_Nonnull value, const char *_Nonnull key_to_get)
+char *libjsonv_anon_layer_get_key(const char *_Nonnull buf, const char *_Nonnull key, const char *_Nonnull value, const char *_Nonnull key_to_get)
 {
 	/*
 	 * Warning: free() after use.
@@ -606,19 +606,19 @@ char *json_anon_layer_get_key(const char *_Nonnull buf, const char *_Nonnull key
 	 * We use key [foo] and value buz to get the value of bar.
 	 * So we return xxx.
 	 *
-	 * It will call json_get_key() directly.
+	 * It will call libjsonv_get_key() directly.
 	 *
 	 */
 	const char *p = buf;
 	char *valtmp = NULL;
 	while (p != NULL) {
-		valtmp = json_get_key(p, key);
+		valtmp = libjsonv_get_key(p, key);
 		if (valtmp == NULL) {
 			p = next_layer(p);
 			continue;
 		}
 		if (strcmp(valtmp, value) == 0) {
-			char *ret = json_get_key(p, key_to_get);
+			char *ret = libjsonv_get_key(p, key_to_get);
 			free(valtmp);
 			return ret;
 		}
@@ -626,28 +626,4 @@ char *json_anon_layer_get_key(const char *_Nonnull buf, const char *_Nonnull key
 		p = next_layer(p);
 	}
 	return NULL;
-}
-char *json_open_file(const char *_Nonnull path)
-{
-	/*
-	 * Warning: free() after use.
-	 *
-	 * Open a json file and return the content.
-	 * It will return NULL if failed.
-	 * Just a simple wrapper of open() and read().
-	 *
-	 */
-	struct stat st;
-	if (stat(path, &st) == -1) {
-		return 0;
-	}
-	char *ret = malloc((size_t)st.st_size + 3);
-	int fd = open(path, O_RDONLY | O_CLOEXEC);
-	if (fd == -1) {
-		free(ret);
-		return NULL;
-	}
-	ssize_t size = read(fd, ret, (size_t)st.st_size);
-	ret[size] = '\0';
-	return ret;
 }
