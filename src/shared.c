@@ -28,7 +28,7 @@
  *
  */
 #include "include/rurima.h"
-char *strstr_ignore_case(const char *_Nonnull haystack, const char *_Nonnull needle)
+char *rurima_strstr_ignore_case(const char *_Nonnull haystack, const char *_Nonnull needle)
 {
 	/*
 	 * An implementation of strccasestr().
@@ -72,7 +72,7 @@ static char *get_dir_realpath(const char *_Nonnull dir)
 	}
 	return ret;
 }
-void check_dir_deny_list(const char *_Nonnull dir)
+void rurima_check_dir_deny_list(const char *_Nonnull dir)
 {
 	/*
 	 * Check if the directory is in deny list.
@@ -82,47 +82,47 @@ void check_dir_deny_list(const char *_Nonnull dir)
 	char *path = get_dir_realpath(dir);
 	rurima_log("{base}Realpath: {cyan}%s{clear}\n", path);
 	if (strcmp(path, "/") == 0) {
-		error("{red}Refuse to extract rootfs to /\n");
+		rurima_error("{red}Refuse to extract rootfs to /\n");
 	}
 	if (strstr(path, "/usr/") == path || strcmp(path, "/usr") == 0) {
-		error("{red}Refuse to extract rootfs to /usr/*\n");
+		rurima_error("{red}Refuse to extract rootfs to /usr/*\n");
 	}
 	if (strstr(path, "/etc/") == path || strcmp(path, "/etc") == 0) {
-		error("{red}Refuse to extract rootfs to /etc/*\n");
+		rurima_error("{red}Refuse to extract rootfs to /etc/*\n");
 	}
 	if (strstr(path, "/bin/") == path || strcmp(path, "/bin") == 0) {
-		error("{red}Refuse to extract rootfs to /bin/*\n");
+		rurima_error("{red}Refuse to extract rootfs to /bin/*\n");
 	}
 	if (strstr(path, "/lib/") == path || strcmp(path, "/lib") == 0) {
-		error("{red}Refuse to extract rootfs to /lib/*\n");
+		rurima_error("{red}Refuse to extract rootfs to /lib/*\n");
 	}
 	if (strstr(path, "/lib64/") == path || strcmp(path, "/lib64") == 0) {
-		error("{red}Refuse to extract rootfs to /lib64/*\n");
+		rurima_error("{red}Refuse to extract rootfs to /lib64/*\n");
 	}
 	if (strstr(path, "/sbin/") == path || strcmp(path, "/sbin") == 0) {
-		error("{red}Refuse to extract rootfs to /sbin/*\n");
+		rurima_error("{red}Refuse to extract rootfs to /sbin/*\n");
 	}
 	if (strstr(path, "/boot/") == path || strcmp(path, "/boot") == 0) {
-		error("{red}Refuse to extract rootfs to /boot/*\n");
+		rurima_error("{red}Refuse to extract rootfs to /boot/*\n");
 	}
 	if (strstr(path, "/dev/") == path || strcmp(path, "/dev") == 0) {
-		error("{red}Refuse to extract rootfs to /dev/*\n");
+		rurima_error("{red}Refuse to extract rootfs to /dev/*\n");
 	}
 	if (strstr(path, "/proc/") == path || strcmp(path, "/proc") == 0) {
-		error("{red}Refuse to extract rootfs to /proc/*\n");
+		rurima_error("{red}Refuse to extract rootfs to /proc/*\n");
 	}
 	if (strstr(path, "/sys/") == path || strcmp(path, "/sys") == 0) {
-		error("{red}Refuse to extract rootfs to /sys/*\n");
+		rurima_error("{red}Refuse to extract rootfs to /sys/*\n");
 	}
 	if (strstr(path, "/snap/") == path || strcmp(path, "/snap") == 0) {
-		error("{red}Refuse to extract rootfs to /snap/*\n");
+		rurima_error("{red}Refuse to extract rootfs to /snap/*\n");
 	}
 	if (strcmp(path, "/data") == 0 || strcmp(path, "/data/") == 0 || strcmp(path, "/data/.") == 0 || strcmp(path, "/data/./") == 0) {
-		error("{red}Refuse to extract rootfs to /data\n");
+		rurima_error("{red}Refuse to extract rootfs to /data\n");
 	}
 	free(path);
 }
-void get_input(char *_Nonnull message, char *_Nonnull buf)
+void rurima_get_input(char *_Nonnull message, char *_Nonnull buf)
 {
 	/*
 	 * Warning: Not a safe function.
@@ -133,7 +133,7 @@ void get_input(char *_Nonnull message, char *_Nonnull buf)
 	scanf("%s", buf);
 	fflush(stdout);
 }
-off_t get_file_size(const char *_Nonnull file)
+off_t rurima_get_file_size(const char *_Nonnull file)
 {
 	struct stat st;
 	if (stat(file, &st) == -1) {
@@ -141,7 +141,7 @@ off_t get_file_size(const char *_Nonnull file)
 	}
 	return st.st_size;
 }
-char *get_prefix(void)
+char *rurima_get_prefix(void)
 {
 	/*
 	 * Warning: free() the return value after use.
@@ -152,7 +152,7 @@ char *get_prefix(void)
 	}
 	return ret;
 }
-int mkdirs(const char *_Nonnull path, mode_t mode)
+int rurima_mkdirs(const char *_Nonnull path, mode_t mode)
 {
 	/*
 	 * A very simple implementation of mkdir -p.
@@ -189,14 +189,14 @@ int mkdirs(const char *_Nonnull path, mode_t mode)
 	}
 	return ret;
 }
-bool run_with_root(void)
+bool rurima_run_with_root(void)
 {
 	if (geteuid() == 0) {
 		return true;
 	}
 	return false;
 }
-char *docker_get_host_arch(void)
+char *rurima_docker_get_host_arch(void)
 {
 	/*
 	 * Get the cpu arch.
@@ -299,11 +299,11 @@ char *docker_get_host_arch(void)
 	ret = "xtensaeb";
 #endif
 	if (ret == NULL) {
-		error("{red}Unknow cpu arch!\n");
+		rurima_error("{red}Unknow cpu arch!\n");
 	}
 	return ret;
 }
-char *lxc_get_host_arch(void)
+char *rurima_lxc_get_host_arch(void)
 {
 	/*
 	 * Get the cpu arch.
@@ -406,11 +406,11 @@ char *lxc_get_host_arch(void)
 	ret = "xtensaeb";
 #endif
 	if (ret == NULL) {
-		error("{red}Unknow cpu arch!\n");
+		rurima_error("{red}Unknow cpu arch!\n");
 	}
 	return ret;
 }
-bool rootless_supported(void)
+bool rurima_rootless_supported(void)
 {
 	pid_t pid = fork();
 	if (pid == 0) {
@@ -429,13 +429,13 @@ bool rootless_supported(void)
 	}
 	return false;
 }
-off_t get_dir_file_size(const char *_Nonnull target)
+off_t rurima_get_dir_file_size(const char *_Nonnull target)
 {
 	/*
 	 * Get the size of the directory or file.
 	 */
 	const char *command[] = { "du", "-s", target, NULL };
-	char *result = fork_execvp_get_stdout_ignore_err(command);
+	char *result = rurima_fork_execvp_get_stdout_ignore_err(command);
 	if (result == NULL) {
 		return 0;
 	}
@@ -443,13 +443,13 @@ off_t get_dir_file_size(const char *_Nonnull target)
 	ret = atol(result);
 	return ret * 1024;
 }
-bool sha256sum_exists(void)
+bool rurima_sha256sum_exists(void)
 {
 	/*
 	 * Check if sha256sum exists.
 	 */
 	const char *command[] = { "sha256sum", "-v", NULL };
-	char *result = fork_execvp_get_stdout_ignore_err(command);
+	char *result = rurima_fork_execvp_get_stdout_ignore_err(command);
 	if (result == NULL) {
 		return false;
 	}
