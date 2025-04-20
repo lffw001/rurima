@@ -44,6 +44,7 @@ static void show_help(void)
 	cprintf("{base}Subcommands:\n");
 	cprintf("{base}  docker: DockerHub support.\n");
 	cprintf("{base}  lxc: LXC mirror support.\n");
+	cprintf("{base}  pull: Pull image, as a wrap of rurima docker/lxc pull.\n");
 	cprintf("{base}  unpack: Unpack rootfs.\n");
 	cprintf("{base}  backup: Backup rootfs.\n");
 	cprintf("{base}  ruri: Built-in ruri command.\n");
@@ -108,6 +109,11 @@ int main(int argc, char **argv)
 				rurima_error("{red}No subcommand specified!\n");
 			}
 			rurima_lxc(argc - i - 1, &argv[i + 1]);
+			return 0;
+		}
+		if (strcmp(argv[i], "pull") == 0 || strcmp(argv[i], "p") == 0) {
+			rurima_check_dep();
+			rurima_pull(argc - i - 1, &argv[i + 1]);
 			return 0;
 		}
 		if (strcmp(argv[i], "backup") == 0 || strcmp(argv[i], "b") == 0) {

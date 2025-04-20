@@ -523,3 +523,104 @@ void rurima_backup(int argc, char **_Nonnull argv)
 		rurima_warning("{yellow}tar exited with error status, but never mind, this might be fine\n");
 	}
 }
+void rurima_pull(int argc, char **_Nonnull argv)
+{
+	if (argc == 0) {
+		rurima_error("{red}Unknown argument!\n");
+	}
+	char *mirror = NULL;
+	char *image = NULL;
+	char *version = NULL;
+	char *architecture = NULL;
+	char *type = NULL;
+	char *savedir = NULL;
+	char *arch = NULL;
+	bool docker_only = false;
+	for (int i = 0; i < argc; i++) {
+		if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
+			cprintf("{base}Usage: pull <options> [image]:[version] [savedir]\n");
+			cprintf("{base}Options:\n");
+			cprintf("{base}  -h, --help: Show help message.\n");
+			cprintf("{base}  -m, --mirror: Mirror URL.\n");
+			cprintf("{base}  -a, --arch: Architecture.\n");
+			cprintf("{base}  -d, --docker: Only search dockerhub for image.\n");
+			cprintf("{base}Note: please remove `https://` prefix from mirror url.\n");
+			cprintf("{base}This is just a wrap of docker and lxc subcommand.\n");
+			cprintf("{base}It will re-exec itself to call the subcommand.\n");
+			cprintf("{base}If -d option is not set, it will find lxc mirror first.\n");
+			return;
+		} else if (strcmp(argv[i], "-m") == 0 || strcmp(argv[i], "--mirror") == 0) {
+			if (i + 1 >= argc) {
+				rurima_error("{red}No mirror specified!\n");
+			}
+			mirror = argv[i + 1];
+			i++;
+		} else if (strcmp(argv[i], "-a") == 0 || strcmp(argv[i], "--arch") == 0) {
+			if (i + 1 >= argc) {
+				rurima_error("{red}No architecture specified!\n");
+			}
+			architecture = argv[i + 1];
+			i++;
+		} else if (strcmp(argv[i], "-d") == 0 || strcmp(argv[i], "--docker") == 0) {
+			docker_only = true;
+		} else {
+			if (strstr(argv[i], ":") != NULL) {
+				image = strtok(argv[i], ":");
+				version = strtok(NULL, ":");
+			} else {
+				image = argv[i];
+				version = "latest";
+			}
+			if (i + 1 < argc) {
+				savedir = argv[i + 1];
+			} else {
+				rurima_error("{red}No save directory specified!\n");
+			}
+			char *re_exec_args[114] = { NULL };
+			if (!docker_only && rurima_lxc_have_image(mirror, image, version, architecture, NULL)) {
+				if (mirror == NULL) {
+					mirror = rurima_global_config.lxc_mirror;
+				}
+				if (architecture == NULL) {
+					architecture = rurima_lxc_get_host_arch();
+				}
+				re_exec_args[0] = "lxc";
+				re_exec_args[1] = "pull";
+				re_exec_args[2] = "-m";
+				re_exec_args[3] = (char *)mirror;
+				re_exec_args[4] = "-o";
+				re_exec_args[5] = (char *)image;
+				re_exec_args[6] = "-v";
+				re_exec_args[7] = (char *)version;
+				re_exec_args[8] = "-a";
+				re_exec_args[9] = (char *)architecture;
+				re_exec_args[10] = "-s";
+				re_exec_args[11] = (char *)savedir;
+				int exit_status = rurima_fork_rexec(12, re_exec_args);
+				exit(exit_status);
+			} else {
+				if (mirror == NULL) {
+					mirror = rurima_global_config.docker_mirror;
+				}
+				if (architecture == NULL) {
+					architecture = rurima_docker_get_host_arch();
+				}
+				re_exec_args[0] = "docker";
+				re_exec_args[1] = "pull";
+				re_exec_args[2] = "-i";
+				re_exec_args[3] = (char *)image;
+				re_exec_args[4] = "-t";
+				re_exec_args[5] = (char *)version;
+				re_exec_args[6] = "-a";
+				re_exec_args[7] = (char *)architecture;
+				re_exec_args[8] = "-s";
+				re_exec_args[9] = (char *)savedir;
+				re_exec_args[10] = "-m";
+				re_exec_args[11] = (char *)mirror;
+				int exit_status = rurima_fork_rexec(12, re_exec_args);
+				exit(exit_status);
+			}
+		}
+	}
+	rurima_error("Emmmm, I think it will never reach here.\n");
+}

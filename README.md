@@ -30,6 +30,19 @@ Or run the follwing command to get rurima to ./rurima and ./rurima-dbg(debug ver
 ```sh
 . <(curl -sL https://get.ruri.zip/rurima)
 ```   
+# The new pull subcommand:
+It's a wrap of docker/lxc pull subcommand.      
+For example:      
+```sh
+rurima pull alpine:edge ./test
+```
+```sh
+rurima pull whyour/qinglong ./test
+```
+```sh
+rurima pull ubuntu ./test
+```
+It will search lxc image first, if not found, it will auto try to pull rootfs from dockerhub.      
 # Example usage of docker subcommand:
 Get `alpine` image, use tag `edge`, save to `./test`     
 ```sh
@@ -112,6 +125,7 @@ Usage: rurima [subcommand] [options]
 Subcommands:
   docker: DockerHub support.
   lxc: LXC mirror support.
+  pull: Pull rootfs.
   unpack: Unpack rootfs.
   backup: Backup rootfs.
   ruri: Built-in ruri command.

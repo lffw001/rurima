@@ -268,6 +268,32 @@ void rurima_lxc_search_image(const char *_Nullable mirror, const char *_Nonnull 
 		rurima_error("{red}No image found.\n");
 	}
 }
+bool rurima_lxc_have_image(const char *_Nullable mirror, const char *_Nonnull os, const char *_Nonnull version, const char *_Nullable architecture, const char *_Nullable type)
+{
+	/*
+	 * Check if the image is available in mirror.
+	 *
+	 * Return: true if available, false if not.
+	 */
+	if (architecture == NULL) {
+		architecture = rurima_lxc_get_host_arch();
+	}
+	if (mirror == NULL) {
+		mirror = rurima_global_config.lxc_mirror;
+	}
+	if (type == NULL) {
+		type = "default";
+	}
+	if (architecture == NULL) {
+		architecture = rurima_lxc_get_host_arch();
+	}
+	char *dir = lxc_get_image_dir(mirror, os, version, architecture, type);
+	if (dir == NULL) {
+		return false;
+	}
+	free(dir);
+	return true;
+}
 void rurima_lxc_pull_image(const char *_Nullable mirror, const char *_Nonnull os, const char *_Nonnull version, const char *_Nullable architecture, const char *_Nullable type, const char *_Nonnull savedir)
 {
 	/*
