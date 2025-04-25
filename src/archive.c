@@ -344,7 +344,7 @@ int rurima_backup_dir(const char *_Nonnull file, const char *_Nonnull dir)
 		int status;
 		waitpid(pid, &status, WNOHANG);
 		off_t totalsize_bk = totalsize;
-		while (WIFEXITED(status) == 0) {
+		while (waitpid(pid, &status, WNOHANG) == 0) {
 			off_t currentsize = rurima_get_file_size(file);
 			totalsize = totalsize_bk;
 			while (totalsize > FLT_MAX) {
@@ -360,7 +360,6 @@ int rurima_backup_dir(const char *_Nonnull file, const char *_Nonnull dir)
 			}
 			show_progress(progress);
 			usleep(100);
-			waitpid(pid, &status, WNOHANG);
 		}
 		show_progress(1.0);
 		return status;
@@ -441,7 +440,7 @@ int rurima_download_file(const char *_Nonnull url, const char *_Nonnull file, co
 		int status;
 		waitpid(pid, &status, WNOHANG);
 		off_t size_bk = size;
-		while (WIFEXITED(status) == 0) {
+		while (waitpid(pid, &status, WNOHANG) == 0) {
 			off_t currentsize = rurima_get_file_size(file);
 			size = size_bk;
 			while (size > FLT_MAX) {
@@ -457,7 +456,6 @@ int rurima_download_file(const char *_Nonnull url, const char *_Nonnull file, co
 			}
 			show_progress(progress);
 			usleep(100);
-			waitpid(pid, &status, WNOHANG);
 		}
 		show_progress(1.0);
 		rurima_log("{green}Download complete.\n");
