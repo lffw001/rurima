@@ -28,6 +28,22 @@
  *
  */
 #include "include/rurima.h"
+bool proot_exist(void)
+{
+	/*
+	 * Test if proot exist.
+	 * We use proot to execute ls, so that we can check if proot is really available.
+	 */
+	const char *cmd[] = { "proot", "ls", NULL };
+	char *ret = rurima_fork_execvp_get_stdout(cmd);
+	if (ret == NULL) {
+		rurima_log("{red}proot not found.\n");
+		return false;
+	}
+	free(ret);
+	rurima_log("{green}proot found.\n");
+	return true;
+}
 char *rurima_strstr_ignore_case(const char *_Nonnull haystack, const char *_Nonnull needle)
 {
 	/*
@@ -135,10 +151,13 @@ void rurima_get_input(char *_Nonnull message, char *_Nonnull buf)
 }
 off_t rurima_get_file_size(const char *_Nonnull file)
 {
+	rurima_log("{base}Getting file size of {cyan}%s\n", file);
 	struct stat st;
 	if (stat(file, &st) == -1) {
+		rurima_log("{red}Failed to get file size!\n");
 		return 0;
 	}
+	rurima_log("{base}File size: {green}%ld\n", st.st_size);
 	return st.st_size;
 }
 char *rurima_get_prefix(void)

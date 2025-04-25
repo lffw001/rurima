@@ -28,22 +28,6 @@
  *
  */
 #include "include/rurima.h"
-static bool proot_exist(void)
-{
-	/*
-	 * Test if proot exist.
-	 * We use proot to execute ls, so that we can check if proot is really available.
-	 */
-	const char *cmd[] = { "proot", "ls", NULL };
-	char *ret = rurima_fork_execvp_get_stdout(cmd);
-	if (ret == NULL) {
-		rurima_log("{red}proot not found.\n");
-		return false;
-	}
-	free(ret);
-	rurima_log("{green}proot found.\n");
-	return true;
-}
 static bool proot_support_link2symlink(void)
 {
 	/*
@@ -154,10 +138,6 @@ static char **get_extract_command(const char *_Nonnull file, const char *_Nonnul
 			}
 		}
 	} else {
-		if (!rurima_run_with_root()) {
-			rurima_warning("{yellow}You are not running as root,");
-			rurima_warning("{yellow}but proot not found, it might cause bugs unpacking rootfs.\n\n");
-		}
 		if (strcmp(type, "application/gzip") == 0) {
 			ret[0] = "tar";
 			ret[1] = "-xpzf";
@@ -224,6 +204,7 @@ int rurima_extract_archive(const char *_Nonnull file, const char *_Nonnull dir)
 	 * So that we can show a progress bar by the size we output.
 	 *
 	 */
+	rurima_log("{base}Extracting {cyan}%s{clear} to {cyan}%s\n", file, dir);
 	rurima_check_dir_deny_list(dir);
 	off_t size = rurima_get_file_size(file);
 	if (size == 0) {
@@ -374,6 +355,9 @@ int rurima_backup_dir(const char *_Nonnull file, const char *_Nonnull dir)
 				}
 			}
 			double progress = ((double)currentsize / (double)totalsize);
+			if (progress > 1.0) {
+				progress = 1.0;
+			}
 			show_progress(progress);
 			usleep(100);
 			waitpid(pid, &status, WNOHANG);
@@ -382,6 +366,105 @@ int rurima_backup_dir(const char *_Nonnull file, const char *_Nonnull dir)
 		return status;
 	} else {
 		int exstat = tar_backup__(file, dir);
+		exit(exstat);
+	}
+	return 0;
+}
+static int download_file__(const char *_Nonnull url, const char *_Nonnull file, const char *_Nullable token)
+{
+	int status = 0;
+	if (token != NULL) {
+		const char *command[] = { "curl", "-sL", "-o", file, "-H", token, url, NULL };
+		status = rurima_fork_execvp(command);
+	} else {
+		const char *command[] = { "curl", "-sL", "-o", file, url, NULL };
+		status = rurima_fork_execvp(command);
+	}
+	return status;
+}
+static ssize_t get_url_file_size__(const char *_Nonnull url)
+{
+	/*
+	 * Get the file size from the URL.
+	 */
+	const char *command[] = { "curl", "-sIL", url, NULL };
+	char *ret = rurima_fork_execvp_get_stdout(command);
+	if (ret == NULL) {
+		rurima_error("{red}Failed to get file size!\n");
+	}
+	char *p = rurima_strstr_ignore_case(ret, "Content-Type");
+	if (p == NULL) {
+		free(ret);
+		return -1;
+	}
+	while (rurima_strstr_ignore_case(p + 1, "Content-Type") != NULL) {
+		p = rurima_strstr_ignore_case(p + 1, "Content-Type");
+	}
+	char *size = rurima_strstr_ignore_case(p, "Content-Length: ");
+	if (size == NULL) {
+		free(ret);
+		return -1;
+	}
+	size += 16;
+	char *end = strstr(size, "\r\n");
+	if (end == NULL) {
+		free(ret);
+		return -1;
+	}
+	*end = '\0';
+	ssize_t filesize = strtoll(size, NULL, 10);
+	free(ret);
+	rurima_log("{base}Get file size: {green}%ld\n", filesize);
+	return filesize;
+}
+int rurima_download_file(const char *_Nonnull url, const char *_Nonnull file, const char *_Nullable token, ssize_t size)
+{
+	/*
+	 * Download file from the specified URL.
+	 */
+	remove(file);
+	unlink(file);
+	if (!du_found()) {
+		rurima_warning("{yellow}du not found, progress will not be shown.\n");
+		int exstat = download_file__(url, file, token);
+		return exstat;
+	}
+	if (size <= 0) {
+		size = get_url_file_size__(url);
+	}
+	if (size <= 0) {
+		rurima_warning("{yellow}Failed to get file size, progress will not work\n");
+		size = 1;
+	}
+	pid_t pid = fork();
+	if (pid > 0) {
+		int status;
+		waitpid(pid, &status, WNOHANG);
+		off_t size_bk = size;
+		while (WIFEXITED(status) == 0) {
+			off_t currentsize = rurima_get_file_size(file);
+			size = size_bk;
+			while (size > FLT_MAX) {
+				size = size / 1024;
+				currentsize = currentsize / 1024;
+				if (size < FLT_MAX) {
+					break;
+				}
+			}
+			double progress = ((double)currentsize / (double)size);
+			if (progress > 1.0) {
+				progress = 1.0;
+			}
+			show_progress(progress);
+			usleep(100);
+			waitpid(pid, &status, WNOHANG);
+		}
+		show_progress(1.0);
+		rurima_log("{green}Download complete.\n");
+		return status;
+	} else {
+		int exstat = download_file__(url, file, token);
+		rurima_log("{green}Download complete.\n");
 		exit(exstat);
 	}
 	return 0;

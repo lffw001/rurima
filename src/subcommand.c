@@ -258,7 +258,9 @@ void rurima_docker(int argc, char **_Nonnull argv)
 			exit(0);
 		}
 		if (!rurima_run_with_root()) {
-			rurima_warning("{yellow}You are not running as root, might cause bug unpacking rootfs!\n");
+			if (!proot_exist()) {
+				rurima_warning("{yellow}You are not running with root, but proot not found, might cause bug unpacking rootfs!\n");
+			}
 		}
 		image = add_library_prefix(image);
 		struct RURIMA_DOCKER *config = rurima_docker_pull(image, tag, architecture, savedir, mirror, fallback);
@@ -397,7 +399,9 @@ void rurima_lxc(int argc, char **_Nonnull argv)
 			rurima_error("{red}No save directory specified!\n");
 		}
 		if (!rurima_run_with_root()) {
-			rurima_warning("{yellow}You are not running as root, might cause bug unpacking rootfs!\n");
+			if (!proot_exist()) {
+				rurima_warning("{yellow}You are not running as root, but proot not found, might cause bug unpacking rootfs!\n");
+			}
 		}
 		rurima_lxc_pull_image(mirror, os, version, architecture, type, savedir);
 	} else if (strcmp(argv[0], "list") == 0) {

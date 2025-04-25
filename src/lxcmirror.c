@@ -140,7 +140,6 @@ static char *lxc_get_image_dir(const char *_Nullable mirror, const char *_Nonnul
 	if (type == NULL) {
 		type = "default";
 	}
-	rurima_log("p: %s\n", p);
 	char *str_to_find = malloc(strlen(os) + strlen(version) + strlen(architecture) + strlen(type) + 10);
 	sprintf(str_to_find, "%s;%s;%s;%s", os, version, architecture, type);
 	rurima_log("str to find: %s\n", str_to_find);
@@ -315,8 +314,7 @@ void rurima_lxc_pull_image(const char *_Nullable mirror, const char *_Nonnull os
 	char *url = malloc(strlen(mirror) + strlen(dir) + 114);
 	sprintf(url, "https://%s/%srootfs.tar.xz", mirror, dir);
 	cprintf("{base}Pulling {cyan}rootfs.tar.xz\n");
-	const char *command[] = { "curl", "-L", "-s", url, "-o", "rootfs.tar.xz", NULL };
-	rurima_fork_execvp(command);
+	rurima_download_file(url, "rootfs.tar.xz", NULL, -1);
 	rurima_extract_archive("rootfs.tar.xz", ".");
 	remove("rootfs.tar.xz");
 	free(url);

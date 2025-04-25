@@ -123,11 +123,12 @@ struct RURIMA_DOCKER {
 	char *_Nullable architecture;
 };
 // Warnings.
-#define rurima_warning(...)                             \
-	{                                               \
-		if (!rurima_global_config.quiet) {      \
-			cfprintf(stderr, ##__VA_ARGS__) \
-		}                                       \
+#define rurima_warning(...)                                                                                 \
+	{                                                                                                   \
+		if (!rurima_global_config.quiet) {                                                          \
+			cfprintf(stderr, "{yellow}In %s() in %s line %d:\n", __func__, __FILE__, __LINE__); \
+			cfprintf(stderr, ##__VA_ARGS__)                                                     \
+		}                                                                                           \
 	}
 // Show error msg and exit.
 #define rurima_error(...)                                                                                              \
@@ -208,3 +209,5 @@ char *rurima_fork_execvp_get_stdout_ignore_err(const char *_Nonnull argv[]);
 bool rurima_sha256sum_exists(void);
 void rurima_pull(int argc, char **_Nonnull argv);
 bool rurima_lxc_have_image(const char *_Nullable mirror, const char *_Nonnull os, const char *_Nonnull version, const char *_Nullable architecture, const char *_Nullable type);
+int rurima_download_file(const char *_Nonnull url, const char *_Nonnull file, const char *_Nullable token, ssize_t size);
+bool proot_exist(void);
