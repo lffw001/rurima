@@ -331,6 +331,10 @@ int rurima_backup_dir(const char *_Nonnull file, const char *_Nonnull dir)
 		rurima_error("{red}Failed to open directory!\n");
 	}
 	closedir(test);
+	// Run ruir -U to umount the container.
+	cprintf("{base}Unmounting container\n");
+	char *rexec_args[] = { "ruri", "-w", "-U", ".", NULL };
+	rurima_fork_rexec(4, rexec_args);
 	if (!du_found()) {
 		rurima_warning("{yellow}du not found, progress will not be shown.\n");
 		int exstat = tar_backup__(file, dir);
