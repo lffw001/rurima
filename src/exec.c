@@ -29,7 +29,7 @@
  *
  */
 #include "include/rurima.h"
-int fork_execvp(const char *_Nonnull argv[])
+int rurima_fork_execvp(const char *_Nonnull argv[])
 {
 	/*
 	 * fork(2) and then execvp(3).
@@ -45,7 +45,7 @@ int fork_execvp(const char *_Nonnull argv[])
 	waitpid(pid, &status, 0);
 	return WEXITSTATUS(status);
 }
-char *fork_execvp_get_stdout_ignore_err(const char *_Nonnull argv[])
+char *rurima_fork_execvp_get_stdout_ignore_err(const char *_Nonnull argv[])
 {
 	/*
 	 * Warning: free() after use.
@@ -108,7 +108,7 @@ char *fork_execvp_get_stdout_ignore_err(const char *_Nonnull argv[])
 	}
 	return NULL;
 }
-char *fork_execvp_get_stdout(const char *_Nonnull argv[])
+char *rurima_fork_execvp_get_stdout(const char *_Nonnull argv[])
 {
 	/*
 	 * Warning: free() after use.
@@ -174,26 +174,46 @@ char *fork_execvp_get_stdout(const char *_Nonnull argv[])
 	}
 	return NULL;
 }
-int fork_rexec(int argc, char **_Nonnull argv)
+void rurima_add_argv(char ***_Nonnull argv, const char *_Nonnull arg)
+{
+	/*
+	 * Add an argument to the argv array.
+	 * Warning: make sure length of argv is enough.
+	 */
+	int argc = 0;
+	while ((*argv)[argc] != NULL) {
+		argc++;
+	}
+	(*argv)[argc] = arg;
+	(*argv)[argc + 1] = NULL;
+}
+int rurima_fork_rexec(char **_Nonnull argv)
 {
 	/*
 	 * Fork and execv self with argv.
 	 */
 	pid_t pid = fork();
 	if (pid == -1) {
-		error("{red}Fork failed!\n");
+		rurima_error("{red}Fork failed!\n");
 	}
 	if (pid == 0) {
+		int argc = 0;
+		while (argv[argc] != NULL) {
+			argc++;
+		}
 		char **new_argv = malloc(sizeof(char *) * (argc + 2));
 		new_argv[0] = "/proc/self/exe";
 		for (int i = 0; i < argc; i++) {
+			rurima_log("{base}Argv[%d]: %s\n", i, argv[i]);
 			new_argv[i + 1] = argv[i];
-			new_argv[i + 2] = NULL;
 		}
+		new_argv[argc + 1] = NULL;
 		execv(new_argv[0], new_argv);
-		error("{red}Execv() failed!\n");
+		rurima_error("{red}Execv() failed!\n");
+		free(new_argv);
+		exit(1);
 	}
 	int status;
 	waitpid(pid, &status, 0);
-	return status;
+	return WEXITSTATUS(status);
 }

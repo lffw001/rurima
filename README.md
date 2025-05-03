@@ -1,9 +1,15 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14099730.svg)](https://doi.org/10.5281/zenodo.14099730)
+# WARNING:
+For production, I fully recommand you to use tools like [crun](https://github.com/containers/crun), [youki](https://github.com/youki-dev/youki), [containerd](https://containerd.io/), [docker](https://www.docker.com/), [podman](https://podman.io/), [LXC](https://linuxcontainers.org/), [bubblewrap](https://github.com/containers/bubblewrap), they are more secure and stable. This is a non-OCI tool and, you take your own risk using it when you really need. The whole project is experimental!        
+# Looking for i18n?
+This project is not for you. If you don't know and don't want to know what's chroot/unshare/namespace/PID/capability/cgroup, you also can't know what's 换根/取消共享/命名空间/进程编号/能力/控制组. And I currently have no time to mantain multi-language docs.      
+But as this is an open-source project, you are welcome to make your own fork with your preferred language :)      
 # WARNING:      
 ```
 * Your warranty is void.
 * I am not responsible for anything that may happen to your device by using this program.
 * You do it at your own risk and take the responsibility upon yourself.
+* This project is open source, you can make your own fork/rewrite but not to blame the author.
 * Docker is a registered trademark of Docker, Inc. This program has no relationship with it.
 * This program has no Super Cow Powers.
 ```
@@ -24,6 +30,19 @@ Or run the follwing command to get rurima to ./rurima and ./rurima-dbg(debug ver
 ```sh
 . <(curl -sL https://get.ruri.zip/rurima)
 ```   
+# The new pull subcommand:
+It's a wrap of docker/lxc pull subcommand.      
+For example:      
+```sh
+rurima pull alpine:edge ./test
+```
+```sh
+rurima pull whyour/qinglong ./test
+```
+```sh
+rurima pull ubuntu ./test
+```
+It will search lxc image first, if not found, it will auto try to pull rootfs from dockerhub.      
 # Example usage of docker subcommand:
 Get `alpine` image, use tag `edge`, save to `./test`     
 ```sh
@@ -106,6 +125,7 @@ Usage: rurima [subcommand] [options]
 Subcommands:
   docker: DockerHub support.
   lxc: LXC mirror support.
+  pull: Pull rootfs.
   unpack: Unpack rootfs.
   backup: Backup rootfs.
   ruri: Built-in ruri command.

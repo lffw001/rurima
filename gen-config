@@ -158,7 +158,7 @@ check_headers_and_libs() {
     done
 }
 show_help() {
-    echo "Usage: ./configure [OPTION]..."
+    echo "Usage: ./gen-config [OPTION]..."
     echo "    -h, --help          show help"
     echo "    -s, --static        compile static binary"
     echo "    -d, --dev           compile dev version"

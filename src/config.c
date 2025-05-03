@@ -28,7 +28,7 @@
  *
  */
 #include "include/rurima.h"
-struct RURIMA *init_config(void)
+struct RURIMA *rurima_init_config(void)
 {
 	/*
 	 * Init an empty RURIMA struct.
@@ -59,6 +59,6 @@ char *dump_ruri_config(struct RURIMA *_Nonnull config)
 	char *ret = ruri_container_info_to_k2v(&config->container);
 	return ret;
 }
-void read_global_config(void)
+void rurima_read_global_config(void)
 {
 }
