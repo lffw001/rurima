@@ -51,32 +51,31 @@ static void docker_pull_try_mirrors(const char *_Nonnull image, const char *_Non
 	/*
 	 * Try mirrors.
 	 */
-	char *rexec_argv[1024] = { NULL };
+	char **rexec_argv = malloc(128 * sizeof(char *));
+	rexec_argv[0] = NULL;
 	for (int i = 0; try_mirrorlist[i] != NULL; i++) {
 		cprintf("{base}Trying mirror: {cyan}%s\n", try_mirrorlist[i]);
-		rexec_argv[0] = "docker";
-		rexec_argv[1] = "pull";
-		rexec_argv[2] = "-i";
-		rexec_argv[3] = (char *)image;
-		rexec_argv[4] = "-t";
-		rexec_argv[5] = (char *)tag;
-		rexec_argv[6] = "-a";
-		rexec_argv[7] = (char *)architecture;
-		rexec_argv[8] = "-s";
-		rexec_argv[9] = (char *)savedir;
-		rexec_argv[10] = "-m";
-		rexec_argv[11] = (char *)try_mirrorlist[i];
+		rurima_add_argv(&rexec_argv, "docker");
+		rurima_add_argv(&rexec_argv, "pull");
+		rurima_add_argv(&rexec_argv, "-i");
+		rurima_add_argv(&rexec_argv, (char *)image);
+		rurima_add_argv(&rexec_argv, "-t");
+		rurima_add_argv(&rexec_argv, (char *)tag);
+		rurima_add_argv(&rexec_argv, "-a");
+		rurima_add_argv(&rexec_argv, (char *)architecture);
+		rurima_add_argv(&rexec_argv, "-s");
+		rurima_add_argv(&rexec_argv, (char *)savedir);
+		rurima_add_argv(&rexec_argv, "-m");
+		rurima_add_argv(&rexec_argv, (char *)try_mirrorlist[i]);
 		if (fallback) {
-			rexec_argv[12] = "-f";
-			rexec_argv[13] = NULL;
-			if (rurima_fork_rexec(13, rexec_argv) == 0) {
+			rurima_add_argv(&rexec_argv, "-f");
+			if (rurima_fork_rexec(rexec_argv) == 0) {
 				exit(0);
 			} else {
 				cprintf("{yellow}Mirror {cyan}%s {yellow}is not working!\n", try_mirrorlist[i]);
 			}
 		} else {
-			rexec_argv[12] = NULL;
-			if (rurima_fork_rexec(12, rexec_argv) == 0) {
+			if (rurima_fork_rexec(rexec_argv) == 0) {
 				exit(0);
 			} else {
 				cprintf("{yellow}Mirror {cyan}%s {yellow}is not working!\n", try_mirrorlist[i]);
@@ -101,7 +100,7 @@ static void docker_pull_try_mirrors(const char *_Nonnull image, const char *_Non
 		if (fallback) {
 			rexec_argv[12] = "-f";
 			rexec_argv[13] = NULL;
-			if (rurima_fork_rexec(13, rexec_argv) == 0) {
+			if (rurima_fork_rexec(rexec_argv) == 0) {
 				cprintf("\n{green}Success!\n");
 				exit(0);
 			} else {
@@ -109,7 +108,7 @@ static void docker_pull_try_mirrors(const char *_Nonnull image, const char *_Non
 			}
 		} else {
 			rexec_argv[12] = NULL;
-			if (rurima_fork_rexec(12, rexec_argv) == 0) {
+			if (rurima_fork_rexec(rexec_argv) == 0) {
 				cprintf("\n{green}Success!\n");
 				exit(0);
 			} else {
@@ -580,7 +579,8 @@ void rurima_pull(int argc, char **_Nonnull argv)
 			} else {
 				rurima_error("{red}No save directory specified!\n");
 			}
-			char *re_exec_args[114] = { NULL };
+			char **rexec_argv = malloc(sizeof(char *) * 114);
+			rexec_argv[0] = NULL;
 			if (!docker_only && rurima_lxc_have_image(mirror, image, version, architecture, NULL)) {
 				if (mirror == NULL) {
 					mirror = rurima_global_config.lxc_mirror;
@@ -588,19 +588,19 @@ void rurima_pull(int argc, char **_Nonnull argv)
 				if (architecture == NULL) {
 					architecture = rurima_lxc_get_host_arch();
 				}
-				re_exec_args[0] = "lxc";
-				re_exec_args[1] = "pull";
-				re_exec_args[2] = "-m";
-				re_exec_args[3] = (char *)mirror;
-				re_exec_args[4] = "-o";
-				re_exec_args[5] = (char *)image;
-				re_exec_args[6] = "-v";
-				re_exec_args[7] = (char *)version;
-				re_exec_args[8] = "-a";
-				re_exec_args[9] = (char *)architecture;
-				re_exec_args[10] = "-s";
-				re_exec_args[11] = (char *)savedir;
-				int exit_status = rurima_fork_rexec(12, re_exec_args);
+				rurima_add_argv(&rexec_argv, "lxc");
+				rurima_add_argv(&rexec_argv, "pull");
+				rurima_add_argv(&rexec_argv, "-m");
+				rurima_add_argv(&rexec_argv, (char *)mirror);
+				rurima_add_argv(&rexec_argv, "-o");
+				rurima_add_argv(&rexec_argv, (char *)image);
+				rurima_add_argv(&rexec_argv, "-v");
+				rurima_add_argv(&rexec_argv, (char *)version);
+				rurima_add_argv(&rexec_argv, "-a");
+				rurima_add_argv(&rexec_argv, (char *)architecture);
+				rurima_add_argv(&rexec_argv, "-s");
+				rurima_add_argv(&rexec_argv, (char *)savedir);
+				int exit_status = rurima_fork_rexec(rexec_argv);
 				exit(exit_status);
 			} else {
 				if (mirror == NULL) {
@@ -609,19 +609,19 @@ void rurima_pull(int argc, char **_Nonnull argv)
 				if (architecture == NULL) {
 					architecture = rurima_docker_get_host_arch();
 				}
-				re_exec_args[0] = "docker";
-				re_exec_args[1] = "pull";
-				re_exec_args[2] = "-i";
-				re_exec_args[3] = (char *)image;
-				re_exec_args[4] = "-t";
-				re_exec_args[5] = (char *)version;
-				re_exec_args[6] = "-a";
-				re_exec_args[7] = (char *)architecture;
-				re_exec_args[8] = "-s";
-				re_exec_args[9] = (char *)savedir;
-				re_exec_args[10] = "-m";
-				re_exec_args[11] = (char *)mirror;
-				int exit_status = rurima_fork_rexec(12, re_exec_args);
+				rurima_add_argv(&rexec_argv, "docker");
+				rurima_add_argv(&rexec_argv, "pull");
+				rurima_add_argv(&rexec_argv, "-i");
+				rurima_add_argv(&rexec_argv, (char *)image);
+				rurima_add_argv(&rexec_argv, "-t");
+				rurima_add_argv(&rexec_argv, (char *)version);
+				rurima_add_argv(&rexec_argv, "-a");
+				rurima_add_argv(&rexec_argv, (char *)architecture);
+				rurima_add_argv(&rexec_argv, "-s");
+				rurima_add_argv(&rexec_argv, (char *)savedir);
+				rurima_add_argv(&rexec_argv, "-m");
+				rurima_add_argv(&rexec_argv, (char *)mirror);
+				int exit_status = rurima_fork_rexec(rexec_argv);
 				exit(exit_status);
 			}
 		}

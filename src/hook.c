@@ -47,13 +47,13 @@ void *rurima_default_hook(const char *_Nonnull container_dir)
 		close(fd);
 		if (rurima_run_with_root()) {
 			char *argv[] = { "ruri", "-j", container_dir, "sh", "/tmp/hook.sh", NULL };
-			rurima_fork_rexec(5, argv);
+			rurima_fork_rexec(argv);
 		} else {
 			if (!rurima_rootless_supported()) {
 				rurima_error("{red}Rootless mode is not supported on your system!\n");
 			}
 			char *argv[] = { "ruri", "-j", "-r", container_dir, "sh", "/tmp/hook.sh", NULL };
-			rurima_fork_rexec(6, argv);
+			rurima_fork_rexec(argv);
 		}
 	} else {
 		char hook_script_path[PATH_MAX] = { '\0' };
@@ -67,13 +67,13 @@ void *rurima_default_hook(const char *_Nonnull container_dir)
 		close(fd2);
 		if (rurima_run_with_root()) {
 			char *argv[] = { "ruri", "-j", container_dir, "sh", "/tmp/hook.sh", NULL };
-			rurima_fork_rexec(5, argv);
+			rurima_fork_rexec(argv);
 		} else {
 			if (!rurima_rootless_supported()) {
 				rurima_error("{red}Rootless mode is not supported on your system!\n");
 			}
 			char *argv[] = { "ruri", "-j", "-r", container_dir, "sh", "/tmp/hook.sh", NULL };
-			rurima_fork_rexec(6, argv);
+			rurima_fork_rexec(argv);
 		}
 	}
 }

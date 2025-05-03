@@ -174,7 +174,20 @@ char *rurima_fork_execvp_get_stdout(const char *_Nonnull argv[])
 	}
 	return NULL;
 }
-int rurima_fork_rexec(int argc, char **_Nonnull argv)
+void rurima_add_argv(char ***_Nonnull argv, const char *_Nonnull arg)
+{
+	/*
+	 * Add an argument to the argv array.
+	 * Warning: make sure length of argv is enough.
+	 */
+	int argc = 0;
+	while ((*argv)[argc] != NULL) {
+		argc++;
+	}
+	(*argv)[argc] = arg;
+	(*argv)[argc + 1] = NULL;
+}
+int rurima_fork_rexec(char **_Nonnull argv)
 {
 	/*
 	 * Fork and execv self with argv.
@@ -184,16 +197,23 @@ int rurima_fork_rexec(int argc, char **_Nonnull argv)
 		rurima_error("{red}Fork failed!\n");
 	}
 	if (pid == 0) {
+		int argc = 0;
+		while (argv[argc] != NULL) {
+			argc++;
+		}
 		char **new_argv = malloc(sizeof(char *) * (argc + 2));
 		new_argv[0] = "/proc/self/exe";
 		for (int i = 0; i < argc; i++) {
+			rurima_log("{base}Argv[%d]: %s\n", i, argv[i]);
 			new_argv[i + 1] = argv[i];
-			new_argv[i + 2] = NULL;
 		}
+		new_argv[argc + 1] = NULL;
 		execv(new_argv[0], new_argv);
 		rurima_error("{red}Execv() failed!\n");
+		free(new_argv);
+		exit(1);
 	}
 	int status;
 	waitpid(pid, &status, 0);
-	return status;
+	return WEXITSTATUS(status);
 }
