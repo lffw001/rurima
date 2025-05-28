@@ -539,6 +539,7 @@ void rurima_pull(int argc, char **_Nonnull argv)
 	char *savedir = NULL;
 	char *arch = NULL;
 	bool docker_only = false;
+	bool fallback = false;
 	for (int i = 0; i < argc; i++) {
 		if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
 			cprintf("{base}Usage: pull <options> [image]:[version] [savedir]\n");
@@ -547,6 +548,7 @@ void rurima_pull(int argc, char **_Nonnull argv)
 			cprintf("{base}  -m, --mirror: Mirror URL.\n");
 			cprintf("{base}  -a, --arch: Architecture.\n");
 			cprintf("{base}  -d, --docker: Only search dockerhub for image.\n");
+			cprintf("{base}  -f, --fallback: Fallback mode, only for docker image.\n");
 			cprintf("{base}Note: please remove `https://` prefix from mirror url.\n");
 			cprintf("{base}This is just a wrap of docker and lxc subcommand.\n");
 			cprintf("{base}It will re-exec itself to call the subcommand.\n");
@@ -566,6 +568,8 @@ void rurima_pull(int argc, char **_Nonnull argv)
 			i++;
 		} else if (strcmp(argv[i], "-d") == 0 || strcmp(argv[i], "--docker") == 0) {
 			docker_only = true;
+		} else if (strcmp(argv[i], "-f") == 0 || strcmp(argv[i], "--fallback") == 0) {
+			fallback = true;
 		} else {
 			if (strstr(argv[i], ":") != NULL) {
 				image = strtok(argv[i], ":");
@@ -611,6 +615,9 @@ void rurima_pull(int argc, char **_Nonnull argv)
 				}
 				rurima_add_argv(&rexec_argv, "docker");
 				rurima_add_argv(&rexec_argv, "pull");
+				if (fallback) {
+					rurima_add_argv(&rexec_argv, "-f");
+				}
 				rurima_add_argv(&rexec_argv, "-i");
 				rurima_add_argv(&rexec_argv, (char *)image);
 				rurima_add_argv(&rexec_argv, "-t");
