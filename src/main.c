@@ -78,8 +78,37 @@ static void detect_suid_or_capability(void)
 	cap_free(caps);
 	cap_free(caps_str);
 }
+static int pmcrts(const char *s1, const char *s2)
+{
+	/*
+	 *
+	 * Compare two strings, but s2 is in the end of s1.
+	 * For example,
+	 * s1 = "./ruri", s2 = "ruri", it will return 0.
+	 * s1 = "./rurima", s2 = "ruri", it will return... 'a' - 'i',
+	 * anyway, it's not 0 :)
+	 * If s1 is shorter than s2, it will return -1.
+	 *
+	 */
+	size_t len1 = strlen(s1);
+	size_t len2 = strlen(s2);
+	if (len1 < len2) {
+		return -1; // s1 is shorter than s2
+	}
+	for (size_t i = len1; i > len1 - len2; i--) {
+		if (s1[i] != s2[i - (len1 - len2)]) {
+			return s1[i] - s2[i - (len1 - len2)];
+		}
+	}
+	return 0; // s1 ends with s2
+}
 int main(int argc, char **argv)
 {
+	// Check for argv[0], if it's ruri, we will only call built-in ruri.
+	if (argc > 0 && pmcrts(argv[0], "ruri") == 0) {
+		rurima_log("{green}Detected ruri mode, calling built-in ruri.\n");
+		return ruri(argc, argv);
+	}
 	detect_suid_or_capability();
 	rurima_read_global_config();
 #ifdef RURIMA_DEV
