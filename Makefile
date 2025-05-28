@@ -109,10 +109,10 @@ help :
 	@echo "  make check          run clang-tidy"
 	@echo "  make format         format code"
 config :
-	@./configure
+	@./gen-config
 dbg_config :
-	@./configure -d -D
+	@./gen-config -d -D
 dev_config :
-	@./configure -d
+	@./gen-config -d
 static_config :
-	@./configure -s
+	@./gen-config -s
