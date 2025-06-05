@@ -29,6 +29,29 @@
  *
  */
 #include "include/rurima.h"
+static size_t get_max_pipe_size(void)
+{
+	int fd = open("/proc/sys/fs/pipe-max-size", O_RDONLY);
+	if (fd < 0) {
+		perror("open /proc/sys/fs/pipe-max-size");
+		return 65536; // Default pipe size
+	}
+	char buffer[16];
+	ssize_t bytes_read = read(fd, buffer, sizeof(buffer) - 1);
+	if (bytes_read < 0) {
+		perror("read /proc/sys/fs/pipe-max-size");
+		close(fd);
+		return 65536; // Default pipe size
+	}
+	buffer[bytes_read] = '\0'; // Null-terminate the string
+	size_t max_size = strtoul(buffer, NULL, 10);
+	close(fd);
+	if (max_size == 0) {
+		return 65536; // Default pipe size
+	}
+	rurima_log("{base}Maximum pipe size: {green}%zu{base} bytes\n", max_size);
+	return max_size;
+}
 int rurima_fork_execvp(const char *_Nonnull argv[])
 {
 	/*
@@ -232,6 +255,9 @@ char *rurima_fork_execvp_get_stdout_with_input(const char *_Nonnull argv[], cons
 		perror("pipe");
 		return NULL;
 	}
+	// Set the maximum pipe size.
+	size_t max_pipe_size = get_max_pipe_size();
+	fcntl(pipefd_in[1], F_SETPIPE_SZ, max_pipe_size);
 	int pipefd_out[2];
 	if (pipe(pipefd_out) == -1) {
 		perror("pipe");
