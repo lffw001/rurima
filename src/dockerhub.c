@@ -987,7 +987,7 @@ static char *docker_search__(const char *_Nonnull url)
 	free(is_offical);
 	return next_url;
 }
-int rurima_docker_search(const char *_Nonnull image, const char *_Nonnull page_size, bool quiet)
+int rurima_docker_search(const char *_Nonnull image, const char *_Nonnull page_size, bool quiet, const char *_Nullable mirror)
 {
 	/*
 	 *
@@ -998,7 +998,12 @@ int rurima_docker_search(const char *_Nonnull image, const char *_Nonnull page_s
 	 */
 	char *url = malloc(4096);
 	url[0] = '\0';
-	strcat(url, "https://hub.docker.com/v2/search/repositories/?page_size=");
+	if (mirror == NULL) {
+		mirror = "hub.docker.com";
+	}
+	strcat(url, "https://");
+	strcat(url, mirror);
+	strcat(url, "/v2/search/repositories/?page_size=");
 	strcat(url, page_size);
 	strcat(url, "&query=");
 	strcat(url, image);
@@ -1092,7 +1097,7 @@ static char *docker_search_tag__(const char *_Nonnull image, const char *_Nonnul
 	free(tags);
 	return next_url;
 }
-int rurima_docker_search_tag(const char *_Nonnull image, const char *_Nonnull page_size, const char *_Nullable architecture, bool quiet)
+int rurima_docker_search_tag(const char *_Nonnull image, const char *_Nonnull page_size, const char *_Nullable architecture, bool quiet, const char *_Nullable mirror)
 {
 	/*
 	 * An implementation of docker tag search.
@@ -1103,7 +1108,12 @@ int rurima_docker_search_tag(const char *_Nonnull image, const char *_Nonnull pa
 	 */
 	char *url = malloc(4096);
 	url[0] = '\0';
-	strcat(url, "https://hub.docker.com/v2/repositories/");
+	if (mirror == NULL) {
+		mirror = "hub.docker.com";
+	}
+	strcat(url, "https://");
+	strcat(url, mirror);
+	strcat(url, "/v2/repositories/");
 	strcat(url, image);
 	strcat(url, "/tags/?page_size=");
 	strcat(url, page_size);

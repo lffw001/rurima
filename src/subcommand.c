@@ -229,7 +229,7 @@ void rurima_docker(int argc, char **_Nonnull argv)
 		if (page_size == NULL) {
 			page_size = "10";
 		}
-		rurima_docker_search(image, page_size, quiet);
+		rurima_docker_search(image, page_size, quiet, mirror);
 	} else if (strcmp(argv[0], "tag") == 0) {
 		if (page_size == NULL) {
 			page_size = "10";
@@ -238,7 +238,7 @@ void rurima_docker(int argc, char **_Nonnull argv)
 			rurima_error("{red}No image specified!\n");
 		}
 		image = add_library_prefix(image);
-		rurima_docker_search_tag(image, page_size, architecture, quiet);
+		rurima_docker_search_tag(image, page_size, architecture, quiet, mirror);
 	} else if (strcmp(argv[0], "pull") == 0) {
 		if (tag == NULL) {
 			tag = "latest";
