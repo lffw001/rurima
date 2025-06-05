@@ -123,6 +123,9 @@ static void docker_pull_try_mirrors(const char *_Nonnull image, const char *_Non
  */
 void rurima_docker(int argc, char **_Nonnull argv)
 {
+	if (!rurima_jq_exists()) {
+		rurima_error("{red}jq is not installed!\n");
+	}
 	char *image = NULL;
 	char *tag = NULL;
 	char *architecture = NULL;

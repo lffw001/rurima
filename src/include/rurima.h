@@ -66,7 +66,6 @@
 #define _Nonnull
 #endif
 #include "version.h"
-#include "jsonv.h"
 #include "../ruri/src/include/ruri.h"
 struct RURIMA_CONFIG {
 	char *_Nonnull docker_mirror;
@@ -212,3 +211,8 @@ void rurima_pull(int argc, char **_Nonnull argv);
 bool rurima_lxc_have_image(const char *_Nullable mirror, const char *_Nonnull os, const char *_Nonnull version, const char *_Nullable architecture, const char *_Nullable type);
 int rurima_download_file(const char *_Nonnull url, const char *_Nonnull file, const char *_Nullable token, ssize_t size);
 bool proot_exist(void);
+bool rurima_jq_exists(void);
+char *rurima_fork_execvp_get_stdout_with_input(const char *_Nonnull argv[], const char *_Nonnull input);
+char *rurima_call_jq(const char *_Nonnull argv[], const char *_Nonnull input);
+size_t rurima_split_lines(const char *_Nonnull input, char ***_Nonnull lines);
+size_t rurima_split_lines_allow_null(const char *_Nonnull input, char ***_Nonnull lines);

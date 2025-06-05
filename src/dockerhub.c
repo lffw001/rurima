@@ -393,7 +393,8 @@ static char *get_token(const char *_Nonnull image, const char *_Nullable mirror,
 	if (token_json == NULL) {
 		rurima_error("{red}Failed to get token!\n");
 	}
-	char *ret = libjsonv_get_key(token_json, "[token]");
+	char *jq_cmd_0[] = { "jq", "-r", "-j", ".token", NULL };
+	char *ret = rurima_call_jq(jq_cmd_0, token_json);
 	if (ret == NULL) {
 		if (fallback) {
 			free(token_json);
@@ -446,8 +447,16 @@ static char *get_tag_digest(const char *_Nonnull manifests, const char *_Nullabl
 	if (architecture == NULL) {
 		architecture = rurima_docker_get_host_arch();
 	}
-	char *tmp = libjsonv_get_key(manifests, "[manifests]");
-	char *digest = libjsonv_anon_layer_get_key(tmp, "[platform][architecture]", architecture, "[digest]");
+	char *jq_cmd_0[] = { "jq", "-r", ".manifests", NULL };
+	char *tmp = rurima_call_jq(jq_cmd_0, manifests);
+	if (tmp == NULL) {
+		rurima_error("{red}Failed to get manifests!\n");
+	}
+	char *jq_arg_0 = malloc(strlen(architecture) + 128);
+	sprintf(jq_arg_0, ".[] | select(.platform.architecture == \"%s\")|select(.platform.os == \"linux\")|.digest", architecture);
+	char *jq_cmd_1[] = { "jq", "-r", "-j", jq_arg_0, NULL };
+	char *digest = rurima_call_jq(jq_cmd_1, tmp);
+	free(jq_arg_0);
 	if (digest == NULL) {
 		free(tmp);
 		return NULL;
@@ -476,17 +485,22 @@ static char **get_blobs(const char *_Nonnull image, const char *_Nonnull digest,
 	auth[0] = '\0';
 	sprintf(auth, "Authorization: Bearer %s", token);
 	const char *curl_command[] = { "curl", "-L", "-s", "-H", "Accept: application/vnd.oci.image.manifest.v1+json", "-H", auth, url, NULL };
+	rurima_log("{base}Command:\n{cyan}curl -L -s -H \"%s\" %s\n", auth, url);
 	char *response = rurima_fork_execvp_get_stdout(curl_command);
 	rurima_log("{base}Response: \n{cyan}%s{clear}\n", response);
 	if (response == NULL) {
 		rurima_error("{red}Failed to get blobs!\n");
 	}
-	char *layers = libjsonv_get_key(response, "[layers]");
+	char *jq_cmd_0[] = { "jq", "-r", ".layers", NULL };
+	char *layers = rurima_call_jq(jq_cmd_0, response);
 	if (layers == NULL) {
 		rurima_error("{red}Failed to get layers!\n");
 	}
 	char **ret = NULL;
-	size_t len = libjsonv_anon_layer_get_key_array(layers, "[digest]", &ret);
+	char *jq_cmd_1[] = { "jq", "-r", ".[] | .digest", NULL };
+	char *layers_orig = rurima_call_jq(jq_cmd_1, layers);
+	size_t len = rurima_split_lines(layers_orig, &ret);
+	free(layers_orig);
 	if (len == 0) {
 		rurima_error("{red}Failed to get layers!\n");
 	}
@@ -591,7 +605,8 @@ static char *get_config_digest_fallback(const char *_Nonnull image, const char *
 		mirror = rurima_global_config.docker_mirror;
 	}
 	char *manifests = get_tag_manifests(image, tag, token, mirror);
-	char *ret = libjsonv_get_key(manifests, "[config][digest]");
+	char *jq_command_0[] = { "jq", "-r", "-j", ".config.digest", NULL };
+	char *ret = rurima_call_jq(jq_command_0, manifests);
 	if (ret == NULL) {
 		rurima_error("{red}Failed to get config!\n");
 	}
@@ -624,7 +639,8 @@ static char *get_config_digest(const char *_Nonnull image, const char *_Nonnull 
 	if (response == NULL) {
 		rurima_error("{red}Failed to get config!\n");
 	}
-	char *config = libjsonv_get_key(response, "[config][digest]");
+	char *jq_command_0[] = { "jq", "-r", "-j", ".config.digest", NULL };
+	char *config = rurima_call_jq(jq_command_0, response);
 	if (config == NULL) {
 		free(response);
 		free(auth);
@@ -731,8 +747,9 @@ static struct RURIMA_DOCKER *get_image_config(const char *_Nonnull image, const 
 	}
 	rurima_log("{base}Config:\n{cyan} %s\n", response);
 	{
-		char *architecture = libjsonv_get_key(response, "[architecture]");
-		rurima_log("{base}Env: {cyan}%s{clear}\n", architecture == NULL ? "NULL" : architecture);
+		char *jq_command_0[] = { "jq", "-r", "-j", ".architecture", NULL };
+		char *architecture = rurima_call_jq(jq_command_0, response);
+		rurima_log("{base}Arch: {cyan}%s{clear}\n", architecture == NULL ? "NULL" : architecture);
 		if (architecture == NULL) {
 			ret->architecture = NULL;
 		} else {
@@ -740,8 +757,9 @@ static struct RURIMA_DOCKER *get_image_config(const char *_Nonnull image, const 
 		}
 	}
 	{
-		char *workdir = libjsonv_get_key(response, "[config][WorkingDir]");
-		rurima_log("{base}Env: {cyan}%s{clear}\n", workdir == NULL ? "NULL" : workdir);
+		char *jq_command_1[] = { "jq", "-r", "-j", ".config.WorkingDir", NULL };
+		char *workdir = rurima_call_jq(jq_command_1, response);
+		rurima_log("{base}Workdir: {cyan}%s{clear}\n", workdir == NULL ? "NULL" : workdir);
 		if (workdir == NULL) {
 			ret->workdir = NULL;
 		} else {
@@ -749,7 +767,8 @@ static struct RURIMA_DOCKER *get_image_config(const char *_Nonnull image, const 
 		}
 	}
 	{
-		char *env_from_json = libjsonv_get_key(response, "[config][Env]");
+		char *jq_command_2[] = { "jq", "-r", "-j", "-c", ".config.Env", NULL };
+		char *env_from_json = rurima_call_jq(jq_command_2, response);
 		rurima_log("{base}Env: {cyan}%s{clear}\n", env_from_json == NULL ? "NULL" : env_from_json);
 		if (env_from_json != NULL) {
 			char *tmp = malloc(strlen(env_from_json) + 114);
@@ -770,7 +789,8 @@ static struct RURIMA_DOCKER *get_image_config(const char *_Nonnull image, const 
 		}
 	}
 	{
-		char *entrypoint = libjsonv_get_key(response, "[config][Entrypoint]");
+		char *jq_command_3[] = { "jq", "-r", "-j", "-c", ".config.Entrypoint", NULL };
+		char *entrypoint = rurima_call_jq(jq_command_3, response);
 		rurima_log("{base}Entrypoint: {cyan}%s{clear}\n", entrypoint == NULL ? "NULL" : entrypoint);
 		if (entrypoint != NULL) {
 			char *tmp = malloc(strlen(entrypoint) + 114);
@@ -787,7 +807,8 @@ static struct RURIMA_DOCKER *get_image_config(const char *_Nonnull image, const 
 		}
 	}
 	{
-		char *cmdline = libjsonv_get_key(response, "[config][Cmd]");
+		char *jq_command_4[] = { "jq", "-r", "-j", "-c", ".config.Cmd", NULL };
+		char *cmdline = rurima_call_jq(jq_command_4, response);
 		rurima_log("{base}Cmdline: {cyan}%s{clear}\n", cmdline == NULL ? "NULL" : cmdline);
 		if (cmdline != NULL) {
 			char *tmp = malloc(strlen(cmdline) + 114);
@@ -845,8 +866,15 @@ static struct RURIMA_DOCKER *docker_pull_fallback(const char *_Nonnull image, co
 	char *token = get_token(image, mirror, true);
 	char *manifests = get_tag_manifests(image, tag, token, mirror);
 	char **blobs = NULL;
-	char *layers = libjsonv_get_key(manifests, "[layers]");
-	size_t len = libjsonv_anon_layer_get_key_array(layers, "[digest]", &blobs);
+	char *jq_cmd_0[] = { "jq", "-r", ".layers", NULL };
+	char *layers = rurima_call_jq(jq_cmd_0, manifests);
+	if (layers == NULL) {
+		rurima_error("{red}Failed to get layers!\n");
+	}
+	char *jq_cmd_1[] = { "jq", "-r", ".[] | .digest", NULL };
+	char *layers_orig = rurima_call_jq(jq_cmd_1, layers);
+	size_t len = rurima_split_lines(layers_orig, &blobs);
+	free(layers_orig);
 	if (len == 0) {
 		rurima_error("{red}Failed to get digest!\n");
 	}
@@ -929,32 +957,61 @@ static char *docker_search__(const char *_Nonnull url)
 		rurima_error("{red}Failed to get response from dockerhub!\n");
 	}
 	rurima_log("{base}Response from dockerhub:\n{cyan}%s{clear}\n", response);
-	char *next_url = libjsonv_get_key(response, "[next]");
-	char *results = libjsonv_get_key(response, "[results]");
+	char *jq_cmd_1[] = { "jq", "-r", ".next", NULL };
+	char *next_url = rurima_call_jq(jq_cmd_1, response);
+	if (next_url == NULL) {
+		rurima_error("{red}Failed to get next url!\n");
+	}
+	char *jq_cmd_2[] = { "jq", "-r", ".results", NULL };
+	char *results = rurima_call_jq(jq_cmd_2, response);
 	if (results == NULL) {
 		rurima_error("{red}No results found!\n");
 	}
 	rurima_log("{base}Results:\n{cyan}%s{clear}\n", results);
 	char **name = NULL;
-	size_t len = libjsonv_anon_layer_get_key_array_allow_null_val(results, "[repo_name]", &name);
+	char *jq_cmd_3[] = { "jq", "-r", ".[].repo_name", NULL };
+	char *name_ori = rurima_call_jq(jq_cmd_3, results);
+	if (name_ori == NULL) {
+		rurima_error("{red}No results found!\n");
+	}
+	size_t len = rurima_split_lines_allow_null(name_ori, &name);
 	if (len == 0) {
 		rurima_error("{red}No results found!\n");
 	}
+	free(name_ori);
 	char **description = NULL;
-	size_t len2 = libjsonv_anon_layer_get_key_array_allow_null_val(results, "[short_description]", &description);
+	char *jq_cmd_4[] = { "jq", "-r", ".[].short_description", NULL };
+	char *description_ori = rurima_call_jq(jq_cmd_4, results);
+	if (description_ori == NULL) {
+		rurima_error("{red}No results found!\n");
+	}
+	size_t len2 = rurima_split_lines_allow_null(description_ori, &description);
+	free(description_ori);
+	if (len2 == 0) {
+		rurima_error("{red}No results found!\n");
+	}
 	if (len2 != len) {
 		rurima_error("{red}Incorrect json!\n");
 	}
 	char **is_offical = NULL;
-	size_t len3 = libjsonv_anon_layer_get_key_array_allow_null_val(results, "[is_official]", &is_offical);
+	char *jq_cmd_5[] = { "jq", "-r", ".[].is_official", NULL };
+	char *is_offical_ori = rurima_call_jq(jq_cmd_5, results);
+	if (is_offical_ori == NULL) {
+		rurima_error("{red}No results found!\n");
+	}
+	size_t len3 = rurima_split_lines_allow_null(is_offical_ori, &is_offical);
+	free(is_offical_ori);
+	if (len3 == 0) {
+		rurima_error("{red}No results found!\n");
+	}
 	if (len3 != len) {
 		rurima_error("{red}Incorrect json!\n");
 	}
-	for (size_t i = 0; i < len; i++) {
+	for (size_t i = 0; i < len - 1; i++) {
 		if (strcmp(is_offical[i], "true") == 0) {
 			if (!rurima_global_config.quiet) {
 				cprintf("{yellow}%s {green}[official]\n", name[i]);
-				if (description[i] != NULL) {
+				if (description[i] != NULL && strlen(description[i]) > 0) {
 					cprintf("  {cyan}Description: %s\n", description[i]);
 				} else {
 					cprintf("  {cyan}Description: No description\n");
@@ -1053,48 +1110,41 @@ static char *docker_search_tag__(const char *_Nonnull image, const char *_Nonnul
 	if (architecture == NULL) {
 		architecture = rurima_docker_get_host_arch();
 	}
-	char *next_url = libjsonv_get_key(response, "[next]");
+	char *jq_cmd_0[] = { "jq", "-r", ".next", NULL };
+	char *next_url = rurima_call_jq(jq_cmd_0, response);
 	rurima_log("{base}next_url: {cyan}%s{clear}\n", next_url);
-	char *results = libjsonv_get_key(response, "[results]");
-	char **images = NULL;
-	size_t len = libjsonv_anon_layer_get_key_array_allow_null_val(results, "[images]", &images);
+	char *jq_cmd_1[] = { "jq", "-r", "-j", ".results", NULL };
+	char *results = rurima_call_jq(jq_cmd_1, response);
+	char *jq_arg_0 = malloc(strlen(architecture) + 1024);
+	sprintf(jq_arg_0, ".[]|select(.images.[].architecture==\"%s\")|.name", architecture);
+	if (results == NULL) {
+		free(jq_arg_0);
+		rurima_error("{red}No results found!\n");
+	}
+	char **name = NULL;
+	char *jq_cmd_2[] = { "jq", "-r", jq_arg_0, NULL };
+	char *name_ori = rurima_call_jq(jq_cmd_2, results);
+	if (name_ori == NULL) {
+		free(jq_arg_0);
+		rurima_error("{red}No results found!\n");
+	}
+	size_t len = rurima_split_lines_allow_null(name_ori, &name);
 	if (len == 0) {
+		free(jq_arg_0);
 		rurima_error("{red}No results found!\n");
 	}
-	char **tags = NULL;
-	size_t len2 = libjsonv_anon_layer_get_key_array_allow_null_val(results, "[name]", &tags);
-	if (len2 != len) {
-		printf("len: %zu, len2: %zu\n", len, len2);
-		rurima_error("{red}Incorrect json!\n");
-	}
-	bool found = false;
-	char *tmp = NULL;
-	for (size_t i = 0; i < len; i++) {
-		if (images[i] == NULL || tags[i] == NULL) {
-			continue;
+	rurima_log("{base}Results:\n{cyan}%s{clear}\n", name_ori);
+	for (size_t i = 0; i < len - 1; i++) {
+		if (!rurima_global_config.quiet) {
+			cprintf("{yellow}[%s]: {cyan}%s{clear}\n", image, name[i]);
+		} else {
+			printf("[%s]: %s\n", image, name[i]);
 		}
-		tmp = libjsonv_anon_layer_get_key(images[i], "[architecture]", architecture, "[digest]");
-		if (tmp != NULL) {
-			found = true;
-			if (!rurima_global_config.quiet) {
-				cprintf("{yellow}[%s]: {cyan}%s{clear}\n", image, tags[i]);
-			} else {
-				printf("[%s]: %s\n", image, tags[i]);
-			}
-			free(tmp);
-		}
+		free(name[i]);
 	}
-	if (!found) {
-		rurima_error("{red}No results found!\n");
-	}
+	free(jq_arg_0);
 	free(response);
 	free(results);
-	for (size_t i = 0; i < len; i++) {
-		free(images[i]);
-		free(tags[i]);
-	}
-	free(images);
-	free(tags);
 	return next_url;
 }
 int rurima_docker_search_tag(const char *_Nonnull image, const char *_Nonnull page_size, const char *_Nullable architecture, bool quiet, const char *_Nullable mirror)
@@ -1127,6 +1177,7 @@ int rurima_docker_search_tag(const char *_Nonnull image, const char *_Nonnull pa
 		if (quiet) {
 			free(url);
 			free(next_url);
+			return 0;
 			break;
 		}
 		char goto_next[114] = { '\0' };
@@ -1220,8 +1271,19 @@ int rurima_docker_search_arch(const char *_Nonnull image, const char *_Nonnull t
 	char *token = get_token(image, mirror, fallback);
 	char *manifests = get_tag_manifests(image, tag, token, mirror);
 	char **arch = NULL;
-	char *tmp = libjsonv_get_key(manifests, "[manifests]");
-	size_t len = libjsonv_anon_layer_get_key_array(tmp, "[platform][architecture]", &arch);
+	char *jq_cmd_0[] = { "jq", "-r", ".manifests", NULL };
+	char *tmp = rurima_call_jq(jq_cmd_0, manifests);
+	if (tmp == NULL) {
+		rurima_error("{red}Failed to get manifests!\n");
+	}
+	char *jq_cmd_1[] = { "jq", "-r", ".[] | .platform.architecture", NULL };
+	char *arch_ori = rurima_call_jq(jq_cmd_1, tmp);
+	if (arch_ori == NULL) {
+		free(tmp);
+		rurima_error("{red}Failed to get architecture!\n");
+	}
+	size_t len = rurima_split_lines(arch_ori, &arch);
+	free(arch_ori);
 	if (len == 0) {
 		rurima_error("{red}No results found!\n");
 	}

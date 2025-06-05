@@ -475,3 +475,96 @@ bool rurima_sha256sum_exists(void)
 	free(result);
 	return true;
 }
+bool rurima_jq_exists(void)
+{
+	/*
+	 * Check if jq exists.
+	 */
+	const char *command[] = { "jq", "--version", NULL };
+	char *result = rurima_fork_execvp_get_stdout(command);
+	if (result == NULL) {
+		return false;
+	}
+	free(result);
+	return true;
+}
+size_t rurima_split_lines(const char *_Nonnull input, char ***_Nonnull lines)
+{
+	/*
+	 * Split the input into lines.
+	 * Warning: free() the lines after use.
+	 */
+	size_t count = 0;
+	char *input_copy = strdup(input);
+	char *line = strtok(input_copy, "\n");
+	while (line != NULL) {
+		if (line[0] == '\0') {
+			line = strtok(NULL, "\n");
+			continue;
+		}
+		count++;
+		line = strtok(NULL, "\n");
+	}
+	free(input_copy);
+	if (count == 0) {
+		return 0;
+	}
+	*lines = malloc(sizeof(char *) * (count + 2));
+	input_copy = strdup(input);
+	line = strtok(input_copy, "\n");
+	size_t index = 0;
+	while (line != NULL && strlen(line) > 0) {
+		(*lines)[index++] = strdup(line);
+		line = strtok(NULL, "\n");
+	}
+	free(input_copy);
+	rurima_log("{base}lines count: {green}%zu{clear}\n", count);
+	for (size_t i = 0; i < count; i++) {
+		rurima_log("{base}lines[%zu]: {cyan}%s{clear}\n", i, (*lines)[i]);
+	}
+	(*lines)[count] = NULL; // Null-terminate the array
+	return count;
+}
+size_t rurima_split_lines_allow_null(const char *_Nonnull input, char ***_Nonnull lines)
+{
+	/*
+	 * Split the input into lines.
+	 * Warning: free() the lines after use.
+	 */
+	size_t count = 0;
+	char *input_copy = strdup(input);
+	char *p = input_copy;
+	char *line = strsep(&p, "\n");
+	while (line != NULL) {
+		count++;
+		line = strsep(&p, "\n");
+	}
+	free(input_copy);
+	if (count == 0) {
+		return 0;
+	}
+	*lines = malloc(sizeof(char *) * (count + 2));
+	input_copy = strdup(input);
+	p = input_copy;
+	line = strsep(&p, "\n");
+	size_t index = 0;
+	while (line != NULL) {
+		if (strlen(line) > 0) {
+			(*lines)[index++] = strdup(line);
+		} else {
+			(*lines)[index++] = NULL; // Allow null lines
+		}
+		line = strsep(&p, "\n");
+	}
+	free(input_copy);
+	rurima_log("{base}lines count: {green}%zu{clear}\n", count);
+	for (size_t i = 0; i < count; i++) {
+		if ((*lines)[i] != NULL) {
+			rurima_log("{base}lines[%zu]: {cyan}%s{clear}\n", i, (*lines)[i]);
+		} else {
+			rurima_log("{base}lines[%zu]: {cyan}NULL{clear}\n", i);
+		}
+	}
+	(*lines)[count] = NULL; // Null-terminate the array
+	return count;
+}
