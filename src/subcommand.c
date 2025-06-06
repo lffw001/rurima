@@ -305,7 +305,7 @@ void rurima_docker(int argc, char **_Nonnull argv)
 		}
 		rurima_docker_search_arch(image, tag, mirror, fallback);
 	} else if (strcmp(argv[0], "help") == 0 || strcmp(argv[0], "-h") == 0 || strcmp(argv[0], "--help") == 0) {
-		cprintf("{base}Usage: docker [subcommand] [options]\n");
+		cprintf("{base}Usage: rurima docker [subcommand] [options]\n");
 		cprintf("{base}Subcommands:\n");
 		cprintf("{base}  search: Search images from DockerHub.\n");
 		cprintf("{base}  tag:    Search tags from DockerHub.\n");
@@ -419,7 +419,7 @@ void rurima_lxc(int argc, char **_Nonnull argv)
 		}
 		rurima_lxc_search_arch(mirror, os);
 	} else if (strcmp(argv[0], "help") == 0 || strcmp(argv[0], "-h") == 0 || strcmp(argv[0], "--help") == 0) {
-		cprintf("{base}Usage: lxc [subcommand] [options]\n");
+		cprintf("{base}Usage: rurima lxc [subcommand] [options]\n");
 		cprintf("{base}Subcommands:\n");
 		cprintf("{base}  pull: Pull image from LXC image server.\n");
 		cprintf("{base}  list: List images from LXC image server.\n");
@@ -463,7 +463,7 @@ void rurima_unpack(int argc, char **_Nonnull argv)
 		} else if (strcmp(argv[i], "-n") == 0 || strcmp(argv[i], "--no-process") == 0) {
 			rurima_global_config.no_process = true;
 		} else if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
-			cprintf("{base}Usage: unpack [options]\n");
+			cprintf("{base}Usage: rurima unpack [options]\n");
 			cprintf("{base}Options:\n");
 			cprintf("{base}  -f, --file: File to unpack.\n");
 			cprintf("{base}  -d, --dir: Directory to unpack.\n");
@@ -509,7 +509,7 @@ void rurima_backup(int argc, char **_Nonnull argv)
 		} else if (strcmp(argv[i], "-n") == 0 || strcmp(argv[i], "--no-process") == 0) {
 			rurima_global_config.no_process = true;
 		} else if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
-			cprintf("{base}Usage: unpack [options]\n");
+			cprintf("{base}Usage: rurima backup [options]\n");
 			cprintf("{base}Options:\n");
 			cprintf("{base}  -f, --file: output file, tar format.\n");
 			cprintf("{base}  -d, --dir: Directory to backup.\n");
@@ -545,7 +545,7 @@ void rurima_pull(int argc, char **_Nonnull argv)
 	bool fallback = false;
 	for (int i = 0; i < argc; i++) {
 		if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
-			cprintf("{base}Usage: pull <options> [image]:[version] [savedir]\n");
+			cprintf("{base}Usage: rurima pull <options> [image]:[version] [savedir]\n");
 			cprintf("{base}Options:\n");
 			cprintf("{base}  -h, --help: Show help message.\n");
 			cprintf("{base}  -m, --mirror: Mirror URL.\n");
