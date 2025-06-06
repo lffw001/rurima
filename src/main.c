@@ -42,14 +42,14 @@ static void show_help(void)
 {
 	cprintf("{base}Usage: rurima [subcommand] [options]\n");
 	cprintf("{base}Subcommands:\n");
-	cprintf("{base}  docker: DockerHub support.\n");
-	cprintf("{base}  lxc: LXC mirror support.\n");
-	cprintf("{base}  pull: Pull image, as a wrap of rurima docker/lxc pull.\n");
-	cprintf("{base}  unpack: Unpack rootfs.\n");
-	cprintf("{base}  backup: Backup rootfs.\n");
-	cprintf("{base}  ruri: Built-in ruri command.\n");
-	cprintf("{base}  help: Show help message.\n");
-	cprintf("{base}  dep: Check dependencies.\n");
+	cprintf("{base}  docker, d : DockerHub support.\n");
+	cprintf("{base}  lxc, l    : LXC mirror support.\n");
+	cprintf("{base}  pull, p   : Pull image, as a wrap of rurima docker/lxc pull.\n");
+	cprintf("{base}  unpack, u : Unpack rootfs.\n");
+	cprintf("{base}  backup, b : Backup rootfs.\n");
+	cprintf("{base}  ruri, r   : Built-in ruri command.\n");
+	cprintf("{base}  help, h   : Show help message.\n");
+	cprintf("{base}  dep       : Check dependencies.\n");
 	cprintf("{base}Options:\n");
 	cprintf("{base}  -h, --help: Show help message.\n");
 	cprintf("{base}  -v, --version: Show version info.\n");
