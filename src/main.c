@@ -49,12 +49,89 @@ static void show_help(void)
 	cprintf("{base}  backup: Backup rootfs.\n");
 	cprintf("{base}  ruri: Built-in ruri command.\n");
 	cprintf("{base}  help: Show help message.\n");
+	cprintf("{base}  dep: Check dependencies.\n");
 	cprintf("{base}Options:\n");
 	cprintf("{base}  -h, --help: Show help message.\n");
 	cprintf("{base}  -v, --version: Show version info.\n");
 	cprintf("{base}  -V, --version-code: Show version code.\n");
 	cprintf("{base}See rurima [subcommand] help for further information.\n");
 	cprintf("{base}Use `rurima -q subcommand` to disable log in rurima-dbg.\n");
+}
+static void rurima_dep_info(void)
+{
+	const char *tar_command[] = { "tar", "--version", NULL };
+	const char *curl_command[] = { "curl", "--version", NULL };
+	const char *file_command[] = { "file", "--version", NULL };
+	const char *gz_command[] = { "gzip", "--version", NULL };
+	const char *xz_command[] = { "xz", "-V", NULL };
+	const char *file_command_2[] = { "file", "--brief", "--mime-type", "/proc/self/exe", NULL };
+	const char *proot_command[] = { "proot", "-V", NULL };
+	const char *sha256_command[] = { "sha256sum", "--version", NULL };
+	const char *jq_command[] = { "jq", "--version", NULL };
+	char *result = NULL;
+	result = rurima_fork_execvp_get_stdout(tar_command);
+	if (result == NULL) {
+		cprintf("{base}tar : {red}not found\n");
+	} else {
+		cprintf("{base}tar :{clear}{green} found\n{blue}%s", result);
+	}
+	free(result);
+	result = rurima_fork_execvp_get_stdout(curl_command);
+	if (result == NULL) {
+		cprintf("{base}curl : {red}not found\n");
+	} else {
+		cprintf("{base}curl :{clear}{green} found\n{blue}%s", result);
+	}
+	free(result);
+	result = rurima_fork_execvp_get_stdout(file_command);
+	if (result == NULL) {
+		cprintf("{base}file : {red}not found\n");
+	} else {
+		cprintf("{base}file :{clear}{green} found\n{blue}%s", result);
+	}
+	free(result);
+	result = rurima_fork_execvp_get_stdout(file_command_2);
+	if (result == NULL) {
+		cprintf("{base}file : {red}not support --brief --mime-type\n");
+	} else {
+		cprintf("\n{blue}file --brief --mime-type /proc/self/exe\n%s", result);
+	}
+	free(result);
+	result = rurima_fork_execvp_get_stdout(gz_command);
+	if (result == NULL) {
+		cprintf("{base}gzip : {red}not found\n");
+	} else {
+		cprintf("{base}gzip :{clear}{green} found\n{blue}%s", result);
+	}
+	free(result);
+	result = rurima_fork_execvp_get_stdout(xz_command);
+	if (result == NULL) {
+		cprintf("{base}xz : {red}not found\n");
+	} else {
+		cprintf("{base}xz :{clear}{green} found\n{blue}%s", result);
+	}
+	free(result);
+	result = rurima_fork_execvp_get_stdout(proot_command);
+	if (result == NULL) {
+		cprintf("{base}proot : {yellow}not found\n");
+	} else {
+		cprintf("{base}proot :{clear}{green} found\n{blue}%s", result);
+	}
+	free(result);
+	result = rurima_fork_execvp_get_stdout(sha256_command);
+	if (result == NULL) {
+		cprintf("{base}sha256sum : {yellow}not found\n");
+	} else {
+		cprintf("{base}sha256sum :{clear}{green} found\n{blue}%s", result);
+	}
+	free(result);
+	result = rurima_fork_execvp_get_stdout(jq_command);
+	if (result == NULL) {
+		cprintf("{base}jq : {yellow}not found\n");
+	} else {
+		cprintf("{base}jq :{clear}{green} found\n{blue}%s", result);
+	}
+	free(result);
 }
 static void detect_suid_or_capability(void)
 {
@@ -153,6 +230,10 @@ int main(int argc, char **argv)
 		if (strcmp(argv[i], "unpack") == 0 || strcmp(argv[i], "u") == 0) {
 			rurima_check_dep();
 			rurima_unpack(argc - i - 1, &argv[i + 1]);
+			return 0;
+		}
+		if (strcmp(argv[i], "dep") == 0) {
+			rurima_dep_info();
 			return 0;
 		}
 		if (strcmp(argv[i], "help") == 0 || strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
