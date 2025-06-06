@@ -30,7 +30,7 @@
 #include "include/rurima.h"
 bool disable_rurima_log = false;
 // clang-format off
-struct RURIMA_CONFIG global_config = {
+struct RURIMA_CONFIG rurima_global_config = {
 	.docker_mirror = "registry-1.docker.io",
 	.lxc_mirror = "images.linuxcontainers.org",
 	.hook_script = NULL,
@@ -42,12 +42,14 @@ static void show_help(void)
 {
 	cprintf("{base}Usage: rurima [subcommand] [options]\n");
 	cprintf("{base}Subcommands:\n");
-	cprintf("{base}  docker: DockerHub support.\n");
-	cprintf("{base}  lxc: LXC mirror support.\n");
-	cprintf("{base}  unpack: Unpack rootfs.\n");
-	cprintf("{base}  backup: Backup rootfs.\n");
-	cprintf("{base}  ruri: Built-in ruri command.\n");
-	cprintf("{base}  help: Show help message.\n");
+	cprintf("{base}  docker, d : DockerHub support.\n");
+	cprintf("{base}  lxc, l    : LXC mirror support.\n");
+	cprintf("{base}  pull, p   : Pull image, as a wrap of rurima docker/lxc pull.\n");
+	cprintf("{base}  unpack, u : Unpack rootfs.\n");
+	cprintf("{base}  backup, b : Backup rootfs.\n");
+	cprintf("{base}  ruri, r   : Built-in ruri command.\n");
+	cprintf("{base}  help, h   : Show help message.\n");
+	cprintf("{base}  dep       : Check dependencies.\n");
 	cprintf("{base}Options:\n");
 	cprintf("{base}  -h, --help: Show help message.\n");
 	cprintf("{base}  -v, --version: Show version info.\n");
@@ -55,12 +57,88 @@ static void show_help(void)
 	cprintf("{base}See rurima [subcommand] help for further information.\n");
 	cprintf("{base}Use `rurima -q subcommand` to disable log in rurima-dbg.\n");
 }
+static void rurima_dep_info(void)
+{
+	const char *tar_command[] = { "tar", "--version", NULL };
+	const char *curl_command[] = { "curl", "--version", NULL };
+	const char *file_command[] = { "file", "--version", NULL };
+	const char *gz_command[] = { "gzip", "--version", NULL };
+	const char *xz_command[] = { "xz", "-V", NULL };
+	const char *file_command_2[] = { "file", "--brief", "--mime-type", "/proc/self/exe", NULL };
+	const char *proot_command[] = { "proot", "-V", NULL };
+	const char *sha256_command[] = { "sha256sum", "--version", NULL };
+	const char *jq_command[] = { "jq", "--version", NULL };
+	char *result = NULL;
+	result = rurima_fork_execvp_get_stdout(tar_command);
+	if (result == NULL) {
+		cprintf("{base}tar : {red}not found\n");
+	} else {
+		cprintf("{base}tar :{clear}{green} found\n{blue}%s", result);
+	}
+	free(result);
+	result = rurima_fork_execvp_get_stdout(curl_command);
+	if (result == NULL) {
+		cprintf("{base}curl : {red}not found\n");
+	} else {
+		cprintf("{base}curl :{clear}{green} found\n{blue}%s", result);
+	}
+	free(result);
+	result = rurima_fork_execvp_get_stdout(file_command);
+	if (result == NULL) {
+		cprintf("{base}file : {red}not found\n");
+	} else {
+		cprintf("{base}file :{clear}{green} found\n{blue}%s", result);
+	}
+	free(result);
+	result = rurima_fork_execvp_get_stdout(file_command_2);
+	if (result == NULL) {
+		cprintf("{base}file : {red}not support --brief --mime-type\n");
+	} else {
+		cprintf("\n{blue}file --brief --mime-type /proc/self/exe\n%s", result);
+	}
+	free(result);
+	result = rurima_fork_execvp_get_stdout(gz_command);
+	if (result == NULL) {
+		cprintf("{base}gzip : {red}not found\n");
+	} else {
+		cprintf("{base}gzip :{clear}{green} found\n{blue}%s", result);
+	}
+	free(result);
+	result = rurima_fork_execvp_get_stdout(xz_command);
+	if (result == NULL) {
+		cprintf("{base}xz : {red}not found\n");
+	} else {
+		cprintf("{base}xz :{clear}{green} found\n{blue}%s", result);
+	}
+	free(result);
+	result = rurima_fork_execvp_get_stdout(proot_command);
+	if (result == NULL) {
+		cprintf("{base}proot : {yellow}not found\n");
+	} else {
+		cprintf("{base}proot :{clear}{green} found\n{blue}%s", result);
+	}
+	free(result);
+	result = rurima_fork_execvp_get_stdout(sha256_command);
+	if (result == NULL) {
+		cprintf("{base}sha256sum : {yellow}not found\n");
+	} else {
+		cprintf("{base}sha256sum :{clear}{green} found\n{blue}%s", result);
+	}
+	free(result);
+	result = rurima_fork_execvp_get_stdout(jq_command);
+	if (result == NULL) {
+		cprintf("{base}jq : {yellow}not found\n");
+	} else {
+		cprintf("{base}jq :{clear}{green} found\n{blue}%s", result);
+	}
+	free(result);
+}
 static void detect_suid_or_capability(void)
 {
 	struct stat st;
 	if (stat("/proc/self/exe", &st) == 0) {
 		if (((st.st_mode & S_ISUID) || (st.st_mode & S_ISGID)) && (geteuid() == 0 || getegid() == 0)) {
-			error("{red}SUID or SGID bit detected on rurima, this is unsafe desu QwQ\n");
+			rurima_error("{red}SUID or SGID bit detected on rurima, this is unsafe desu QwQ\n");
 		}
 	}
 	cap_t caps = cap_get_file("/proc/self/exe");
@@ -72,17 +150,46 @@ static void detect_suid_or_capability(void)
 		return;
 	}
 	if (strlen(caps_str) > 0) {
-		error("{red}Capabilities detected on rurima, this is unsafe desu QwQ\n");
+		rurima_error("{red}Capabilities detected on rurima, this is unsafe desu QwQ\n");
 	}
 	cap_free(caps);
 	cap_free(caps_str);
 }
+static int pmcrts(const char *s1, const char *s2)
+{
+	/*
+	 *
+	 * Compare two strings, but s2 is in the end of s1.
+	 * For example,
+	 * s1 = "./ruri", s2 = "ruri", it will return 0.
+	 * s1 = "./rurima", s2 = "ruri", it will return... 'a' - 'i',
+	 * anyway, it's not 0 :)
+	 * If s1 is shorter than s2, it will return -1.
+	 *
+	 */
+	size_t len1 = strlen(s1);
+	size_t len2 = strlen(s2);
+	if (len1 < len2) {
+		return -1; // s1 is shorter than s2
+	}
+	for (size_t i = len1; i > len1 - len2; i--) {
+		if (s1[i] != s2[i - (len1 - len2)]) {
+			return s1[i] - s2[i - (len1 - len2)];
+		}
+	}
+	return 0; // s1 ends with s2
+}
 int main(int argc, char **argv)
 {
+	// Check for argv[0], if it's ruri, we will only call built-in ruri.
+	if (argc > 0 && pmcrts(argv[0], "ruri") == 0) {
+		rurima_log("{green}Detected ruri mode, calling built-in ruri.\n");
+		return ruri(argc, argv);
+	}
 	detect_suid_or_capability();
-	read_global_config();
+	rurima_read_global_config();
 #ifdef RURIMA_DEV
-	warning("{red}You are using dev/debug build, if you think this is wrong, please rebuild rurima or get it from release page.\n");
+	rurima_warning("{red}You are using dev/debug build, if you think this is wrong, please rebuild rurima or get it from release page.\n");
 #endif
 	rurima_register_signal();
 	if (argc == 1) {
@@ -95,29 +202,38 @@ int main(int argc, char **argv)
 			continue;
 		}
 		if (strcmp(argv[i], "docker") == 0 || strcmp(argv[i], "d") == 0) {
-			check_dep();
+			rurima_check_dep();
 			if (i + 1 >= argc) {
-				error("{red}No subcommand specified!\n");
+				rurima_error("{red}No subcommand specified!\n");
 			}
-			docker(argc - i - 1, &argv[i + 1]);
+			rurima_docker(argc - i - 1, &argv[i + 1]);
 			return 0;
 		}
 		if (strcmp(argv[i], "lxc") == 0 || strcmp(argv[i], "l") == 0) {
-			check_dep();
+			rurima_check_dep();
 			if (i + 1 >= argc) {
-				error("{red}No subcommand specified!\n");
+				rurima_error("{red}No subcommand specified!\n");
 			}
-			lxc(argc - i - 1, &argv[i + 1]);
+			rurima_lxc(argc - i - 1, &argv[i + 1]);
+			return 0;
+		}
+		if (strcmp(argv[i], "pull") == 0 || strcmp(argv[i], "p") == 0) {
+			rurima_check_dep();
+			rurima_pull(argc - i - 1, &argv[i + 1]);
 			return 0;
 		}
 		if (strcmp(argv[i], "backup") == 0 || strcmp(argv[i], "b") == 0) {
-			check_dep();
-			backup(argc - i - 1, &argv[i + 1]);
+			rurima_check_dep();
+			rurima_backup(argc - i - 1, &argv[i + 1]);
 			return 0;
 		}
 		if (strcmp(argv[i], "unpack") == 0 || strcmp(argv[i], "u") == 0) {
-			check_dep();
-			unpack(argc - i - 1, &argv[i + 1]);
+			rurima_check_dep();
+			rurima_unpack(argc - i - 1, &argv[i + 1]);
+			return 0;
+		}
+		if (strcmp(argv[i], "dep") == 0) {
+			rurima_dep_info();
 			return 0;
 		}
 		if (strcmp(argv[i], "help") == 0 || strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0) {
@@ -125,11 +241,11 @@ int main(int argc, char **argv)
 			return 0;
 		}
 		if (strcmp(argv[i], "version") == 0 || strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--version") == 0) {
-			show_version_info();
+			rurima_show_version_info();
 			return 0;
 		}
 		if (strcmp(argv[i], "-V") == 0 || strcmp(argv[i], "--version-code") == 0) {
-			show_version_code();
+			rurima_show_version_code();
 			return 0;
 		}
 		if (strcmp(argv[i], "ruri") == 0 || strcmp(argv[i], "r") == 0) {
@@ -145,7 +261,7 @@ int main(int argc, char **argv)
 			return 0;
 		}
 		show_help();
-		error("{red}Invalid subcommand `%s`!\n", argv[i]);
+		rurima_error("{red}Invalid subcommand `%s`!\n", argv[i]);
 		return 1;
 	}
 	return 0;
