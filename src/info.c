@@ -28,7 +28,7 @@
  *
  */
 #include "include/rurima.h"
-void show_version_info(void)
+void rurima_show_version_info(void)
 {
 	/*
 	 * Just show version info and license.
@@ -62,7 +62,7 @@ void show_version_info(void)
 	cprintf("{clear}\n");
 }
 // For `rurima -V`.
-void show_version_code(void)
+void rurima_show_version_code(void)
 {
 	/*
 	 * The version code is not standard now,
