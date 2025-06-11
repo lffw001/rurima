@@ -538,9 +538,7 @@ void rurima_pull(int argc, char **_Nonnull argv)
 	char *image = NULL;
 	char *version = NULL;
 	char *architecture = NULL;
-	char *type = NULL;
 	char *savedir = NULL;
-	char *arch = NULL;
 	bool docker_only = false;
 	bool fallback = false;
 	for (int i = 0; i < argc; i++) {

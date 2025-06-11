@@ -53,10 +53,10 @@ char *rurima_strstr_ignore_case(const char *_Nonnull haystack, const char *_Nonn
 	char *needle_lower = strdup(needle);
 	char *ret = NULL;
 	for (size_t i = 0; i < strlen(haystack_lower); i++) {
-		haystack_lower[i] = tolower(haystack_lower[i]);
+		haystack_lower[i] = (char)tolower(haystack_lower[i]);
 	}
 	for (size_t i = 0; i < strlen(needle_lower); i++) {
-		needle_lower[i] = tolower(needle_lower[i]);
+		needle_lower[i] = (char)tolower(needle_lower[i]);
 	}
 	if (strstr(haystack_lower, needle_lower) == NULL) {
 		free(haystack_lower);

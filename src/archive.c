@@ -351,10 +351,10 @@ int rurima_backup_dir(const char *_Nonnull file, const char *_Nonnull dir)
 		while (waitpid(pid, &status, WNOHANG) == 0) {
 			off_t currentsize = rurima_get_file_size(file);
 			totalsize = totalsize_bk;
-			while (totalsize > FLT_MAX) {
+			while (totalsize > (int)FLT_MAX) {
 				totalsize = totalsize / 1024;
 				currentsize = currentsize / 1024;
-				if (totalsize < FLT_MAX) {
+				if (totalsize < (int)FLT_MAX) {
 					break;
 				}
 			}
@@ -447,10 +447,10 @@ int rurima_download_file(const char *_Nonnull url, const char *_Nonnull file, co
 		while (waitpid(pid, &status, WNOHANG) == 0) {
 			off_t currentsize = rurima_get_file_size(file);
 			size = size_bk;
-			while (size > FLT_MAX) {
+			while (size > (int)FLT_MAX) {
 				size = size / 1024;
 				currentsize = currentsize / 1024;
-				if (size < FLT_MAX) {
+				if (size < (int)FLT_MAX) {
 					break;
 				}
 			}

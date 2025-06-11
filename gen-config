@@ -103,6 +103,7 @@ default_cflag() {
     test_and_add_cflag "-fdata-sections"
     test_and_add_cflag "-Wl,--gc-sections"
     test_and_add_cflag "-Wl,--strip-all"
+    test_and_add_cflag "-Wno-unused-command-line-argument -Wno-gnu-statement-expression-from-macro-expansion"
     if [ $STATIC_COMPILE ]; then
         test_and_add_cflag "-static"
         test_and_add_cflag "-Wl,--disable-new-dtags"
@@ -111,6 +112,7 @@ default_cflag() {
         test_and_add_cflag "-DRURIMA_DEBUG"
     fi
     test_and_add_cflag "-U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=3"
+    test_and_add_cflag "-Wno-unused-command-line-argument -Wno-gnu-statement-expression-from-macro-expansion"
     test_and_add_ldflag "-lcap"
     test_and_add_ldflag "-lpthread"
     test_and_add_ldflag "-lseccomp"

@@ -197,7 +197,7 @@ char *rurima_fork_execvp_get_stdout(const char *_Nonnull argv[])
 	}
 	return NULL;
 }
-void rurima_add_argv(char ***_Nonnull argv, const char *_Nonnull arg)
+void rurima_add_argv(char ***_Nonnull argv, char *_Nonnull arg)
 {
 	/*
 	 * Add an argument to the argv array.
@@ -220,14 +220,14 @@ int rurima_fork_rexec(char **_Nonnull argv)
 		rurima_error("{red}Fork failed!\n");
 	}
 	if (pid == 0) {
-		int argc = 0;
+		size_t argc = 0;
 		while (argv[argc] != NULL) {
 			argc++;
 		}
 		char **new_argv = malloc(sizeof(char *) * (argc + 2));
 		new_argv[0] = "/proc/self/exe";
-		for (int i = 0; i < argc; i++) {
-			rurima_log("{base}Argv[%d]: %s\n", i, argv[i]);
+		for (size_t i = 0; i < argc; i++) {
+			rurima_log("{base}Argv[%zu]: %s\n", i, argv[i]);
 			new_argv[i + 1] = argv[i];
 		}
 		new_argv[argc + 1] = NULL;

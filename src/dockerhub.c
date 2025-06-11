@@ -393,7 +393,7 @@ static char *get_token(const char *_Nonnull image, const char *_Nullable mirror,
 	if (token_json == NULL) {
 		rurima_error("{red}Failed to get token!\n");
 	}
-	char *jq_cmd_0[] = { "jq", "-r", "-j", ".token", NULL };
+	const char *jq_cmd_0[] = { "jq", "-r", "-j", ".token", NULL };
 	char *ret = rurima_call_jq(jq_cmd_0, token_json);
 	if (ret == NULL) {
 		if (fallback) {
@@ -447,14 +447,14 @@ static char *get_tag_digest(const char *_Nonnull manifests, const char *_Nullabl
 	if (architecture == NULL) {
 		architecture = rurima_docker_get_host_arch();
 	}
-	char *jq_cmd_0[] = { "jq", "-r", ".manifests", NULL };
+	const char *jq_cmd_0[] = { "jq", "-r", ".manifests", NULL };
 	char *tmp = rurima_call_jq(jq_cmd_0, manifests);
 	if (tmp == NULL) {
 		rurima_error("{red}Failed to get manifests!\n");
 	}
 	char *jq_arg_0 = malloc(strlen(architecture) + 128);
 	sprintf(jq_arg_0, ".[] | select(.platform.architecture == \"%s\")|select(.platform.os == \"linux\")|.digest", architecture);
-	char *jq_cmd_1[] = { "jq", "-r", "-j", jq_arg_0, NULL };
+	const char *jq_cmd_1[] = { "jq", "-r", "-j", jq_arg_0, NULL };
 	char *digest = rurima_call_jq(jq_cmd_1, tmp);
 	free(jq_arg_0);
 	if (digest == NULL) {
@@ -491,13 +491,13 @@ static char **get_blobs(const char *_Nonnull image, const char *_Nonnull digest,
 	if (response == NULL) {
 		rurima_error("{red}Failed to get blobs!\n");
 	}
-	char *jq_cmd_0[] = { "jq", "-r", ".layers", NULL };
+	const char *jq_cmd_0[] = { "jq", "-r", ".layers", NULL };
 	char *layers = rurima_call_jq(jq_cmd_0, response);
 	if (layers == NULL) {
 		rurima_error("{red}Failed to get layers!\n");
 	}
 	char **ret = NULL;
-	char *jq_cmd_1[] = { "jq", "-r", ".[] | .digest", NULL };
+	const char *jq_cmd_1[] = { "jq", "-r", ".[] | .digest", NULL };
 	char *layers_orig = rurima_call_jq(jq_cmd_1, layers);
 	size_t len = rurima_split_lines(layers_orig, &ret);
 	free(layers_orig);
@@ -605,7 +605,7 @@ static char *get_config_digest_fallback(const char *_Nonnull image, const char *
 		mirror = rurima_global_config.docker_mirror;
 	}
 	char *manifests = get_tag_manifests(image, tag, token, mirror);
-	char *jq_command_0[] = { "jq", "-r", "-j", ".config.digest", NULL };
+	const char *jq_command_0[] = { "jq", "-r", "-j", ".config.digest", NULL };
 	char *ret = rurima_call_jq(jq_command_0, manifests);
 	if (ret == NULL) {
 		rurima_error("{red}Failed to get config!\n");
@@ -639,7 +639,7 @@ static char *get_config_digest(const char *_Nonnull image, const char *_Nonnull 
 	if (response == NULL) {
 		rurima_error("{red}Failed to get config!\n");
 	}
-	char *jq_command_0[] = { "jq", "-r", "-j", ".config.digest", NULL };
+	const char *jq_command_0[] = { "jq", "-r", "-j", ".config.digest", NULL };
 	char *config = rurima_call_jq(jq_command_0, response);
 	if (config == NULL) {
 		free(response);
@@ -747,7 +747,7 @@ static struct RURIMA_DOCKER *get_image_config(const char *_Nonnull image, const 
 	}
 	rurima_log("{base}Config:\n{cyan} %s\n", response);
 	{
-		char *jq_command_0[] = { "jq", "-r", "-j", ".architecture", NULL };
+		const char *jq_command_0[] = { "jq", "-r", "-j", ".architecture", NULL };
 		char *architecture = rurima_call_jq(jq_command_0, response);
 		rurima_log("{base}Arch: {cyan}%s{clear}\n", architecture == NULL ? "NULL" : architecture);
 		if (architecture == NULL) {
@@ -757,7 +757,7 @@ static struct RURIMA_DOCKER *get_image_config(const char *_Nonnull image, const 
 		}
 	}
 	{
-		char *jq_command_1[] = { "jq", "-r", "-j", ".config.WorkingDir", NULL };
+		const char *jq_command_1[] = { "jq", "-r", "-j", ".config.WorkingDir", NULL };
 		char *workdir = rurima_call_jq(jq_command_1, response);
 		rurima_log("{base}Workdir: {cyan}%s{clear}\n", workdir == NULL ? "NULL" : workdir);
 		if (workdir == NULL) {
@@ -767,7 +767,7 @@ static struct RURIMA_DOCKER *get_image_config(const char *_Nonnull image, const 
 		}
 	}
 	{
-		char *jq_command_2[] = { "jq", "-r", "-j", "-c", ".config.Env", NULL };
+		const char *jq_command_2[] = { "jq", "-r", "-j", "-c", ".config.Env", NULL };
 		char *env_from_json = rurima_call_jq(jq_command_2, response);
 		rurima_log("{base}Env: {cyan}%s{clear}\n", env_from_json == NULL ? "NULL" : env_from_json);
 		if (env_from_json != NULL) {
@@ -789,7 +789,7 @@ static struct RURIMA_DOCKER *get_image_config(const char *_Nonnull image, const 
 		}
 	}
 	{
-		char *jq_command_3[] = { "jq", "-r", "-j", "-c", ".config.Entrypoint", NULL };
+		const char *jq_command_3[] = { "jq", "-r", "-j", "-c", ".config.Entrypoint", NULL };
 		char *entrypoint = rurima_call_jq(jq_command_3, response);
 		rurima_log("{base}Entrypoint: {cyan}%s{clear}\n", entrypoint == NULL ? "NULL" : entrypoint);
 		if (entrypoint != NULL) {
@@ -807,7 +807,7 @@ static struct RURIMA_DOCKER *get_image_config(const char *_Nonnull image, const 
 		}
 	}
 	{
-		char *jq_command_4[] = { "jq", "-r", "-j", "-c", ".config.Cmd", NULL };
+		const char *jq_command_4[] = { "jq", "-r", "-j", "-c", ".config.Cmd", NULL };
 		char *cmdline = rurima_call_jq(jq_command_4, response);
 		rurima_log("{base}Cmdline: {cyan}%s{clear}\n", cmdline == NULL ? "NULL" : cmdline);
 		if (cmdline != NULL) {
@@ -866,12 +866,12 @@ static struct RURIMA_DOCKER *docker_pull_fallback(const char *_Nonnull image, co
 	char *token = get_token(image, mirror, true);
 	char *manifests = get_tag_manifests(image, tag, token, mirror);
 	char **blobs = NULL;
-	char *jq_cmd_0[] = { "jq", "-r", ".layers", NULL };
+	const char *jq_cmd_0[] = { "jq", "-r", ".layers", NULL };
 	char *layers = rurima_call_jq(jq_cmd_0, manifests);
 	if (layers == NULL) {
 		rurima_error("{red}Failed to get layers!\n");
 	}
-	char *jq_cmd_1[] = { "jq", "-r", ".[] | .digest", NULL };
+	const char *jq_cmd_1[] = { "jq", "-r", ".[] | .digest", NULL };
 	char *layers_orig = rurima_call_jq(jq_cmd_1, layers);
 	size_t len = rurima_split_lines(layers_orig, &blobs);
 	free(layers_orig);
@@ -957,19 +957,19 @@ static char *docker_search__(const char *_Nonnull url)
 		rurima_error("{red}Failed to get response from dockerhub!\n");
 	}
 	rurima_log("{base}Response from dockerhub:\n{cyan}%s{clear}\n", response);
-	char *jq_cmd_1[] = { "jq", "-r", ".next", NULL };
+	const char *jq_cmd_1[] = { "jq", "-r", ".next", NULL };
 	char *next_url = rurima_call_jq(jq_cmd_1, response);
 	if (next_url == NULL) {
 		rurima_error("{red}Failed to get next url!\n");
 	}
-	char *jq_cmd_2[] = { "jq", "-r", ".results", NULL };
+	const char *jq_cmd_2[] = { "jq", "-r", ".results", NULL };
 	char *results = rurima_call_jq(jq_cmd_2, response);
 	if (results == NULL) {
 		rurima_error("{red}No results found!\n");
 	}
 	rurima_log("{base}Results:\n{cyan}%s{clear}\n", results);
 	char **name = NULL;
-	char *jq_cmd_3[] = { "jq", "-r", ".[].repo_name", NULL };
+	const char *jq_cmd_3[] = { "jq", "-r", ".[].repo_name", NULL };
 	char *name_ori = rurima_call_jq(jq_cmd_3, results);
 	if (name_ori == NULL) {
 		rurima_error("{red}No results found!\n");
@@ -980,7 +980,7 @@ static char *docker_search__(const char *_Nonnull url)
 	}
 	free(name_ori);
 	char **description = NULL;
-	char *jq_cmd_4[] = { "jq", "-r", ".[].short_description", NULL };
+	const char *jq_cmd_4[] = { "jq", "-r", ".[].short_description", NULL };
 	char *description_ori = rurima_call_jq(jq_cmd_4, results);
 	if (description_ori == NULL) {
 		rurima_error("{red}No results found!\n");
@@ -994,7 +994,7 @@ static char *docker_search__(const char *_Nonnull url)
 		rurima_error("{red}Incorrect json!\n");
 	}
 	char **is_offical = NULL;
-	char *jq_cmd_5[] = { "jq", "-r", ".[].is_official", NULL };
+	const char *jq_cmd_5[] = { "jq", "-r", ".[].is_official", NULL };
 	char *is_offical_ori = rurima_call_jq(jq_cmd_5, results);
 	if (is_offical_ori == NULL) {
 		rurima_error("{red}No results found!\n");
@@ -1110,10 +1110,10 @@ static char *docker_search_tag__(const char *_Nonnull image, const char *_Nonnul
 	if (architecture == NULL) {
 		architecture = rurima_docker_get_host_arch();
 	}
-	char *jq_cmd_0[] = { "jq", "-r", ".next", NULL };
+	const char *jq_cmd_0[] = { "jq", "-r", ".next", NULL };
 	char *next_url = rurima_call_jq(jq_cmd_0, response);
 	rurima_log("{base}next_url: {cyan}%s{clear}\n", next_url);
-	char *jq_cmd_1[] = { "jq", "-r", "-j", ".results", NULL };
+	const char *jq_cmd_1[] = { "jq", "-r", "-j", ".results", NULL };
 	char *results = rurima_call_jq(jq_cmd_1, response);
 	char *jq_arg_0 = malloc(strlen(architecture) + 1024);
 	sprintf(jq_arg_0, ".[]|select(.images.[].architecture==\"%s\")|.name", architecture);
@@ -1122,7 +1122,7 @@ static char *docker_search_tag__(const char *_Nonnull image, const char *_Nonnul
 		rurima_error("{red}No results found!\n");
 	}
 	char **name = NULL;
-	char *jq_cmd_2[] = { "jq", "-r", jq_arg_0, NULL };
+	const char *jq_cmd_2[] = { "jq", "-r", jq_arg_0, NULL };
 	char *name_ori = rurima_call_jq(jq_cmd_2, results);
 	if (name_ori == NULL) {
 		free(jq_arg_0);
@@ -1271,12 +1271,12 @@ int rurima_docker_search_arch(const char *_Nonnull image, const char *_Nonnull t
 	char *token = get_token(image, mirror, fallback);
 	char *manifests = get_tag_manifests(image, tag, token, mirror);
 	char **arch = NULL;
-	char *jq_cmd_0[] = { "jq", "-r", ".manifests", NULL };
+	const char *jq_cmd_0[] = { "jq", "-r", ".manifests", NULL };
 	char *tmp = rurima_call_jq(jq_cmd_0, manifests);
 	if (tmp == NULL) {
 		rurima_error("{red}Failed to get manifests!\n");
 	}
-	char *jq_cmd_1[] = { "jq", "-r", ".[] | .platform.architecture", NULL };
+	const char *jq_cmd_1[] = { "jq", "-r", ".[] | .platform.architecture", NULL };
 	char *arch_ori = rurima_call_jq(jq_cmd_1, tmp);
 	if (arch_ori == NULL) {
 		free(tmp);
