@@ -122,18 +122,18 @@ struct RURIMA_DOCKER {
 	char *_Nullable architecture;
 };
 // Warnings.
-#define rurima_warning(...)                                                                                 \
+#define rurima_warning(format, ...)                                                                         \
 	{                                                                                                   \
 		if (!rurima_global_config.quiet) {                                                          \
 			cfprintf(stderr, "{yellow}In %s() in %s line %d:\n", __func__, __FILE__, __LINE__); \
-			cfprintf(stderr, ##__VA_ARGS__)                                                     \
+			cfprintf(stderr, format, ##__VA_ARGS__);                                            \
 		}                                                                                           \
 	}
 // Show error msg and exit.
-#define rurima_error(...)                                                                                              \
+#define rurima_error(format, ...)                                                                                      \
 	{                                                                                                              \
 		cfprintf(stderr, "{red}In %s() in %s line %d:\n", __func__, __FILE__, __LINE__);                       \
-		cfprintf(stderr, ##__VA_ARGS__);                                                                       \
+		cfprintf(stderr, format, ##__VA_ARGS__);                                                               \
 		cfprintf(stderr, "{base}%s{clear}\n", "  .^.   .^.");                                                  \
 		cfprintf(stderr, "{base}%s{clear}\n", "  /⋀\\_ﾉ_/⋀\\");                                                \
 		cfprintf(stderr, "{base}%s{clear}\n", " /ﾉｿﾉ\\ﾉｿ丶)|");                                                \
@@ -153,17 +153,17 @@ struct RURIMA_DOCKER {
 // We use a global variable to disable log in runtime.
 extern bool disable_rurima_log;
 #if defined(RURIMA_DEBUG)
-#define rurima_log(...)                                                                                                                       \
+#define rurima_log(format, ...)                                                                                                               \
 	{                                                                                                                                     \
 		if (!disable_rurima_log) {                                                                                                    \
 			struct timeval tv;                                                                                                    \
 			gettimeofday(&tv, NULL);                                                                                              \
 			cfprintf(stderr, "{green}[%ld.%06ld] in %s() in %s line %d:\n", tv.tv_sec, tv.tv_usec, __func__, __FILE__, __LINE__); \
-			cfprintf(stderr, ##__VA_ARGS__)                                                                                       \
+			cfprintf(stderr, format, ##__VA_ARGS__);                                                                              \
 		}                                                                                                                             \
 	}
 #else
-#define rurima_log(...)
+#define rurima_log(format, ...)
 #endif
 // Functions.
 int rurima_fork_execvp(const char *_Nonnull argv[]);
