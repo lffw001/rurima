@@ -27,13 +27,13 @@ AC_DEFUN([CHECK_AND_ADD_CFLAGS],[AC_MSG_CHECKING([whether $CC supports $1])
 AC_ARG_ENABLE([debug],[AS_HELP_STRING([--enable-debug],[Enable debug log])],[enable_debug=yes],[enable_debug=no])
 if test "$enable_debug" != "no";then
     AC_MSG_NOTICE([debug log enabled])
-    DEBUG_CFLAGS="-DRURI_DEBUG"
+    DEBUG_CFLAGS="-DRURI_DEBUG -DRURIMA_DEBUG"
 else
     DEBUG_CFLAGS=""
 fi
 AC_ARG_ENABLE([dev],[AS_HELP_STRING([--enable-dev],[Enable dev build])],[enable_dev=yes],[enable_dev=no])
 if test "$enable_dev" != "no";then
-    DEV_CFLAGS="-DRURI_DEV"
+    DEV_CFLAGS="-DRURI_DEV -DRURIMA_DEV"
     STRIP="true"
     AC_MSG_NOTICE([dev build enabled])
     CHECK_AND_ADD_CFLAGS([-g])

@@ -22,6 +22,9 @@ git submodule update --init --recursive
 ./configure --enable-static
 make
 strip rurima
-cp rurima ../output/ruri
+cp rurima ../output/rurima
+./configure --enable-static --enable-debug --enable-dev
+make
+cp rurima ../output/rurima-dbg
 cp LICENSE ../output/LICENSE
 exit 0
