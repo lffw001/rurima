@@ -28,7 +28,23 @@
  *
  */
 #include "include/rurima.h"
-char *strstr_ignore_case(const char *_Nonnull haystack, const char *_Nonnull needle)
+bool proot_exist(void)
+{
+	/*
+	 * Test if proot exist.
+	 * We use proot to execute ls, so that we can check if proot is really available.
+	 */
+	const char *cmd[] = { "proot", "ls", NULL };
+	char *ret = rurima_fork_execvp_get_stdout(cmd);
+	if (ret == NULL) {
+		rurima_log("{red}proot not found.\n");
+		return false;
+	}
+	free(ret);
+	rurima_log("{green}proot found.\n");
+	return true;
+}
+char *rurima_strstr_ignore_case(const char *_Nonnull haystack, const char *_Nonnull needle)
 {
 	/*
 	 * An implementation of strccasestr().
@@ -37,10 +53,10 @@ char *strstr_ignore_case(const char *_Nonnull haystack, const char *_Nonnull nee
 	char *needle_lower = strdup(needle);
 	char *ret = NULL;
 	for (size_t i = 0; i < strlen(haystack_lower); i++) {
-		haystack_lower[i] = tolower(haystack_lower[i]);
+		haystack_lower[i] = (char)tolower(haystack_lower[i]);
 	}
 	for (size_t i = 0; i < strlen(needle_lower); i++) {
-		needle_lower[i] = tolower(needle_lower[i]);
+		needle_lower[i] = (char)tolower(needle_lower[i]);
 	}
 	if (strstr(haystack_lower, needle_lower) == NULL) {
 		free(haystack_lower);
@@ -72,7 +88,7 @@ static char *get_dir_realpath(const char *_Nonnull dir)
 	}
 	return ret;
 }
-void check_dir_deny_list(const char *_Nonnull dir)
+void rurima_check_dir_deny_list(const char *_Nonnull dir)
 {
 	/*
 	 * Check if the directory is in deny list.
@@ -82,47 +98,47 @@ void check_dir_deny_list(const char *_Nonnull dir)
 	char *path = get_dir_realpath(dir);
 	rurima_log("{base}Realpath: {cyan}%s{clear}\n", path);
 	if (strcmp(path, "/") == 0) {
-		error("{red}Refuse to extract rootfs to /\n");
+		rurima_error("{red}Refuse to extract rootfs to /\n");
 	}
 	if (strstr(path, "/usr/") == path || strcmp(path, "/usr") == 0) {
-		error("{red}Refuse to extract rootfs to /usr/*\n");
+		rurima_error("{red}Refuse to extract rootfs to /usr/*\n");
 	}
 	if (strstr(path, "/etc/") == path || strcmp(path, "/etc") == 0) {
-		error("{red}Refuse to extract rootfs to /etc/*\n");
+		rurima_error("{red}Refuse to extract rootfs to /etc/*\n");
 	}
 	if (strstr(path, "/bin/") == path || strcmp(path, "/bin") == 0) {
-		error("{red}Refuse to extract rootfs to /bin/*\n");
+		rurima_error("{red}Refuse to extract rootfs to /bin/*\n");
 	}
 	if (strstr(path, "/lib/") == path || strcmp(path, "/lib") == 0) {
-		error("{red}Refuse to extract rootfs to /lib/*\n");
+		rurima_error("{red}Refuse to extract rootfs to /lib/*\n");
 	}
 	if (strstr(path, "/lib64/") == path || strcmp(path, "/lib64") == 0) {
-		error("{red}Refuse to extract rootfs to /lib64/*\n");
+		rurima_error("{red}Refuse to extract rootfs to /lib64/*\n");
 	}
 	if (strstr(path, "/sbin/") == path || strcmp(path, "/sbin") == 0) {
-		error("{red}Refuse to extract rootfs to /sbin/*\n");
+		rurima_error("{red}Refuse to extract rootfs to /sbin/*\n");
 	}
 	if (strstr(path, "/boot/") == path || strcmp(path, "/boot") == 0) {
-		error("{red}Refuse to extract rootfs to /boot/*\n");
+		rurima_error("{red}Refuse to extract rootfs to /boot/*\n");
 	}
 	if (strstr(path, "/dev/") == path || strcmp(path, "/dev") == 0) {
-		error("{red}Refuse to extract rootfs to /dev/*\n");
+		rurima_error("{red}Refuse to extract rootfs to /dev/*\n");
 	}
 	if (strstr(path, "/proc/") == path || strcmp(path, "/proc") == 0) {
-		error("{red}Refuse to extract rootfs to /proc/*\n");
+		rurima_error("{red}Refuse to extract rootfs to /proc/*\n");
 	}
 	if (strstr(path, "/sys/") == path || strcmp(path, "/sys") == 0) {
-		error("{red}Refuse to extract rootfs to /sys/*\n");
+		rurima_error("{red}Refuse to extract rootfs to /sys/*\n");
 	}
 	if (strstr(path, "/snap/") == path || strcmp(path, "/snap") == 0) {
-		error("{red}Refuse to extract rootfs to /snap/*\n");
+		rurima_error("{red}Refuse to extract rootfs to /snap/*\n");
 	}
 	if (strcmp(path, "/data") == 0 || strcmp(path, "/data/") == 0 || strcmp(path, "/data/.") == 0 || strcmp(path, "/data/./") == 0) {
-		error("{red}Refuse to extract rootfs to /data\n");
+		rurima_error("{red}Refuse to extract rootfs to /data\n");
 	}
 	free(path);
 }
-void get_input(char *_Nonnull message, char *_Nonnull buf)
+void rurima_get_input(char *_Nonnull message, char *_Nonnull buf)
 {
 	/*
 	 * Warning: Not a safe function.
@@ -133,15 +149,18 @@ void get_input(char *_Nonnull message, char *_Nonnull buf)
 	scanf("%s", buf);
 	fflush(stdout);
 }
-off_t get_file_size(const char *_Nonnull file)
+off_t rurima_get_file_size(const char *_Nonnull file)
 {
+	rurima_log("{base}Getting file size of {cyan}%s\n", file);
 	struct stat st;
 	if (stat(file, &st) == -1) {
+		rurima_log("{red}Failed to get file size!\n");
 		return 0;
 	}
+	rurima_log("{base}File size: {green}%ld\n", st.st_size);
 	return st.st_size;
 }
-char *get_prefix(void)
+char *rurima_get_prefix(void)
 {
 	/*
 	 * Warning: free() the return value after use.
@@ -152,7 +171,7 @@ char *get_prefix(void)
 	}
 	return ret;
 }
-int mkdirs(const char *_Nonnull path, mode_t mode)
+int rurima_mkdirs(const char *_Nonnull path, mode_t mode)
 {
 	/*
 	 * A very simple implementation of mkdir -p.
@@ -189,14 +208,14 @@ int mkdirs(const char *_Nonnull path, mode_t mode)
 	}
 	return ret;
 }
-bool run_with_root(void)
+bool rurima_run_with_root(void)
 {
 	if (geteuid() == 0) {
 		return true;
 	}
 	return false;
 }
-char *docker_get_host_arch(void)
+char *rurima_docker_get_host_arch(void)
 {
 	/*
 	 * Get the cpu arch.
@@ -299,11 +318,11 @@ char *docker_get_host_arch(void)
 	ret = "xtensaeb";
 #endif
 	if (ret == NULL) {
-		error("{red}Unknow cpu arch!\n");
+		rurima_error("{red}Unknow cpu arch!\n");
 	}
 	return ret;
 }
-char *lxc_get_host_arch(void)
+char *rurima_lxc_get_host_arch(void)
 {
 	/*
 	 * Get the cpu arch.
@@ -406,11 +425,11 @@ char *lxc_get_host_arch(void)
 	ret = "xtensaeb";
 #endif
 	if (ret == NULL) {
-		error("{red}Unknow cpu arch!\n");
+		rurima_error("{red}Unknow cpu arch!\n");
 	}
 	return ret;
 }
-bool rootless_supported(void)
+bool rurima_rootless_supported(void)
 {
 	pid_t pid = fork();
 	if (pid == 0) {
@@ -429,13 +448,13 @@ bool rootless_supported(void)
 	}
 	return false;
 }
-off_t get_dir_file_size(const char *_Nonnull target)
+off_t rurima_get_dir_file_size(const char *_Nonnull target)
 {
 	/*
 	 * Get the size of the directory or file.
 	 */
 	const char *command[] = { "du", "-s", target, NULL };
-	char *result = fork_execvp_get_stdout_ignore_err(command);
+	char *result = rurima_fork_execvp_get_stdout_ignore_err(command);
 	if (result == NULL) {
 		return 0;
 	}
@@ -443,16 +462,109 @@ off_t get_dir_file_size(const char *_Nonnull target)
 	ret = atol(result);
 	return ret * 1024;
 }
-bool sha256sum_exists(void)
+bool rurima_sha256sum_exists(void)
 {
 	/*
 	 * Check if sha256sum exists.
 	 */
 	const char *command[] = { "sha256sum", "-v", NULL };
-	char *result = fork_execvp_get_stdout_ignore_err(command);
+	char *result = rurima_fork_execvp_get_stdout_ignore_err(command);
 	if (result == NULL) {
 		return false;
 	}
 	free(result);
 	return true;
+}
+bool rurima_jq_exists(void)
+{
+	/*
+	 * Check if jq exists.
+	 */
+	const char *command[] = { "jq", "--version", NULL };
+	char *result = rurima_fork_execvp_get_stdout(command);
+	if (result == NULL) {
+		return false;
+	}
+	free(result);
+	return true;
+}
+size_t rurima_split_lines(const char *_Nonnull input, char ***_Nonnull lines)
+{
+	/*
+	 * Split the input into lines.
+	 * Warning: free() the lines after use.
+	 */
+	size_t count = 0;
+	char *input_copy = strdup(input);
+	char *line = strtok(input_copy, "\n");
+	while (line != NULL) {
+		if (line[0] == '\0') {
+			line = strtok(NULL, "\n");
+			continue;
+		}
+		count++;
+		line = strtok(NULL, "\n");
+	}
+	free(input_copy);
+	if (count == 0) {
+		return 0;
+	}
+	*lines = malloc(sizeof(char *) * (count + 2));
+	input_copy = strdup(input);
+	line = strtok(input_copy, "\n");
+	size_t index = 0;
+	while (line != NULL && strlen(line) > 0) {
+		(*lines)[index++] = strdup(line);
+		line = strtok(NULL, "\n");
+	}
+	free(input_copy);
+	rurima_log("{base}lines count: {green}%zu{clear}\n", count);
+	for (size_t i = 0; i < count; i++) {
+		rurima_log("{base}lines[%zu]: {cyan}%s{clear}\n", i, (*lines)[i]);
+	}
+	(*lines)[count] = NULL; // Null-terminate the array
+	return count;
+}
+size_t rurima_split_lines_allow_null(const char *_Nonnull input, char ***_Nonnull lines)
+{
+	/*
+	 * Split the input into lines.
+	 * Warning: free() the lines after use.
+	 */
+	size_t count = 0;
+	char *input_copy = strdup(input);
+	char *p = input_copy;
+	char *line = strsep(&p, "\n");
+	while (line != NULL) {
+		count++;
+		line = strsep(&p, "\n");
+	}
+	free(input_copy);
+	if (count == 0) {
+		return 0;
+	}
+	*lines = malloc(sizeof(char *) * (count + 2));
+	input_copy = strdup(input);
+	p = input_copy;
+	line = strsep(&p, "\n");
+	size_t index = 0;
+	while (line != NULL) {
+		if (strlen(line) > 0) {
+			(*lines)[index++] = strdup(line);
+		} else {
+			(*lines)[index++] = NULL; // Allow null lines
+		}
+		line = strsep(&p, "\n");
+	}
+	free(input_copy);
+	rurima_log("{base}lines count: {green}%zu{clear}\n", count);
+	for (size_t i = 0; i < count; i++) {
+		if ((*lines)[i] != NULL) {
+			rurima_log("{base}lines[%zu]: {cyan}%s{clear}\n", i, (*lines)[i]);
+		} else {
+			rurima_log("{base}lines[%zu]: {cyan}NULL{clear}\n", i);
+		}
+	}
+	(*lines)[count] = NULL; // Null-terminate the array
+	return count;
 }

@@ -66,7 +66,6 @@
 #define _Nonnull
 #endif
 #include "version.h"
-#include "jsonv.h"
 #include "../ruri/src/include/ruri.h"
 struct RURIMA_CONFIG {
 	char *_Nonnull docker_mirror;
@@ -75,7 +74,7 @@ struct RURIMA_CONFIG {
 	bool quiet;
 	bool no_process;
 };
-extern struct RURIMA_CONFIG global_config;
+extern struct RURIMA_CONFIG rurima_global_config;
 struct RURIMA {
 	/*
 	 * This is full rurima config.
@@ -107,7 +106,7 @@ struct RURIMA {
 	// Full ruri container config.
 	struct RURI_CONTAINER container;
 };
-struct DOCKER {
+struct RURIMA_DOCKER {
 	/*
 	 * This is part of docker config that we need.
 	 */
@@ -123,17 +122,18 @@ struct DOCKER {
 	char *_Nullable architecture;
 };
 // Warnings.
-#define warning(...)                                    \
-	{                                               \
-		if (!global_config.quiet) {             \
-			cfprintf(stderr, ##__VA_ARGS__) \
-		}                                       \
+#define rurima_warning(format, ...)                                                                         \
+	{                                                                                                   \
+		if (!rurima_global_config.quiet) {                                                          \
+			cfprintf(stderr, "{yellow}In %s() in %s line %d:\n", __func__, __FILE__, __LINE__); \
+			cfprintf(stderr, format, ##__VA_ARGS__);                                            \
+		}                                                                                           \
 	}
 // Show error msg and exit.
-#define error(...)                                                                                                     \
+#define rurima_error(format, ...)                                                                                      \
 	{                                                                                                              \
 		cfprintf(stderr, "{red}In %s() in %s line %d:\n", __func__, __FILE__, __LINE__);                       \
-		cfprintf(stderr, ##__VA_ARGS__);                                                                       \
+		cfprintf(stderr, format, ##__VA_ARGS__);                                                               \
 		cfprintf(stderr, "{base}%s{clear}\n", "  .^.   .^.");                                                  \
 		cfprintf(stderr, "{base}%s{clear}\n", "  /⋀\\_ﾉ_/⋀\\");                                                \
 		cfprintf(stderr, "{base}%s{clear}\n", " /ﾉｿﾉ\\ﾉｿ丶)|");                                                \
@@ -153,58 +153,66 @@ struct DOCKER {
 // We use a global variable to disable log in runtime.
 extern bool disable_rurima_log;
 #if defined(RURIMA_DEBUG)
-#define rurima_log(...)                                                                                                                       \
+#define rurima_log(format, ...)                                                                                                               \
 	{                                                                                                                                     \
 		if (!disable_rurima_log) {                                                                                                    \
 			struct timeval tv;                                                                                                    \
 			gettimeofday(&tv, NULL);                                                                                              \
-			cfprintf(stdout, "{green}[%ld.%06ld] in %s() in %s line %d:\n", tv.tv_sec, tv.tv_usec, __func__, __FILE__, __LINE__); \
-			cfprintf(stdout, ##__VA_ARGS__)                                                                                       \
+			cfprintf(stderr, "{green}[%ld.%06ld] in %s() in %s line %d:\n", tv.tv_sec, tv.tv_usec, __func__, __FILE__, __LINE__); \
+			cfprintf(stderr, format, ##__VA_ARGS__);                                                                              \
 		}                                                                                                                             \
 	}
 #else
-#define rurima_log(...)
+#define rurima_log(format, ...)
 #endif
 // Functions.
-int fork_execvp(const char *_Nonnull argv[]);
-char *fork_execvp_get_stdout(const char *_Nonnull argv[]);
-int extract_archive(const char *_Nonnull file, const char *_Nonnull dir);
-off_t get_file_size(const char *_Nonnull file);
-char *get_prefix(void);
-int mkdirs(const char *_Nonnull path, mode_t mode);
-bool run_with_root(void);
-int docker_search(const char *_Nonnull image, const char *_Nonnull page_size, bool quiet);
-int docker_search_tag(const char *_Nonnull image, const char *_Nonnull page_size, const char *_Nullable architecture, bool quiet);
-struct DOCKER *docker_pull(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nullable architecture, const char *_Nonnull savedir, const char *_Nullable mirror, bool fallback);
+int rurima_fork_execvp(const char *_Nonnull argv[]);
+char *rurima_fork_execvp_get_stdout(const char *_Nonnull argv[]);
+int rurima_extract_archive(const char *_Nonnull file, const char *_Nonnull dir);
+off_t rurima_get_file_size(const char *_Nonnull file);
+char *rurima_get_prefix(void);
+int rurima_mkdirs(const char *_Nonnull path, mode_t mode);
+bool rurima_run_with_root(void);
+int rurima_docker_search(const char *_Nonnull image, const char *_Nonnull page_size, bool quiet, const char *_Nullable mirror);
+int rurima_docker_search_tag(const char *_Nonnull image, const char *_Nonnull page_size, const char *_Nullable architecture, bool quiet, const char *_Nullable mirror);
+struct RURIMA_DOCKER *rurima_docker_pull(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nullable architecture, const char *_Nonnull savedir, const char *_Nullable mirror, bool fallback);
 void rurima_register_signal(void);
-char *docker_get_host_arch(void);
-char *lxc_get_host_arch(void);
-void lxc_pull_image(const char *_Nullable mirror, const char *_Nonnull os, const char *_Nonnull version, const char *_Nullable architecture, const char *_Nullable type, const char *_Nonnull savedir);
-void lxc_get_image_list(const char *_Nullable mirror, const char *_Nullable architecture);
-void lxc_search_image(const char *_Nullable mirror, const char *_Nonnull os, const char *_Nullable architecture);
-void docker(int argc, char **_Nonnull argv);
-void lxc(int argc, char **_Nonnull argv);
-void unpack(int argc, char **_Nonnull argv);
-struct RURIMA *init_config(void);
-void get_input(char *_Nonnull message, char *_Nonnull buf);
-void check_dep(void);
-struct DOCKER *get_docker_config(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nullable architecture, const char *_Nullable mirror, bool fallback);
-void show_docker_config(struct DOCKER *_Nonnull config, char *_Nullable savedir, char *_Nullable runtime, bool quiet);
-void free_docker_config(struct DOCKER *_Nonnull config);
-void lxc_search_arch(const char *_Nullable mirror, const char *_Nonnull os);
-int docker_search_arch(const char *_Nonnull image, const char *_Nonnull tag, char *_Nullable mirror, bool fallback);
-void show_version_info(void);
-void show_version_code(void);
-void check_dir_deny_list(const char *_Nonnull dir);
-char *strstr_ignore_case(const char *_Nonnull haystack, const char *_Nonnull needle);
-int fork_rexec(int argc, char **_Nonnull argv);
-void *default_hook(const char *_Nonnull container_dir);
-void list_template(void);
-void template(const char *_Nonnull name, const char *_Nonnull dir, int argc, char **argv);
-void read_global_config(void);
-bool rootless_supported(void);
-off_t get_dir_file_size(const char *_Nonnull target);
-int backup_dir(const char *_Nonnull file, const char *_Nonnull dir);
-void backup(int argc, char **_Nonnull argv);
-char *fork_execvp_get_stdout_ignore_err(const char *_Nonnull argv[]);
-bool sha256sum_exists(void);
+char *rurima_docker_get_host_arch(void);
+char *rurima_lxc_get_host_arch(void);
+void rurima_lxc_pull_image(const char *_Nullable mirror, const char *_Nonnull os, const char *_Nonnull version, const char *_Nullable architecture, const char *_Nullable type, const char *_Nonnull savedir);
+void rurima_lxc_get_image_list(const char *_Nullable mirror, const char *_Nullable architecture);
+void rurima_lxc_search_image(const char *_Nullable mirror, const char *_Nonnull os, const char *_Nullable architecture);
+void rurima_docker(int argc, char **_Nonnull argv);
+void rurima_lxc(int argc, char **_Nonnull argv);
+void rurima_unpack(int argc, char **_Nonnull argv);
+struct RURIMA *rurima_init_config(void);
+void rurima_get_input(char *_Nonnull message, char *_Nonnull buf);
+void rurima_check_dep(void);
+struct RURIMA_DOCKER *rurima_get_docker_config(const char *_Nonnull image, const char *_Nonnull tag, const char *_Nullable architecture, const char *_Nullable mirror, bool fallback);
+void rurima_show_docker_config(struct RURIMA_DOCKER *_Nonnull config, char *_Nullable savedir, char *_Nullable runtime, bool quiet);
+void rurima_free_docker_config(struct RURIMA_DOCKER *_Nonnull config);
+void rurima_lxc_search_arch(const char *_Nullable mirror, const char *_Nonnull os);
+int rurima_docker_search_arch(const char *_Nonnull image, const char *_Nonnull tag, char *_Nullable mirror, bool fallback);
+void rurima_show_version_info(void);
+void rurima_show_version_code(void);
+void rurima_check_dir_deny_list(const char *_Nonnull dir);
+char *rurima_strstr_ignore_case(const char *_Nonnull haystack, const char *_Nonnull needle);
+int rurima_fork_rexec(char **_Nonnull argv);
+void rurima_add_argv(char ***_Nonnull argv, char *_Nonnull arg);
+void *rurima_default_hook(const char *_Nonnull container_dir);
+void rurima_read_global_config(void);
+bool rurima_rootless_supported(void);
+off_t rurima_get_dir_file_size(const char *_Nonnull target);
+int rurima_backup_dir(const char *_Nonnull file, const char *_Nonnull dir);
+void rurima_backup(int argc, char **_Nonnull argv);
+char *rurima_fork_execvp_get_stdout_ignore_err(const char *_Nonnull argv[]);
+bool rurima_sha256sum_exists(void);
+void rurima_pull(int argc, char **_Nonnull argv);
+bool rurima_lxc_have_image(const char *_Nullable mirror, const char *_Nonnull os, const char *_Nonnull version, const char *_Nullable architecture, const char *_Nullable type);
+int rurima_download_file(const char *_Nonnull url, const char *_Nonnull file, const char *_Nullable token, ssize_t size);
+bool proot_exist(void);
+bool rurima_jq_exists(void);
+char *rurima_fork_execvp_get_stdout_with_input(const char *_Nonnull argv[], const char *_Nonnull input);
+char *rurima_call_jq(const char *_Nonnull argv[], const char *_Nonnull input);
+size_t rurima_split_lines(const char *_Nonnull input, char ***_Nonnull lines);
+size_t rurima_split_lines_allow_null(const char *_Nonnull input, char ***_Nonnull lines);

@@ -1,9 +1,14 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14099730.svg)](https://doi.org/10.5281/zenodo.14099730)
+# WARNING:
+For production, I fully recommand you to use tools like [crun](https://github.com/containers/crun), [youki](https://github.com/youki-dev/youki), [containerd](https://containerd.io/), [docker](https://www.docker.com/), [podman](https://podman.io/), [LXC](https://linuxcontainers.org/), [bubblewrap](https://github.com/containers/bubblewrap), they are more secure and stable. This is a non-OCI tool and, you take your own risk using it when you really need. The whole project is experimental!        
+# NOTE:
+rurima now use [jq](https://github.com/jqlang) for dockerhub support.      
 # WARNING:      
 ```
 * Your warranty is void.
 * I am not responsible for anything that may happen to your device by using this program.
 * You do it at your own risk and take the responsibility upon yourself.
+* This project is open source, you can make your own fork/rewrite but not to blame the author.
 * Docker is a registered trademark of Docker, Inc. This program has no relationship with it.
 * This program has no Super Cow Powers.
 ```
@@ -24,6 +29,19 @@ Or run the follwing command to get rurima to ./rurima and ./rurima-dbg(debug ver
 ```sh
 . <(curl -sL https://get.ruri.zip/rurima)
 ```   
+# The new pull subcommand:
+It's a wrap of docker/lxc pull subcommand.      
+For example:      
+```sh
+rurima pull alpine:edge ./test
+```
+```sh
+rurima pull whyour/qinglong ./test
+```
+```sh
+rurima pull ubuntu ./test
+```
+It will search lxc image first, if not found, it will auto try to pull rootfs from dockerhub.      
 # Example usage of docker subcommand:
 Get `alpine` image, use tag `edge`, save to `./test`     
 ```sh
@@ -82,6 +100,7 @@ rurima needs tar, xz, gzip, file, you can find these static binary for aarch64, 
 [file-static](https://github.com/Moe-sushi/file-static)      
 rurima need `curl` for downloading images, you can find a third party build here (Thanks stunnel) [stunnel/static-curl](https://github.com/stunnel/static-curl).      
 rurima need `sha256sum` for checking downloaded file from dockerhub, use `--fallback` option can disable this.      
+rurima need `jq` for parsing json, you can find it in [jq](https://github.com/jqlang).      
 rurima also need proot if you are unpacking rootfs without root privileges, you can find it by the following way:      
 First, you know your cpu arch, then, for example for aarch64:      
 ```sh
@@ -106,6 +125,7 @@ Usage: rurima [subcommand] [options]
 Subcommands:
   docker: DockerHub support.
   lxc: LXC mirror support.
+  pull: Pull rootfs.
   unpack: Unpack rootfs.
   backup: Backup rootfs.
   ruri: Built-in ruri command.

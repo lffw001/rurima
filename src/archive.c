@@ -28,22 +28,6 @@
  *
  */
 #include "include/rurima.h"
-static bool proot_exist(void)
-{
-	/*
-	 * Test if proot exist.
-	 * We use proot to execute ls, so that we can check if proot is really available.
-	 */
-	const char *cmd[] = { "proot", "ls", NULL };
-	char *ret = fork_execvp_get_stdout(cmd);
-	if (ret == NULL) {
-		rurima_log("{red}proot not found.\n");
-		return false;
-	}
-	free(ret);
-	rurima_log("{green}proot found.\n");
-	return true;
-}
 static bool proot_support_link2symlink(void)
 {
 	/*
@@ -51,7 +35,7 @@ static bool proot_support_link2symlink(void)
 	 * We use proot to execute ls, so that we can check if proot is really available.
 	 */
 	const char *cmd[] = { "proot", "--link2symlink", "ls", NULL };
-	char *ret = fork_execvp_get_stdout(cmd);
+	char *ret = rurima_fork_execvp_get_stdout(cmd);
 	if (ret == NULL) {
 		rurima_log("{red}proot not support --link2symlink.\n");
 		return false;
@@ -75,14 +59,14 @@ static char **get_extract_command(const char *_Nonnull file, const char *_Nonnul
 	 */
 	char **ret = malloc(sizeof(char *) * 14);
 	const char *file_command[] = { "file", "--brief", "--mime-type", file, NULL };
-	char *type = fork_execvp_get_stdout(file_command);
+	char *type = rurima_fork_execvp_get_stdout(file_command);
 	if (type == NULL) {
-		error("{red}Failed to get file type!\n");
+		rurima_error("{red}Failed to get file type!\n");
 		free(ret);
 		return NULL;
 	}
 	type[strlen(type) - 1] = '\0';
-	if (!run_with_root() && proot_exist()) {
+	if (!rurima_run_with_root() && proot_exist()) {
 		if (proot_support_link2symlink()) {
 			if (strcmp(type, "application/gzip") == 0) {
 				ret[0] = "proot";
@@ -154,10 +138,6 @@ static char **get_extract_command(const char *_Nonnull file, const char *_Nonnul
 			}
 		}
 	} else {
-		if (!run_with_root()) {
-			warning("{yellow}You are not running as root,");
-			warning("{yellow}but proot not found, it might cause bugs unpacking rootfs.\n\n");
-		}
 		if (strcmp(type, "application/gzip") == 0) {
 			ret[0] = "tar";
 			ret[1] = "-xpzf";
@@ -193,7 +173,7 @@ static void show_progress(double per)
 	/*
 	 * Show progress bar.
 	 */
-	if (global_config.no_process) {
+	if (rurima_global_config.no_process) {
 		return;
 	}
 	struct winsize size;
@@ -212,43 +192,44 @@ static void show_progress(double per)
 	fflush(stdout);
 	printf("\033[?25h");
 }
-int extract_archive(const char *_Nonnull file, const char *_Nonnull dir)
+int rurima_extract_archive(const char *_Nonnull file, const char *_Nonnull dir)
 {
 	/*
 	 * Extract the archive.
 	 * The return value is not important,
-	 * because we will error() directly if failed.
+	 * because we will rurima_error() directly if failed.
 	 *
 	 * We read the file, output it to stdout,
 	 * and then pipe it to the extract command.
 	 * So that we can show a progress bar by the size we output.
 	 *
 	 */
-	check_dir_deny_list(dir);
-	off_t size = get_file_size(file);
+	rurima_log("{base}Extracting {cyan}%s{clear} to {cyan}%s\n", file, dir);
+	rurima_check_dir_deny_list(dir);
+	off_t size = rurima_get_file_size(file);
 	if (size == 0) {
-		error("{red}File size is 0!\n");
+		rurima_error("{red}File size is 0!\n");
 	}
 	char **command = get_extract_command(file, dir);
 	if (command == NULL) {
-		error("{red}Unsupported file type!\n");
+		rurima_error("{red}Unsupported file type!\n");
 	}
-	if (mkdirs(dir, 0755) == -1) {
+	if (rurima_mkdirs(dir, 0755) == -1) {
 		free(command);
-		error("{red}Failed to create directory!\n");
+		rurima_error("{red}Failed to create directory!\n");
 	}
 	cprintf("{base}Extracting {cyan}%s\n", file);
 	FILE *fp = fopen(file, "rb");
 	if (fp == NULL) {
 		perror("fopen");
 		free(command);
-		error("{red}Failed to open file!\n");
+		rurima_error("{red}Failed to open file!\n");
 	}
 	int pipefd[2];
 	if (pipe(pipefd) == -1) {
 		perror("pipe");
 		free(command);
-		error("{red}Failed to create pipe!\n");
+		rurima_error("{red}Failed to create pipe!\n");
 	}
 	pid_t pid = fork();
 	if (pid == 0) {
@@ -260,7 +241,7 @@ int extract_archive(const char *_Nonnull file, const char *_Nonnull dir)
 		dup2(fd, STDERR_FILENO);
 		execvp(command[0], command);
 		free(command);
-		error("{red}Failed to exec command!\n");
+		rurima_error("{red}Failed to exec command!\n");
 	} else {
 		close(pipefd[0]);
 		// When buf is only 1024, it's very slow.
@@ -276,7 +257,7 @@ int extract_archive(const char *_Nonnull file, const char *_Nonnull dir)
 			if (write(pipefd[1], buf, bytes_read) == -1) {
 				perror("write");
 				free(command);
-				error("{red}Failed to write to stdout!");
+				rurima_error("{red}Failed to write to stdout!");
 			}
 		}
 		close(pipefd[1]);
@@ -291,12 +272,12 @@ int extract_archive(const char *_Nonnull file, const char *_Nonnull dir)
 	free(command);
 	return 0;
 }
-static int __tar_backup(const char *_Nonnull file, const char *_Nonnull dir)
+static int tar_backup__(const char *_Nonnull file, const char *_Nonnull dir)
 {
 	/*
 	 * Backup dir as file(.tar format).
 	 */
-	mkdirs(file, 0755);
+	rurima_mkdirs(file, 0755);
 	rmdir(file);
 	close(open(file, O_CLOEXEC | O_CREAT, 0755));
 	char *file_realpath = realpath(file, NULL);
@@ -312,11 +293,11 @@ static int __tar_backup(const char *_Nonnull file, const char *_Nonnull dir)
 		char exclude2[PATH_MAX + 12] = { '\0' };
 		sprintf(exclude2, "--exclude=%s", file);
 		const char *command[] = { "tar", exclude, exclude2, "-cpf", file_realpath, ".", NULL };
-		ret = fork_execvp(command);
+		ret = rurima_fork_execvp(command);
 	} else {
 		chdir(dir);
 		const char *command[] = { "tar", "-cpf", file_realpath, ".", NULL };
-		ret = fork_execvp(command);
+		ret = rurima_fork_execvp(command);
 	}
 	close(nullfd);
 	free(file_realpath);
@@ -326,7 +307,7 @@ static int __tar_backup(const char *_Nonnull file, const char *_Nonnull dir)
 static bool du_found(void)
 {
 	const char *command[] = { "du", "--version", NULL };
-	char *ret = fork_execvp_get_stdout(command);
+	char *ret = rurima_fork_execvp_get_stdout(command);
 	if (ret == NULL) {
 		rurima_log("{red}du not found.\n");
 		return false;
@@ -335,7 +316,7 @@ static bool du_found(void)
 	rurima_log("{green}du found.\n");
 	return true;
 }
-int backup_dir(const char *_Nonnull file, const char *_Nonnull dir)
+int rurima_backup_dir(const char *_Nonnull file, const char *_Nonnull dir)
 {
 	/*
 	 * Backup container as *.tar file.
@@ -343,45 +324,149 @@ int backup_dir(const char *_Nonnull file, const char *_Nonnull dir)
 	 */
 	struct stat st;
 	if (stat(file, &st) == 0) {
-		error("{red}File already exist!\n");
+		rurima_error("{red}File already exist!\n");
 	}
 	DIR *test = opendir(dir);
 	if (test == NULL) {
-		error("{red}Failed to open directory!\n");
+		rurima_error("{red}Failed to open directory!\n");
 	}
 	closedir(test);
+	// Run ruir -U to umount the container.
+	cprintf("{base}Unmounting container\n");
+	char *rexec_args[] = { "ruri", "-w", "-U", ".", NULL };
+	rurima_fork_rexec(rexec_args);
 	if (!du_found()) {
-		warning("{yellow}du not found, progress will not be shown.\n");
-		int exstat = __tar_backup(file, dir);
+		rurima_warning("{yellow}du not found, progress will not be shown.\n");
+		int exstat = tar_backup__(file, dir);
 		return exstat;
 	}
 	cprintf("{base}Getting total size to backup\n");
-	off_t totalsize = get_dir_file_size(dir);
+	off_t totalsize = rurima_get_dir_file_size(dir);
 	cprintf("{base}Backing up to {cyan}%s\n", file);
 	pid_t pid = fork();
 	if (pid > 0) {
 		int status;
 		waitpid(pid, &status, WNOHANG);
 		off_t totalsize_bk = totalsize;
-		while (WIFEXITED(status) == 0) {
-			off_t currentsize = get_file_size(file);
+		while (waitpid(pid, &status, WNOHANG) == 0) {
+			off_t currentsize = rurima_get_file_size(file);
 			totalsize = totalsize_bk;
-			while (totalsize > FLT_MAX) {
+			while (totalsize > (int)FLT_MAX) {
 				totalsize = totalsize / 1024;
 				currentsize = currentsize / 1024;
-				if (totalsize < FLT_MAX) {
+				if (totalsize < (int)FLT_MAX) {
 					break;
 				}
 			}
 			double progress = ((double)currentsize / (double)totalsize);
+			if (progress > 1.0) {
+				progress = 1.0;
+			}
 			show_progress(progress);
 			usleep(100);
-			waitpid(pid, &status, WNOHANG);
 		}
 		show_progress(1.0);
 		return status;
 	} else {
-		int exstat = __tar_backup(file, dir);
+		int exstat = tar_backup__(file, dir);
+		exit(exstat);
+	}
+	return 0;
+}
+static int download_file__(const char *_Nonnull url, const char *_Nonnull file, const char *_Nullable token)
+{
+	int status = 0;
+	if (token != NULL) {
+		const char *command[] = { "curl", "-sL", "-o", file, "-H", token, url, NULL };
+		status = rurima_fork_execvp(command);
+	} else {
+		const char *command[] = { "curl", "-sL", "-o", file, url, NULL };
+		status = rurima_fork_execvp(command);
+	}
+	return status;
+}
+static ssize_t get_url_file_size__(const char *_Nonnull url)
+{
+	/*
+	 * Get the file size from the URL.
+	 */
+	const char *command[] = { "curl", "-sIL", url, NULL };
+	char *ret = rurima_fork_execvp_get_stdout(command);
+	if (ret == NULL) {
+		rurima_error("{red}Failed to get file size!\n");
+	}
+	char *p = rurima_strstr_ignore_case(ret, "Content-Type");
+	if (p == NULL) {
+		free(ret);
+		return -1;
+	}
+	while (rurima_strstr_ignore_case(p + 1, "Content-Type") != NULL) {
+		p = rurima_strstr_ignore_case(p + 1, "Content-Type");
+	}
+	char *size = rurima_strstr_ignore_case(p, "Content-Length: ");
+	if (size == NULL) {
+		free(ret);
+		return -1;
+	}
+	size += 16;
+	char *end = strstr(size, "\r\n");
+	if (end == NULL) {
+		free(ret);
+		return -1;
+	}
+	*end = '\0';
+	ssize_t filesize = strtoll(size, NULL, 10);
+	free(ret);
+	rurima_log("{base}Get file size: {green}%ld\n", filesize);
+	return filesize;
+}
+int rurima_download_file(const char *_Nonnull url, const char *_Nonnull file, const char *_Nullable token, ssize_t size)
+{
+	/*
+	 * Download file from the specified URL.
+	 */
+	remove(file);
+	unlink(file);
+	if (!du_found()) {
+		rurima_warning("{yellow}du not found, progress will not be shown.\n");
+		int exstat = download_file__(url, file, token);
+		return exstat;
+	}
+	if (size <= 0) {
+		size = get_url_file_size__(url);
+	}
+	if (size <= 0) {
+		rurima_warning("{yellow}Failed to get file size, progress will not work\n");
+		size = 1;
+	}
+	pid_t pid = fork();
+	if (pid > 0) {
+		int status;
+		waitpid(pid, &status, WNOHANG);
+		off_t size_bk = size;
+		while (waitpid(pid, &status, WNOHANG) == 0) {
+			off_t currentsize = rurima_get_file_size(file);
+			size = size_bk;
+			while (size > (int)FLT_MAX) {
+				size = size / 1024;
+				currentsize = currentsize / 1024;
+				if (size < (int)FLT_MAX) {
+					break;
+				}
+			}
+			double progress = ((double)currentsize / (double)size);
+			if (progress > 1.0) {
+				progress = 1.0;
+			}
+			show_progress(progress);
+			usleep(100);
+		}
+		show_progress(1.0);
+		rurima_log("{green}Download complete.\n");
+		return status;
+	} else {
+		int exstat = download_file__(url, file, token);
+		rurima_log("{green}Download complete.\n");
 		exit(exstat);
 	}
 	return 0;
