@@ -17,6 +17,7 @@ mkdir output
 
 git clone --depth 1 https://github.com/moe-hacker/rurima.git
 cd rurima
+git submodule update --init --recursive
 ./autogen.sh
 ./configure --enable-static
 make
